@@ -83,12 +83,12 @@ export default function MobileBottomNav() {
                 {recentCartProducts.map((p, idx) => (
                   <div
                     key={p?.id || idx}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border-2 border-[#4CB01E] overflow-hidden flex items-center justify-center p-0.5 shadow-xs shrink-0"
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white border-2 border-white shadow-md overflow-hidden shrink-0 relative"
                   >
                     <img
                       src={p?.image}
                       alt={p?.nameEn}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover rounded-full"
                       loading="lazy"
                     />
                   </div>
