@@ -553,7 +553,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('upi')}
-                    className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
                       paymentMethod === 'upi'
                         ? 'border-brand-primary bg-brand-mint'
                         : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
@@ -564,7 +564,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-extrabold text-sm text-brand-slate">{t('payOnline', lang)}</p>
-                      <p className="text-xs text-slate-500 font-semibold mt-0.5">via UPI / Card</p>
+                      <p className="text-xs text-brand-primary font-semibold mt-0.5">{t('zeroFee', lang)}</p>
                     </div>
                     {paymentMethod === 'upi' && <IconCheckCircle className="w-5 h-5 text-brand-primary shrink-0" />}
                   </button>
