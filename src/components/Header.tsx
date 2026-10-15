@@ -10,6 +10,7 @@ import {
   User,
   ChevronDown,
   Languages,
+  Store,
   ShoppingCart,
   ShoppingBag,
   Package,
@@ -83,7 +84,7 @@ export default function Header() {
           <div className="flex items-center justify-between gap-2.5">
             {/* Left: SA Logo Badge + Clean Aligned Location Pill */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              {/* Home Logo Button - Sleek Grocery Shopping Cart Icon Badge */}
+              {/* Home Logo Button - Supermarket Store Icon Badge */}
               <button
                 type="button"
                 onClick={() => {
@@ -92,11 +93,11 @@ export default function Header() {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white text-[#1E4D12] flex items-center justify-center shadow-md border-2 border-emerald-300/80 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none group relative overflow-hidden"
-                title={lang === 'ta' ? 'ஸ்ரீ அம்மன் மளிகை முகப்பு' : 'Sri Amman Supermarket'}
+                title={lang === 'ta' ? 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட் முகப்பு' : 'Sri Amman Supermarket'}
                 aria-label="Sri Amman Supermarket Home"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-emerald-50 opacity-90" />
-                <ShoppingCart className="w-5 h-5 text-[#1E4D12] group-hover:text-[#4CB01E] relative z-10 transition-colors drop-shadow-2xs stroke-[2.2]" />
+                <Store className="w-5 h-5 text-[#1E4D12] group-hover:text-[#4CB01E] relative z-10 transition-colors drop-shadow-2xs stroke-[2.2]" />
               </button>
 
               {/* Subtle vertical divider */}
@@ -166,20 +167,20 @@ export default function Header() {
             : 'bg-[#1E4D12] border-b border-emerald-900/60 shadow-md'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-1.5">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 pt-2 pb-1.5">
           {/* Row 2: Search Bar + Wishlist Heart Button Layout */}
-          <div ref={searchRef} className="relative z-30 mb-2">
-            <div className="flex items-center gap-2 sm:gap-2.5">
+          <div ref={searchRef} className="relative z-30 mb-2 w-full">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 w-full">
               {/* Floating Pill Search Bar */}
               <div
-                className={`flex-1 flex items-center bg-white rounded-2xl shadow-md h-12 px-3 sm:px-4 border-2 transition-all ${
+                className={`flex-1 min-w-0 flex items-center bg-white rounded-2xl shadow-md h-11 sm:h-12 px-2.5 sm:px-4 border-2 transition-all ${
                   searchFocused
                     ? 'border-yellow-400 ring-2 ring-yellow-400/30'
                     : 'border-transparent'
                 }`}
               >
                 {/* Green Magnifying Glass Icon */}
-                <Search className="w-5 h-5 text-[#4CB01E] shrink-0 mr-2 sm:mr-2.5" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#4CB01E] shrink-0 mr-1.5 sm:mr-2.5" />
 
                 {/* Input with simple clean placeholder */}
                 <input
@@ -194,14 +195,14 @@ export default function Header() {
                       dispatch({ type: 'SET_PAGE', page: 'products' });
                     }
                   }}
-                  className="flex-1 bg-transparent text-sm sm:text-base outline-none text-slate-900 placeholder-slate-400 font-medium min-w-0"
+                  className="flex-1 bg-transparent text-xs sm:text-base outline-none text-slate-900 placeholder-slate-400 font-medium min-w-0"
                 />
 
                 {state.searchQuery && (
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SET_SEARCH', query: '' })}
-                    className="p-1 text-slate-400 hover:text-slate-600 mr-1.5"
+                    className="p-1 text-slate-400 hover:text-slate-600 mr-1"
                     aria-label="Clear search"
                   >
                     <X className="w-4 h-4" />
@@ -213,35 +214,35 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-                  className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#1E4D12] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all shrink-0 border border-[#4CB01E]/30"
+                  className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#1E4D12] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-black transition-all shrink-0 border border-[#4CB01E]/30"
                 >
-                  <Zap className="w-3.5 h-3.5 text-yellow-600 fill-current shrink-0" />
+                  <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-600 fill-current shrink-0" />
                   <span className="whitespace-nowrap hidden xs:inline">
                     {lang === 'ta' ? 'மாத மளிகை' : 'Monthly List'}
                   </span>
                   <span className="whitespace-nowrap xs:hidden">
-                    {lang === 'ta' ? 'மாத மளிகை' : 'List'}
+                    {lang === 'ta' ? 'மாதம்' : 'List'}
                   </span>
                 </button>
               </div>
 
-              {/* Wishlist Heart Button - Perfectly aligned to the right of search bar */}
+              {/* Wishlist Heart Button - Accurately constrained within screen bounds */}
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
-                className="relative h-12 w-12 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-100 flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 group"
+                className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-100 flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 group mr-1"
                 aria-label="View Wishlist"
                 title="Wishlist"
               >
                 <Heart
-                  className={`w-5 h-5 transition-transform group-hover:scale-110 duration-200 ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:scale-110 duration-200 ${
                     state.wishlist.length > 0
                       ? 'fill-rose-500 text-rose-500'
                       : 'text-slate-600 group-hover:text-rose-500'
                   }`}
                 />
                 {state.wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-xs animate-scale-in">
+                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] sm:text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-xs animate-scale-in">
                     {state.wishlist.length}
                   </span>
                 )}
