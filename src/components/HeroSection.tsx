@@ -216,7 +216,9 @@ export default function HeroSection() {
             <div key={`bottom-${activeSlide}`} className="relative z-10 mt-2 sm:mt-4 flex items-center justify-between gap-1.5 sm:gap-2 pt-1.5 sm:pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
               <div className="flex items-baseline gap-1 sm:gap-2 bg-black/45 backdrop-blur-md px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
                 <span className="text-xs sm:text-lg font-black text-yellow-300">{currentSlide.price}</span>
-                <span className="text-[9px] sm:text-xs text-white/60 line-through hidden xs:inline">{currentSlide.mrp}</span>
+                {currentSlide.id === 'monthly-bundle' && (
+                  <span className="text-[9px] sm:text-xs text-white/60 line-through hidden xs:inline">{currentSlide.mrp}</span>
+                )}
                 <span className="text-[9px] sm:text-[10px] font-black text-emerald-300 bg-emerald-950/80 px-1.5 py-0.5 rounded">
                   {lang === 'ta' ? currentSlide.saveTa : currentSlide.saveEn}
                 </span>
