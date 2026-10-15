@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
 import { products, impulseEssentials } from '@/data/products';
@@ -21,6 +21,20 @@ export default function CartDrawer() {
   const lang = state.lang;
   const [couponCode, setCouponCode] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
+
+  useEffect(() => {
+    if (state.cartOpen) {
+      const originalOverflow = document.body.style.overflow;
+      const originalTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.touchAction = originalTouchAction;
+      };
+    }
+  }, [state.cartOpen]);
 
   if (!state.cartOpen) return null;
 
@@ -44,12 +58,12 @@ export default function CartDrawer() {
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex justify-end"
+      className="fixed inset-0 z-[90] flex justify-end overscroll-contain"
       onClick={() => dispatch({ type: 'SET_CART_OPEN', open: false })}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity" />
       <div
-        className="relative w-full max-w-md bg-[#FDFBF7] h-full flex flex-col animate-slide-right shadow-2xl border-l border-[#EAE2D5]"
+        className="relative w-full max-w-md bg-[#FDFBF7] h-full flex flex-col animate-slide-right shadow-2xl border-l border-[#EAE2D5] overscroll-contain"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -108,7 +122,10 @@ export default function CartDrawer() {
         )}
 
         {/* Cart Content Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+        <div
+          className="flex-1 overflow-y-auto px-4 py-3 space-y-4 overscroll-contain touch-pan-y"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {state.cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16 px-4">
               <div className="w-20 h-20 rounded-2xl bg-[#F5EFE6] border border-[#EAE2D5] flex items-center justify-center text-brand-primary mb-4 shadow-xs">
