@@ -270,7 +270,7 @@ export default function Header() {
           </div>
 
           {/* Row 3: Blinkit-Style Horizontal Icon Category Strip with Lucide Icons (Seamless Edge-to-Edge) */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 text-white -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 edge-scroll">
+          <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-1 text-white -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 touch-pan-x cursor-grab active:cursor-grabbing select-none">
             {quickTabs.map((tab) => {
               const TabIcon = tab.Icon;
               const isActive =

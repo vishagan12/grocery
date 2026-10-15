@@ -93,8 +93,8 @@ export default function ProductsPage() {
         {/* Top Controls: Horizontal Category Scroll + Clean Inline Sort Dropdown */}
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           {/* Category Horizontal Scroll Bar (Seamless Edge-to-Edge with clean pills) */}
-          <div className="flex-1 -mx-4 px-4 overflow-x-auto hide-scrollbar edge-scroll">
-            <div className="flex items-center gap-2 pb-1">
+          <div className="flex-1 min-w-0 -mx-4 px-4 overflow-x-auto overflow-y-hidden hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing select-none">
+            <div className="flex items-center gap-2 pb-1.5 w-max">
               <button
                 onClick={() => dispatch({ type: 'SET_CATEGORY', category: 'all' })}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-black whitespace-nowrap transition-all border shrink-0 flex items-center gap-1.5 ${
