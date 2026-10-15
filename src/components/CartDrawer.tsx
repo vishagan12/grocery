@@ -21,45 +21,6 @@ export default function CartDrawer() {
   const lang = state.lang;
   const [couponCode, setCouponCode] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
-  const [showOutOfStockSection, setShowOutOfStockSection] = useState(true);
-
-  // Out of stock demo items from reference screenshot 1
-  const outOfStockItems = [
-    {
-      id: 'oos-vanilla',
-      name: lang === 'ta' ? 'புரமேட் வெண்ணிலா எசென்ஸ்' : 'Puramate Culinary Vanilla Essence',
-      unit: '1 unit • 30 ml',
-      image: 'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: 'oos-baking-paper',
-      name: lang === 'ta' ? 'பெகோ பேக்கிங் & ரேப்பிங் பேப்பர்' : 'Beco Baking & Food Wrapping Paper',
-      unit: '1 unit • 1 roll',
-      image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=200&q=80',
-    },
-  ];
-
-  // Substitute recommendations from reference screenshot 1
-  const substituteSuggestions = [
-    {
-      id: 'sub-baking-soda',
-      name: lang === 'ta' ? 'புரமேட் பேக்கிங் சோடா' : 'Puramate Baking Soda',
-      unit: '50 g',
-      price: 23,
-      mrp: 25,
-      discount: '8% OFF',
-      image: 'https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      id: 'sub-wrap-roll',
-      name: lang === 'ta' ? 'ஆர்கானிக் கிச்சன் ரேப்' : 'Beco Brown Food Wrap',
-      unit: '1 roll',
-      price: 125,
-      mrp: 155,
-      discount: '20% OFF',
-      image: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?auto=format&fit=crop&w=200&q=80',
-    },
-  ];
 
   if (!state.cartOpen) return null;
 
@@ -148,88 +109,6 @@ export default function CartDrawer() {
 
         {/* Cart Content Area */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-          {/* Blinkit-Style "Items Not In Stock" Warning Card (as requested from reference screenshot) */}
-          {state.cart.length > 0 && showOutOfStockSection && (
-            <div className="bg-[#1C1F26] border-2 border-rose-500/60 rounded-3xl p-3.5 text-white shadow-xl animate-fade-in">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-rose-900/40">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-                  <h3 className="font-black text-rose-400 text-sm tracking-tight">
-                    {lang === 'ta' ? '2 பொருட்கள் இருப்பில் இல்லை' : '2 items are not in stock'}
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowOutOfStockSection(false)}
-                  className="w-6 h-6 rounded-full bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white flex items-center justify-center text-xs transition-colors"
-                  aria-label="Dismiss out of stock warning"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* List of Out of stock items */}
-              <div className="space-y-2.5 py-1">
-                {outOfStockItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-slate-800/80 p-1 border border-slate-700/60 flex items-center justify-center shrink-0">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-contain rounded opacity-75" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-xs text-slate-200 truncate">{item.name}</p>
-                      <p className="text-[11px] text-slate-400 font-medium">{item.unit}</p>
-                      <button
-                        type="button"
-                        onClick={() => showToast(lang === 'ta' ? 'விருப்பப்பட்டியலில் சேர்க்கப்பட்டது!' : 'Moved to wishlist!')}
-                        className="text-[11px] font-bold text-slate-400 hover:text-emerald-400 underline decoration-dotted mt-0.5"
-                      >
-                        {lang === 'ta' ? 'விருப்பப்பட்டியலுக்கு மாற்று' : 'Move to wishlist'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Add these items instead Carousel / Rail */}
-              <div className="mt-3 pt-2.5 border-t border-slate-700/60">
-                <p className="text-xs font-black text-slate-300 mb-2">
-                  {lang === 'ta' ? 'மாற்றாக இவற்றைச் சேர்க்கவும்' : 'Add these items instead'}
-                </p>
-                <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
-                  {substituteSuggestions.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="w-44 shrink-0 bg-slate-800/70 border border-slate-700/80 rounded-2xl p-2.5 flex items-center gap-2 relative shadow-md"
-                    >
-                      <span className="absolute top-1.5 left-1.5 bg-blue-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded shadow-xs">
-                        {sub.discount}
-                      </span>
-                      <div className="w-12 h-12 rounded-xl bg-slate-900/80 p-1 border border-slate-700 flex items-center justify-center shrink-0 mt-2">
-                        <img src={sub.image} alt={sub.name} className="w-full h-full object-contain rounded" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-[11px] text-slate-200 truncate leading-tight">{sub.name}</p>
-                        <p className="text-[10px] text-slate-400">{sub.unit}</p>
-                        <div className="flex items-baseline gap-1 mt-0.5">
-                          <span className="font-black text-xs text-white">₹{sub.price}</span>
-                          <span className="text-[10px] text-slate-400 line-through">₹{sub.mrp}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            showToast(lang === 'ta' ? `${sub.name} கூடையில் சேர்க்கப்பட்டது!` : `Added ${sub.name}!`);
-                          }}
-                          className="mt-1 w-full bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/50 text-[10px] font-black py-1 rounded-lg transition-colors text-center"
-                        >
-                          {lang === 'ta' ? 'சேர்' : 'ADD'}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
           {state.cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16 px-4">
               <div className="w-20 h-20 rounded-2xl bg-[#F5EFE6] border border-[#EAE2D5] flex items-center justify-center text-brand-primary mb-4 shadow-xs">
@@ -254,8 +133,8 @@ export default function CartDrawer() {
             </div>
           ) : (
             <>
-              {/* Itemized List */}
-              <div className="space-y-2.5">
+              {/* Itemized List - Clean, premium and neat card styling */}
+              <div className="space-y-3">
                 {state.cart.map((item) => {
                   const product = products.find((p) => p.id === item.productId);
                   if (!product) return null;
@@ -265,27 +144,27 @@ export default function CartDrawer() {
                   return (
                     <div
                       key={`${item.productId}-${item.variantIndex}`}
-                      className="flex items-center gap-3 bg-[#FFFFFF] border border-[#EAE2D5] rounded-xl p-3 shadow-xs"
+                      className="flex items-center gap-3 bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs hover:shadow-xs transition-all"
                     >
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-[#FBF8F3] border border-[#EAE2D5] shrink-0 p-0.5">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 shrink-0 p-1 flex items-center justify-center">
                         <img
                           src={product.image}
                           alt={lang === 'ta' ? product.nameTa : product.nameEn}
-                          className="w-full h-full object-cover rounded"
+                          className="w-full h-full object-contain rounded-lg"
                         />
                       </div>
                       <div className="flex-1 min-w-0 text-xs">
-                        <p className="font-bold text-brand-slate break-words leading-tight">
+                        <p className="font-bold text-slate-900 break-words leading-tight text-sm">
                           {lang === 'ta' ? product.nameTa : product.nameEn}
                         </p>
-                        <p className="text-brand-slate/50 text-[11px] mt-0.5 break-words">
+                        <p className="text-slate-500 text-xs mt-0.5 font-medium">
                           {variant.label}
                         </p>
                         <div className="flex items-baseline gap-2 mt-1">
-                          <span className="font-extrabold text-brand-slate text-sm">
+                          <span className="font-extrabold text-slate-900 text-sm">
                             ₹{variant.price * item.quantity}
                           </span>
-                          <span className="text-[10px] text-gray-400 line-through">
+                          <span className="text-[11px] text-slate-400 line-through">
                             ₹{variant.mrp * item.quantity}
                           </span>
                         </div>
