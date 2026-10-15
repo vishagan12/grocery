@@ -162,7 +162,7 @@ export default function HeroSection() {
               }
               dispatch({ type: 'SET_PAGE', page: currentSlide.targetPage });
             }}
-            className="md:col-span-5 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white p-3.5 sm:p-5 md:p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer min-h-[145px] sm:min-h-[190px] md:min-h-[350px] group border border-emerald-800/30 select-none"
+            className="md:col-span-5 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white p-4 sm:p-5 md:p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer min-h-[165px] sm:min-h-[210px] md:min-h-[360px] group border border-emerald-800/30 select-none"
           >
             {/* Background Image Overlay with smooth fade */}
             <div className="absolute inset-0 z-0">
@@ -179,14 +179,14 @@ export default function HeroSection() {
 
             {/* Content Top with smooth fade */}
             <div key={`content-${activeSlide}`} className="relative z-10 animate-fade-in">
-              <div className="flex items-center justify-between gap-2 mb-1.5">
-                <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-2xs whitespace-nowrap">
-                  <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current shrink-0" />
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[11px] sm:text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-2xs whitespace-nowrap">
+                  <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
                   <span>{lang === 'ta' ? currentSlide.tagTa : currentSlide.tagEn}</span>
                 </div>
 
                 {/* Carousel Pagination Dots */}
-                <div className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-full">
+                <div className="flex items-center gap-1.5 bg-black/45 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
                   {heroSlides.map((_, idx) => (
                     <button
                       key={idx}
@@ -197,35 +197,35 @@ export default function HeroSection() {
                         setActiveSlide(idx);
                       }}
                       className={`h-1.5 rounded-full transition-all ${
-                        idx === activeSlide ? 'w-4 bg-yellow-300' : 'w-1.5 bg-white/50'
+                        idx === activeSlide ? 'w-5 bg-yellow-300' : 'w-1.5 bg-white/50'
                       }`}
                     />
                   ))}
                 </div>
               </div>
 
-              <h3 className="text-sm xs:text-base sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1 line-clamp-2">
+              <h3 className="text-base xs:text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1.5 line-clamp-2 drop-shadow-xs">
                 {lang === 'ta' ? currentSlide.titleTa : currentSlide.titleEn}
               </h3>
-              <p className="text-[10px] xs:text-[11px] sm:text-sm text-emerald-100 font-medium leading-snug line-clamp-2">
+              <p className="text-xs xs:text-[13px] sm:text-sm md:text-base text-emerald-100 font-medium leading-relaxed line-clamp-2 drop-shadow-xs">
                 {lang === 'ta' ? currentSlide.subTa : currentSlide.subEn}
               </p>
             </div>
 
             {/* Content Bottom: Price Pill + Action Trigger */}
-            <div key={`bottom-${activeSlide}`} className="relative z-10 mt-2 sm:mt-4 flex items-center justify-between gap-1.5 sm:gap-2 pt-1.5 sm:pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
-              <div className="flex items-baseline gap-1 sm:gap-2 bg-black/45 backdrop-blur-md px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
-                <span className="text-xs sm:text-lg font-black text-yellow-300">{currentSlide.price}</span>
+            <div key={`bottom-${activeSlide}`} className="relative z-10 mt-3 sm:mt-4 flex items-center justify-between gap-2 pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
+              <div className="flex items-baseline gap-1.5 sm:gap-2.5 bg-black/55 backdrop-blur-md px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
+                <span className="text-sm xs:text-base sm:text-xl font-black text-yellow-300">{currentSlide.price}</span>
                 {currentSlide.id === 'monthly-bundle' && (
-                  <span className="text-[9px] sm:text-xs text-white/60 line-through hidden xs:inline">{currentSlide.mrp}</span>
+                  <span className="text-[10px] sm:text-xs text-white/60 line-through hidden xs:inline">{currentSlide.mrp}</span>
                 )}
-                <span className="text-[9px] sm:text-[10px] font-black text-emerald-300 bg-emerald-950/80 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] sm:text-xs font-black text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded">
                   {lang === 'ta' ? currentSlide.saveTa : currentSlide.saveEn}
                 </span>
               </div>
-              <span className="bg-white text-[#143B0D] font-black text-[10px] sm:text-xs px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap">
+              <span className="bg-white text-[#143B0D] font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                 <span>{lang === 'ta' ? currentSlide.actionTa : currentSlide.actionEn}</span>
-                <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </span>
             </div>
           </div>
@@ -239,20 +239,20 @@ export default function HeroSection() {
                   dispatch({ type: 'SET_CATEGORY', category: card.id });
                   dispatch({ type: 'SET_PAGE', page: 'products' });
                 }}
-                className="relative rounded-2xl overflow-hidden bg-white p-2.5 sm:p-3.5 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all cursor-pointer border border-slate-200/80 hover:border-[#4CB01E] group min-h-[185px] sm:min-h-[205px] select-none"
+                className="relative rounded-2xl overflow-hidden bg-white p-3 sm:p-4 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all cursor-pointer border border-slate-200/80 hover:border-[#4CB01E] group min-h-[195px] sm:min-h-[215px] select-none"
               >
                 {/* Card Top: Badge & Full Title visible on multiple lines */}
                 <div className="min-w-0">
                   <div className="flex items-center justify-between gap-1 mb-1.5 flex-wrap">
-                    <span className="text-[10px] font-black text-emerald-900 bg-emerald-100/90 px-2 py-0.5 rounded-full inline-block">
+                    <span className="text-[11px] font-black text-emerald-900 bg-emerald-100/90 px-2.5 py-0.5 rounded-full inline-block">
                       {lang === 'ta' ? card.badgeTa : card.badgeEn}
                     </span>
-                    <span className="text-[10px] font-bold text-[#4CB01E] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0">
+                    <span className="text-[11px] font-bold text-[#4CB01E] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0">
                       <span>{lang === 'ta' ? 'பார்க்க' : 'Shop'}</span>
                       <ArrowRight className="w-3 h-3" />
                     </span>
                   </div>
-                  <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug break-words">
+                  <h4 className="font-extrabold text-[13px] sm:text-base text-slate-900 leading-snug break-words">
                     {lang === 'ta' ? card.titleTa : card.titleEn}
                   </h4>
                 </div>
@@ -268,7 +268,7 @@ export default function HeroSection() {
                 </div>
 
                 {/* Card Bottom: Subtext fully visible */}
-                <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium pt-0.5 leading-tight">
+                <div className="flex items-center justify-between text-[11px] text-slate-600 font-semibold pt-0.5 leading-tight">
                   <span>{lang === 'ta' ? card.subTa : card.subEn}</span>
                 </div>
               </div>
