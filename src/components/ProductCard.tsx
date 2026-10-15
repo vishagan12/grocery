@@ -54,9 +54,9 @@ export default function ProductCard({ product }: Props) {
           <span>{lang === 'ta' ? '20 நிமிடம்' : '20 MINS'}</span>
         </div>
 
-        {/* Product Title - Fully visible across multiple lines (no hidden ellipses) */}
+        {/* Product Title - Prominent, natural font size for elders, fully visible */}
         <h3
-          className="text-xs sm:text-sm font-bold text-slate-900 leading-snug cursor-pointer hover:text-[#4CB01E] transition-colors break-words mb-1"
+          className="text-xs xs:text-sm sm:text-base font-extrabold text-slate-900 leading-snug cursor-pointer hover:text-[#4CB01E] transition-colors break-words mb-1"
           onClick={() => {
             dispatch({ type: 'SET_PRODUCT_DETAIL', id: product.id });
             dispatch({ type: 'SET_PAGE', page: 'product-detail' });

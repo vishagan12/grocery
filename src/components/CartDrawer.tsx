@@ -81,14 +81,14 @@ export default function CartDrawer() {
 
         {/* Free Delivery Meter */}
         {state.cart.length > 0 && (
-          <div className="px-5 py-3 bg-brand-mint border-b border-emerald-100">
-            <div className="flex items-center justify-between text-xs font-bold text-brand-slate mb-1.5">
-              <span>
+          <div className="mx-4 my-2.5 px-4 py-2.5 bg-gradient-to-r from-[#F1F9EC] to-emerald-50 rounded-2xl border border-emerald-200/80 shadow-2xs">
+            <div className="flex items-center justify-between gap-2 text-xs font-black text-slate-800 mb-1.5 whitespace-nowrap overflow-hidden">
+              <span className="truncate text-[11px] sm:text-xs">
                 {remaining > 0
                   ? t('addMoreForFree', lang, { amount: remaining })
                   : t('freeDeliveryUnlocked', lang)}
               </span>
-              <span className="text-brand-primary text-[10px]">
+              <span className="text-[#1E4D12] text-[10px] font-black bg-emerald-100/80 px-2 py-0.5 rounded-full shrink-0">
                 {Math.round(progress)}%
               </span>
             </div>
@@ -211,17 +211,17 @@ export default function CartDrawer() {
                 })}
               </div>
 
-              {/* Frequently Added Impulse Essentials (Fills empty vertical space!) */}
+              {/* Frequently Added Essentials - Side by Side with Smooth Horizontal Scroll & Prominent Images */}
               <div className="pt-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-brand-slate/70">
+                <div className="flex items-center justify-between mb-2 px-1">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
                     {t('impulseAddTitle', lang)}
                   </h4>
-                  <span className="text-[10px] text-brand-primary font-bold bg-brand-mint px-2 py-0.5 rounded">
+                  <span className="text-[10px] text-[#1E4D12] font-black bg-[#F1F9EC] px-2 py-0.5 rounded-full border border-emerald-200">
                     {lang === 'ta' ? 'அத்தியாவசியம்' : 'Quick Add'}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 px-1 edge-scroll">
                   {impulseEssentials.map((imp) => {
                     const prod = products.find((p) => p.id === imp.productId);
                     if (!prod) return null;
@@ -231,16 +231,17 @@ export default function CartDrawer() {
                     return (
                       <div
                         key={prod.id}
-                        className="bg-[#FFFFFF] border border-[#EAE2D5] rounded-xl p-2.5 flex items-center gap-2 hover:border-brand-primary/40 transition-colors shadow-xs"
+                        className="w-40 shrink-0 bg-white border border-slate-200/90 rounded-2xl p-2.5 flex flex-col justify-between shadow-2xs hover:shadow-xs hover:border-[#4CB01E] transition-all"
                       >
-                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-[#F5EFE6] shrink-0">
-                          <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-cover" />
+                        <div className="w-full h-20 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5 mb-2">
+                          <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-contain" />
                         </div>
-                        <div className="flex-1 min-w-0 text-[11px]">
-                          <p className="font-bold text-brand-slate break-words leading-snug">
+                        <div className="min-w-0 mb-2">
+                          <p className="font-bold text-xs text-slate-900 truncate leading-snug">
                             {lang === 'ta' ? prod.nameTa : prod.nameEn}
                           </p>
-                          <p className="text-brand-slate/60 text-[10px] mt-0.5">₹{variant.price}</p>
+                          <p className="text-[10px] text-slate-500 font-semibold">{variant.label}</p>
+                          <p className="font-black text-xs text-[#1E4D12] mt-0.5">₹{variant.price}</p>
                         </div>
                         <button
                           type="button"
@@ -253,10 +254,10 @@ export default function CartDrawer() {
                             });
                             showToast(t('addedToCart', lang));
                           }}
-                          className="bg-brand-mint hover:bg-brand-primary hover:text-white text-brand-primary font-black px-2 py-1 rounded text-xs transition-colors shrink-0"
-                          title="Quick Add to Cart"
+                          className="w-full bg-[#F1F9EC] hover:bg-[#4CB01E] hover:text-white text-[#1E4D12] font-black py-1.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-2xs active:scale-95"
                         >
-                          +
+                          <span>+</span>
+                          <span>{lang === 'ta' ? 'சேர்' : 'ADD'}</span>
                         </button>
                       </div>
                     );

@@ -7,6 +7,91 @@ import { Zap, ArrowRight, Sparkles } from 'lucide-react';
 export default function HeroSection() {
   const { state, dispatch } = useStore();
   const lang = state.lang;
+  const [activeSlide, setActiveSlide] = React.useState(0);
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+
+  const heroSlides = [
+    {
+      id: 'monthly-bundle',
+      tagEn: 'Bestselling Bundle',
+      tagTa: 'குடும்ப மெகா சேமிப்பு',
+      titleEn: 'Monthly Maligai Bundle',
+      titleTa: 'மாதாந்திர மளிகை தொகுப்பு',
+      subEn: 'Rice, Dals, Oils & Masalas in 1 tap',
+      subTa: 'அரிசி, பருப்பு, எண்ணெய் & மசாலா அனைத்தும் ஒரே கிளிக்கில்',
+      price: '₹1,540',
+      mrp: '₹1,890',
+      saveEn: 'SAVE ₹350',
+      saveTa: 'ரூ.350 மிச்சம்',
+      actionEn: 'Order Now',
+      actionTa: 'ஆர்டர் செய்',
+      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85',
+      targetPage: 'monthly-list',
+    },
+    {
+      id: 'super-saver-deals',
+      tagEn: 'Today Special Offers',
+      tagTa: 'இன்றைய அதிரடி தள்ளுபடி',
+      titleEn: 'Wholesale Grocery Deals',
+      titleTa: 'மொத்த விலை மளிகை சலுகைகள்',
+      subEn: 'Top kitchen essentials at direct counter prices',
+      subTa: 'அத்தியாவசிய சமையல் மளிகைக்கு 30% வரை நேரடி தள்ளுபடி',
+      price: 'Up to 30% OFF',
+      mrp: 'Best Rate',
+      saveEn: 'HOT DEALS',
+      saveTa: 'சூப்பர் சேவர்',
+      actionEn: 'View Deals',
+      actionTa: 'சலுகைகள் பார்',
+      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=900&q=85',
+      targetPage: 'products',
+    },
+    {
+      id: 'fresh-farm-produce',
+      tagEn: 'Farm Fresh Direct',
+      tagTa: 'நேரடி பண்ணை புதிய வரத்து',
+      titleEn: 'Morning Fresh Vegetables',
+      titleTa: 'காலை புதிய பண்ணை காய்கறிகள்',
+      subEn: 'Harvested fresh & delivered in 25 minutes',
+      subTa: 'தினசரி காலை புதிய காய்கறிகள் உங்கள் வாசலில்',
+      price: 'Daily Fresh',
+      mrp: 'Clean & Inspected',
+      saveEn: 'FRESH PICK',
+      saveTa: 'புதியது',
+      actionEn: 'Shop Veggies',
+      actionTa: 'காய்கறி வாங்க',
+      image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=900&q=85',
+      targetPage: 'products',
+      targetCat: 'vegetables-fruits',
+    },
+  ];
+
+  // Auto-advance slide every 5 seconds
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (diff > 40) {
+      // Swiped left -> next
+      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+    } else if (diff < -40) {
+      // Swiped right -> prev
+      setActiveSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+    }
+    setTouchStart(null);
+  };
+
+  const currentSlide = heroSlides[activeSlide];
 
   const bentoCards = [
     {
@@ -67,50 +152,77 @@ export default function HeroSection() {
 
         {/* 3-Column Asymmetric Bento Grid (Mobile & Desktop) */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 sm:gap-4">
-          {/* Left Tall Card (Slim and compact on mobile, perfectly scaled on desktop) */}
+          {/* Left Tall Card: Dynamic Swipeable Auto-Carousel (5s interval, touch swipe, smooth fade) */}
           <div
-            onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-            className="md:col-span-5 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white p-3 sm:p-5 md:p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer min-h-[135px] sm:min-h-[180px] md:min-h-[350px] group border border-emerald-800/30 select-none"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onClick={() => {
+              if (currentSlide.targetCat) {
+                dispatch({ type: 'SET_CATEGORY', category: currentSlide.targetCat });
+              }
+              dispatch({ type: 'SET_PAGE', page: currentSlide.targetPage });
+            }}
+            className="md:col-span-5 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white p-3.5 sm:p-5 md:p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer min-h-[145px] sm:min-h-[190px] md:min-h-[350px] group border border-emerald-800/30 select-none"
           >
-            {/* Background Image Overlay: Crystal Clear, high visibility photography */}
+            {/* Background Image Overlay with smooth fade */}
             <div className="absolute inset-0 z-0">
               <img
-                src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85"
-                alt="Monthly Provision Bundle"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+                key={currentSlide.id}
+                src={currentSlide.image}
+                alt={currentSlide.titleEn}
+                className="w-full h-full object-cover transition-all duration-700 opacity-80 group-hover:scale-105 animate-smooth-fade"
                 loading="lazy"
               />
-              {/* Soft, reduced subtle gradient so photo shines through brightly */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
+              {/* Soft subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
             </div>
 
-            {/* Content Top - Fully visible with clean scaling */}
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2 py-0.5 sm:py-1 rounded-full uppercase tracking-wider mb-1 sm:mb-1.5 shadow-2xs whitespace-nowrap">
-                <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current shrink-0" />
-                <span>{lang === 'ta' ? 'குடும்ப மெகா சேமிப்பு' : 'Bestselling Bundle'}</span>
+            {/* Content Top with smooth fade */}
+            <div key={`content-${activeSlide}`} className="relative z-10 animate-fade-in">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-2xs whitespace-nowrap">
+                  <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current shrink-0" />
+                  <span>{lang === 'ta' ? currentSlide.tagTa : currentSlide.tagEn}</span>
+                </div>
+
+                {/* Carousel Pagination Dots */}
+                <div className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded-full">
+                  {heroSlides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      aria-label={`Slide ${idx + 1}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveSlide(idx);
+                      }}
+                      className={`h-1.5 rounded-full transition-all ${
+                        idx === activeSlide ? 'w-4 bg-yellow-300' : 'w-1.5 bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
-              <h3 className="text-sm xs:text-base sm:text-2xl md:text-3xl font-black text-white leading-tight mb-0.5 sm:mb-1">
-                {lang === 'ta' ? 'மாதாந்திர மளிகை தொகுப்பு' : 'Monthly Maligai Bundle'}
+
+              <h3 className="text-base sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1">
+                {lang === 'ta' ? currentSlide.titleTa : currentSlide.titleEn}
               </h3>
-              <p className="text-[10px] xs:text-[11px] sm:text-sm text-emerald-100 font-medium leading-snug line-clamp-1 sm:line-clamp-none">
-                {lang === 'ta'
-                  ? 'அரிசி, பருப்பு, எண்ணெய் & மசாலா அனைத்தும் ஒரே கிளிக்கில்'
-                  : 'Rice, Dals, Oils & Masalas in 1 tap'}
+              <p className="text-[11px] sm:text-sm text-emerald-100 font-medium leading-snug">
+                {lang === 'ta' ? currentSlide.subTa : currentSlide.subEn}
               </p>
             </div>
 
-            {/* Content Bottom: Price Pill + 1-Tap Trigger */}
-            <div className="relative z-10 mt-2 sm:mt-4 flex items-center justify-between gap-2 pt-1.5 sm:pt-2 border-t border-white/20 flex-nowrap">
-              <div className="flex items-baseline gap-1.5 sm:gap-2 bg-black/40 backdrop-blur-md px-2 sm:px-3 py-0.5 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
-                <span className="text-xs xs:text-sm sm:text-xl font-black text-yellow-300">₹1,540</span>
-                <span className="text-[9px] xs:text-[10px] sm:text-xs text-white/60 line-through">₹1,890</span>
-                <span className="text-[8px] xs:text-[9px] sm:text-[10px] font-extrabold text-emerald-300 bg-emerald-950/70 px-1.5 py-0.5 rounded">
-                  {lang === 'ta' ? 'ரூ.350 மிச்சம்' : 'SAVE ₹350'}
+            {/* Content Bottom: Price Pill + Action Trigger */}
+            <div key={`bottom-${activeSlide}`} className="relative z-10 mt-2 sm:mt-4 flex items-center justify-between gap-2 pt-1.5 sm:pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
+              <div className="flex items-baseline gap-1.5 sm:gap-2 bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
+                <span className="text-xs sm:text-lg font-black text-yellow-300">{currentSlide.price}</span>
+                <span className="text-[9px] sm:text-xs text-white/60 line-through">{currentSlide.mrp}</span>
+                <span className="text-[9px] sm:text-[10px] font-black text-emerald-300 bg-emerald-950/80 px-1.5 py-0.5 rounded">
+                  {lang === 'ta' ? currentSlide.saveTa : currentSlide.saveEn}
                 </span>
               </div>
-              <span className="bg-white text-[#143B0D] font-black text-[10px] xs:text-[11px] sm:text-xs px-2.5 sm:px-3.5 py-1 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap">
-                <span>{lang === 'ta' ? 'ஆர்டர் செய்' : 'Order Now'}</span>
+              <span className="bg-white text-[#143B0D] font-black text-[10px] sm:text-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap">
+                <span>{lang === 'ta' ? currentSlide.actionTa : currentSlide.actionEn}</span>
                 <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </span>
             </div>

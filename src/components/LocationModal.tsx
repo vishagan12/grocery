@@ -74,11 +74,11 @@ export default function LocationModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in"
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 animate-fade-in"
       onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: false })}
     >
       <div
-        className="bg-[#FFFFFF] rounded-2xl shadow-2xl border border-[#EAE2D5] w-full max-w-lg p-5 md:p-6 animate-scale-up max-h-[85vh] flex flex-col"
+        className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-5 md:p-6 animate-scale-up max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
