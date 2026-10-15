@@ -64,13 +64,13 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar: Brand Logo, Location, Language Toggle & Profile (Scrolls away naturally) */}
+      {/* Top Bar: Brand SA Icon, Location, Language Toggle & Profile (Scrolls away naturally) */}
       <div className="bg-[#1E4D12] text-white relative z-20 border-b border-emerald-900/60">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2">
-          <div className="flex items-center justify-between gap-2">
-            {/* Left: Brand Logo + Clean Madurai Delivery Location */}
+          <div className="flex items-center justify-between gap-2.5">
+            {/* Left: SA Logo Badge + Clean Aligned Location Pill */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              {/* Home Logo Button */}
+              {/* Home SA Logo Button - Clean icon badge only */}
               <button
                 type="button"
                 onClick={() => {
@@ -78,37 +78,27 @@ export default function Header() {
                   dispatch({ type: 'SET_CATEGORY', category: 'all' });
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="flex items-center gap-1.5 text-left group shrink-0 focus:outline-none"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-[#1E4D12] flex items-center justify-center font-black text-xs sm:text-sm shadow-xs border border-yellow-300 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none"
                 title={lang === 'ta' ? 'முகப்பு பக்கம் செல்ல' : 'Go to Homepage'}
                 aria-label="Sri Amman Supermarket Home"
               >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-[#1E4D12] flex items-center justify-center font-black text-xs sm:text-sm shadow-xs border border-yellow-300 group-hover:scale-105 active:scale-95 transition-all">
-                  <span>SA</span>
-                </div>
-                <div className="flex flex-col leading-tight">
-                  <span className="font-black text-xs sm:text-sm text-yellow-300 tracking-tight whitespace-nowrap">
-                    {lang === 'ta' ? 'ஸ்ரீ அம்மன்' : 'Sri Amman'}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-emerald-100 font-semibold uppercase tracking-wider opacity-85 hidden xs:block">
-                    Supermarket
-                  </span>
-                </div>
+                <span>SA</span>
               </button>
 
-              {/* Subtle divider */}
+              {/* Subtle vertical divider */}
               <div className="h-6 w-px bg-white/20 shrink-0" />
 
               {/* Clean, perfectly aligned location pill with MapPin */}
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: true })}
-                className="flex items-center gap-1.5 bg-black/20 hover:bg-black/30 border border-white/20 px-2 sm:px-2.5 py-1 rounded-xl text-left group min-w-0 transition-all active:scale-95"
+                className="flex items-center gap-2 bg-black/20 hover:bg-black/30 border border-white/20 px-2.5 py-1 rounded-xl text-left group min-w-0 transition-all active:scale-95"
                 title="Change delivery location"
               >
                 <MapPin className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
                 <div className="flex flex-col leading-none min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="font-extrabold text-white text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[85px] xs:max-w-[120px] sm:max-w-[160px]">
+                    <span className="font-extrabold text-white text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[200px]">
                       {state.location.area || 'Madurai'}
                     </span>
                     <ChevronDown className="w-2.5 h-2.5 text-white/70 group-hover:translate-y-0.5 transition-transform shrink-0" />
@@ -121,12 +111,12 @@ export default function Header() {
             </div>
 
             {/* Right: Language Toggle & Profile Button */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {/* Language Pill Switcher */}
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_LANG', lang: lang === 'en' ? 'ta' : 'en' })}
-                className="flex items-center gap-1 bg-black/25 hover:bg-black/35 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/30 text-[11px] sm:text-xs font-black text-white shadow-2xs transition-all active:scale-95"
+                className="flex items-center gap-1.5 bg-black/25 hover:bg-black/35 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/30 text-[11px] sm:text-xs font-black text-white shadow-2xs transition-all active:scale-95"
                 aria-label="Toggle Language"
               >
                 <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 shrink-0" />
@@ -148,8 +138,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* STICKY SEARCH & CATEGORIES HEADER: Stays glued at top-0 of viewport at all times */}
-      <header className="sticky top-0 z-50 bg-gradient-to-b from-[#225714] via-[#2A6B1A] to-[#3B9117] text-white shadow-lg border-b border-white/10 backdrop-blur-md">
+      {/* STICKY SEARCH & CATEGORIES HEADER: Translucent frosted-glass backdrop blur over scrolling content */}
+      <header className="sticky top-0 z-50 bg-[#1E4D12]/85 backdrop-blur-xl text-white shadow-lg border-b border-white/15 transition-all">
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-1.5">
           {/* Row 2: Floating Pill Search Bar */}
           <div ref={searchRef} className="relative z-30 mb-2">
