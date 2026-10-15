@@ -227,7 +227,7 @@ export default function OrdersPage() {
 
           {/* Right Column (Itemized Printable Thermal Bill Receipt) */}
           <div className="lg:col-span-5 sticky top-36">
-            <div className="bg-[#FFFFFF] rounded-2xl border-2 border-[#EAE2D5] shadow-xl p-6 relative font-mono text-xs text-brand-slate">
+            <div id="printable-receipt" className="bg-[#FFFFFF] rounded-2xl border-2 border-[#EAE2D5] shadow-xl p-6 relative font-mono text-xs text-brand-slate">
               {/* Receipt Header */}
               <div className="text-center pb-4 border-b border-dashed border-[#D1C7B7] space-y-1">
                 <div className="w-9 h-9 rounded-xl bg-brand-primary flex items-center justify-center text-white mx-auto mb-2 shadow-xs">
@@ -311,11 +311,11 @@ export default function OrdersPage() {
                 {t('thankYouMessage', lang)}
               </div>
 
-              {/* Print Receipt Button */}
+              {/* Print Receipt Button (hidden during print) */}
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="mt-4 w-full bg-[#F5EFE6] hover:bg-[#EAE2D5] text-brand-slate py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-[#EAE2D5] font-sans"
+                className="print-receipt-btn mt-4 w-full bg-[#F5EFE6] hover:bg-[#EAE2D5] text-brand-slate py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-[#EAE2D5] font-sans"
               >
                 <IconReceipt className="w-3.5 h-3.5 text-brand-primary" />
                 <span>{lang === 'ta' ? 'ரசீதை பிரிண்ட் செய்' : 'Print Receipt'}</span>

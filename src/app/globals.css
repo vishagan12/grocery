@@ -206,3 +206,58 @@ button, a, input, select {
   min-height: 48px;
   @apply flex items-center justify-center;
 }
+
+/* Print Stylesheet: Isolate bill receipt, hide entire website UI, header, nav, and buttons */
+@media print {
+  @page {
+    margin: 10mm 15mm;
+    size: auto;
+  }
+
+  /* Hide everything on the page by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make printable receipt and its contents visible */
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible;
+  }
+
+  /* Position receipt cleanly at top-left of page and center it neatly */
+  #printable-receipt {
+    position: absolute;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    width: 380px !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide the print button itself */
+  .print-receipt-btn,
+  #printable-receipt button {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Ensure text colors print with high contrast and neat readability */
+  #printable-receipt p,
+  #printable-receipt span,
+  #printable-receipt h3,
+  #printable-receipt div {
+    color: #000000 !important;
+  }
+
+  #printable-receipt .border-dashed {
+    border-color: #555555 !important;
+  }
+}
