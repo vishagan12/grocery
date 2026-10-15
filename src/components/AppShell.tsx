@@ -10,9 +10,9 @@ import LocationModal from '@/components/LocationModal';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAF7] text-slate-900 overflow-x-clip max-w-[100vw] w-full">
+    <div className="min-h-screen flex flex-col bg-[#F8FAF7] text-slate-900 w-full relative">
       <Header />
-      <main className="flex-1 w-full max-w-[100vw] overflow-x-clip">
+      <main className="flex-1 w-full">
         {children}
       </main>
       <Footer />

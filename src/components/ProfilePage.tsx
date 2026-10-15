@@ -289,8 +289,8 @@ export default function ProfilePage() {
   const wishlistedItems = products.filter((p) => state.wishlist.includes(p.id));
 
   return (
-    <section className="min-h-screen bg-slate-50 md:py-8 flex justify-center">
-      <div className="w-full max-w-xl bg-white min-h-screen md:min-h-0 md:rounded-3xl md:shadow-xl md:border md:border-slate-200/80 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+      <div className="w-full max-w-xl mx-auto min-h-screen bg-white flex flex-col">
         {/* A. Top Sticky Bar */}
         <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3.5 flex items-center justify-between">
           <button
@@ -1363,6 +1363,6 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
