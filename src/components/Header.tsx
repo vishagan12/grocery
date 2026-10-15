@@ -122,7 +122,7 @@ export default function Header() {
               </button>
             </div>
 
-            {/* Right: Language Toggle, Wishlist & Profile Button */}
+            {/* Right: Language Toggle & Profile Button */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Language Pill Switcher */}
               <button
@@ -133,22 +133,6 @@ export default function Header() {
               >
                 <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 shrink-0" />
                 <span className="font-bold">{lang === 'en' ? 'தமிழ்' : 'English'}</span>
-              </button>
-
-              {/* Wishlist Button with Badge */}
-              <button
-                type="button"
-                onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
-                className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
-                aria-label="View Wishlist"
-                title="Wishlist"
-              >
-                <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${state.wishlist.length > 0 ? 'fill-rose-400 text-rose-300' : 'text-white'}`} />
-                {state.wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
-                    {state.wishlist.length}
-                  </span>
-                )}
               </button>
 
               {/* User Profile / Login Icon Button */}
@@ -181,59 +165,84 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-1.5">
-          {/* Row 2: Floating Pill Search Bar */}
+          {/* Row 2: Search Bar + Wishlist Heart Button Layout */}
           <div ref={searchRef} className="relative z-30 mb-2">
-            <div
-              className={`flex items-center bg-white rounded-2xl shadow-md h-12 px-3 sm:px-4 border-2 transition-all ${
-                searchFocused
-                  ? 'border-yellow-400 ring-2 ring-yellow-400/30'
-                  : 'border-transparent'
-              }`}
-            >
-              {/* Green Magnifying Glass Icon */}
-              <Search className="w-5 h-5 text-[#4CB01E] shrink-0 mr-2.5" />
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* Floating Pill Search Bar */}
+              <div
+                className={`flex-1 flex items-center bg-white rounded-2xl shadow-md h-12 px-3 sm:px-4 border-2 transition-all ${
+                  searchFocused
+                    ? 'border-yellow-400 ring-2 ring-yellow-400/30'
+                    : 'border-transparent'
+                }`}
+              >
+                {/* Green Magnifying Glass Icon */}
+                <Search className="w-5 h-5 text-[#4CB01E] shrink-0 mr-2 sm:mr-2.5" />
 
-              {/* Input with simple clean placeholder */}
-              <input
-                type="text"
-                placeholder={lang === 'ta' ? 'தேடுங்கள்' : 'Search'}
-                value={state.searchQuery}
-                onChange={(e) => dispatch({ type: 'SET_SEARCH', query: e.target.value })}
-                onFocus={() => setSearchFocused(true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setSearchFocused(false);
-                    dispatch({ type: 'SET_PAGE', page: 'products' });
-                  }
-                }}
-                className="flex-1 bg-transparent text-sm sm:text-base outline-none text-slate-900 placeholder-slate-400 font-medium"
-              />
+                {/* Input with simple clean placeholder */}
+                <input
+                  type="text"
+                  placeholder={lang === 'ta' ? 'தேடுங்கள்' : 'Search'}
+                  value={state.searchQuery}
+                  onChange={(e) => dispatch({ type: 'SET_SEARCH', query: e.target.value })}
+                  onFocus={() => setSearchFocused(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setSearchFocused(false);
+                      dispatch({ type: 'SET_PAGE', page: 'products' });
+                    }
+                  }}
+                  className="flex-1 bg-transparent text-sm sm:text-base outline-none text-slate-900 placeholder-slate-400 font-medium min-w-0"
+                />
 
-              {state.searchQuery && (
+                {state.searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => dispatch({ type: 'SET_SEARCH', query: '' })}
+                    className="p-1 text-slate-400 hover:text-slate-600 mr-1.5"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+
+                {/* Right: Subtle vertical divider + Quick 1-Click Monthly List Badge */}
+                <div className="h-5 sm:h-6 w-px bg-slate-200 mx-1 sm:mx-1.5 shrink-0" />
                 <button
                   type="button"
-                  onClick={() => dispatch({ type: 'SET_SEARCH', query: '' })}
-                  className="p-1 text-slate-400 hover:text-slate-600 mr-2"
-                  aria-label="Clear search"
+                  onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
+                  className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#1E4D12] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all shrink-0 border border-[#4CB01E]/30"
                 >
-                  <X className="w-4 h-4" />
+                  <Zap className="w-3.5 h-3.5 text-yellow-600 fill-current shrink-0" />
+                  <span className="whitespace-nowrap hidden xs:inline">
+                    {lang === 'ta' ? 'மாத மளிகை' : 'Monthly List'}
+                  </span>
+                  <span className="whitespace-nowrap xs:hidden">
+                    {lang === 'ta' ? 'மாத மளிகை' : 'List'}
+                  </span>
                 </button>
-              )}
+              </div>
 
-              {/* Right: Subtle vertical divider + Quick 1-Click Monthly List Badge */}
-              <div className="h-5 sm:h-6 w-px bg-slate-200 mx-1 sm:mx-1.5 shrink-0" />
+              {/* Wishlist Heart Button - Perfectly aligned to the right of search bar */}
               <button
                 type="button"
-                onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-                className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#1E4D12] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all shrink-0 border border-[#4CB01E]/30"
+                onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
+                className="relative h-12 w-12 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-100 flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 group"
+                aria-label="View Wishlist"
+                title="Wishlist"
               >
-                <Zap className="w-3.5 h-3.5 text-yellow-600 fill-current shrink-0" />
-                <span className="whitespace-nowrap hidden xs:inline">
-                  {lang === 'ta' ? 'மாத மளிகை' : 'Monthly List'}
-                </span>
-                <span className="whitespace-nowrap xs:hidden">
-                  {lang === 'ta' ? 'மாத மளிகை' : 'List'}
-                </span>
+                <Heart
+                  className={`w-5 h-5 transition-transform group-hover:scale-110 duration-200 ${
+                    state.wishlist.length > 0
+                      ? 'fill-rose-500 text-rose-500'
+                      : 'text-slate-600 group-hover:text-rose-500'
+                  }`}
+                />
+                {state.wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-xs animate-scale-in">
+                    {state.wishlist.length}
+                  </span>
+                )}
               </button>
             </div>
 
