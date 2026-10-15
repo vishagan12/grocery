@@ -171,17 +171,17 @@ export default function MonthlyListPage() {
         </div>
 
         {/* 2-Column Responsive Layout */}
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
+        <div className="grid lg:grid-cols-12 gap-5 sm:gap-8 items-start">
           {/* Left Column (Items List & Category Filter) */}
-          <div className="lg:col-span-8 space-y-4">
-            {/* Filter Pills, Customize Button & Select All Bar (Seamless Edge-to-Edge) */}
-            <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-3 md:p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-1 -mx-2 px-2 edge-scroll">
+          <div className="lg:col-span-8 space-y-3.5 sm:space-y-4 min-w-0">
+            {/* Filter Pills, Customize Button & Select All Bar */}
+            <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-1 -mx-1 px-1 touch-pan-x">
                 {/* Customize List Button (Opens interactive catalog add modal) */}
                 <button
                   type="button"
                   onClick={() => setCustomizeOpen(true)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-black whitespace-nowrap transition-all border bg-yellow-400 hover:bg-yellow-300 text-slate-900 border-yellow-500 shadow-xs flex items-center gap-1.5 shrink-0 active:scale-95"
+                  className="px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all border bg-yellow-400 hover:bg-yellow-300 text-slate-900 border-yellow-500 shadow-xs flex items-center gap-1.5 shrink-0 active:scale-95"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>{lang === 'ta' ? 'பட்டியலை மாற்று / சேர்' : 'Customize List'}</span>
@@ -192,9 +192,9 @@ export default function MonthlyListPage() {
                 <button
                   type="button"
                   onClick={() => setActiveCatFilter('all')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
                     activeCatFilter === 'all'
-                      ? 'bg-brand-primary text-white border-brand-primary'
+                      ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
                       : 'bg-[#F5EFE6] text-brand-slate border-[#EAE2D5] hover:bg-[#EFE9DF]'
                   }`}
                 >
@@ -205,9 +205,9 @@ export default function MonthlyListPage() {
                     key={c.id}
                     type="button"
                     onClick={() => setActiveCatFilter(c.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
                       activeCatFilter === c.id
-                        ? 'bg-brand-primary text-white border-brand-primary'
+                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
                         : 'bg-[#F5EFE6] text-brand-slate border-[#EAE2D5] hover:bg-[#EFE9DF]'
                     }`}
                   >
@@ -216,11 +216,11 @@ export default function MonthlyListPage() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-bold shrink-0">
+              <div className="flex items-center justify-between sm:justify-end gap-2 text-xs font-bold pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-brand-primary hover:underline px-2 py-1"
+                  className="text-brand-primary hover:underline py-1"
                 >
                   {t('selectAll', lang)}
                 </button>
@@ -228,14 +228,14 @@ export default function MonthlyListPage() {
                 <button
                   type="button"
                   onClick={deselectAll}
-                  className="text-brand-slate/60 hover:text-brand-slate px-2 py-1"
+                  className="text-brand-slate/60 hover:text-brand-slate py-1"
                 >
                   {t('deselectAll', lang)}
                 </button>
               </div>
             </div>
 
-            {/* Items List */}
+            {/* Items List - Mobile-Optimized Rows with Zero Screen Overflow */}
             <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] shadow-sm overflow-hidden divide-y divide-[#F5EFE6]">
               {displayedItems.map((item) => {
                 const product = products.find((p) => p.id === item.productId);
@@ -249,75 +249,78 @@ export default function MonthlyListPage() {
                 return (
                   <div
                     key={`${item.productId}-${item.variantIndex}`}
-                    className={`flex items-center gap-3 md:gap-4 p-4 md:p-5 transition-colors ${
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 md:p-5 transition-colors ${
                       item.checked ? 'bg-[#FFFFFF]' : 'bg-[#FAF6EE]/50 opacity-60'
                     }`}
                   >
-                    {/* Checkbox */}
-                    <button
-                      type="button"
-                      aria-label="Toggle item selection"
-                      onClick={() => toggleItem(item.originalIndex)}
-                      className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        item.checked
-                          ? 'bg-brand-primary border-brand-primary text-white shadow-xs'
-                          : 'border-[#D1C7B7] bg-[#FFFFFF]'
-                      }`}
-                    >
-                      {item.checked && <IconCheck className="w-4 h-4 stroke-[3]" />}
-                    </button>
+                    {/* Left: Checkbox + Image + Product Details */}
+                    <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                      {/* Checkbox */}
+                      <button
+                        type="button"
+                        aria-label="Toggle item selection"
+                        onClick={() => toggleItem(item.originalIndex)}
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
+                          item.checked
+                            ? 'bg-brand-primary border-brand-primary text-white shadow-xs'
+                            : 'border-[#D1C7B7] bg-[#FFFFFF]'
+                        }`}
+                      >
+                        {item.checked && <IconCheck className="w-3.5 h-3.5 stroke-[3]" />}
+                      </button>
 
-                    {/* Product Image */}
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#FBF8F3] border border-[#EAE2D5] shrink-0 flex items-center justify-center p-1">
-                      <img
-                        src={product.image}
-                        alt={lang === 'ta' ? product.nameTa : product.nameEn}
-                        className="w-full h-full object-cover rounded-lg"
-                        loading="lazy"
-                      />
-                    </div>
+                      {/* Product Image */}
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-[#FBF8F3] border border-[#EAE2D5] shrink-0 flex items-center justify-center p-1">
+                        <img
+                          src={product.image}
+                          alt={lang === 'ta' ? product.nameTa : product.nameEn}
+                          className="w-full h-full object-contain rounded-lg"
+                          loading="lazy"
+                        />
+                      </div>
 
-                    {/* Product Info */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-extrabold text-sm md:text-base text-brand-slate leading-snug break-words">
-                        {lang === 'ta' ? product.nameTa : product.nameEn}
-                      </h4>
-                      <p className="text-xs text-brand-slate/60 mt-0.5 break-words">
-                        {variant.label} &bull; {lang === 'ta' ? product.nameEn : product.nameTa}
-                      </p>
-                      <div className="flex items-baseline gap-2 mt-1">
-                        <span className="font-extrabold text-brand-slate text-sm md:text-base">₹{itemTotal}</span>
-                        <span className="text-xs text-gray-400 line-through">₹{itemMrpTotal}</span>
-                        {itemMrpTotal > itemTotal && (
-                          <span className="text-[10px] font-bold text-brand-primary bg-brand-mint px-1.5 py-0.2 rounded border border-brand-primary/10">
-                            {lang === 'ta' ? `₹${itemMrpTotal - itemTotal} சேமிப்பு` : `Save ₹${itemMrpTotal - itemTotal}`}
-                          </span>
-                        )}
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-extrabold text-xs sm:text-sm md:text-base text-brand-slate leading-snug break-words">
+                          {lang === 'ta' ? product.nameTa : product.nameEn}
+                        </h4>
+                        <p className="text-[11px] sm:text-xs text-brand-slate/60 mt-0.5 break-words">
+                          {variant.label} &bull; {lang === 'ta' ? product.nameEn : product.nameTa}
+                        </p>
+                        <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1 flex-wrap">
+                          <span className="font-extrabold text-brand-slate text-sm sm:text-base">₹{itemTotal}</span>
+                          <span className="text-[11px] sm:text-xs text-gray-400 line-through">₹{itemMrpTotal}</span>
+                          {itemMrpTotal > itemTotal && (
+                            <span className="text-[9px] sm:text-[10px] font-bold text-brand-primary bg-brand-mint px-1.5 py-0.2 rounded border border-brand-primary/10">
+                              {lang === 'ta' ? `₹${itemMrpTotal - itemTotal} சேமிப்பு` : `Save ₹${itemMrpTotal - itemTotal}`}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Quantity Stepper & Quick Remove */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    {/* Right: Quantity Stepper & Quick Remove */}
+                    <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pl-8 sm:pl-0 pt-1 sm:pt-0">
                       <div
                         className="flex items-center bg-[#F5EFE6] rounded-xl overflow-hidden border border-[#EAE2D5]"
-                        style={{ minHeight: '40px' }}
+                        style={{ minHeight: '34px' }}
                       >
                         <button
                           type="button"
                           aria-label="Decrease quantity"
                           onClick={() => updateQty(item.originalIndex, -1)}
-                          className="px-3 py-1.5 text-brand-slate font-bold hover:bg-[#EAE2D5] transition-all text-base"
+                          className="px-2.5 py-1 text-brand-slate font-bold hover:bg-[#EAE2D5] transition-all text-sm"
                         >
                           −
                         </button>
-                        <span className="px-3 font-extrabold text-brand-slate text-sm min-w-[2rem] text-center">
+                        <span className="px-2.5 font-extrabold text-brand-slate text-xs min-w-[1.75rem] text-center">
                           {item.qty}
                         </span>
                         <button
                           type="button"
                           aria-label="Increase quantity"
                           onClick={() => updateQty(item.originalIndex, 1)}
-                          className="px-3 py-1.5 text-brand-slate font-bold hover:bg-[#EAE2D5] transition-all text-base"
+                          className="px-2.5 py-1 text-brand-slate font-bold hover:bg-[#EAE2D5] transition-all text-sm"
                         >
                           +
                         </button>
@@ -326,11 +329,11 @@ export default function MonthlyListPage() {
                       <button
                         type="button"
                         onClick={() => removeItem(item.productId)}
-                        className="w-9 h-9 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200 flex items-center justify-center transition-all"
+                        className="w-8 h-8 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200 flex items-center justify-center transition-all shrink-0"
                         title={lang === 'ta' ? 'பட்டியலிலிருந்து நீக்கு' : 'Remove from list'}
                         aria-label="Remove item"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -340,41 +343,43 @@ export default function MonthlyListPage() {
           </div>
 
           {/* Right Column (Sticky Family Savings & 1-Click Order Summary) */}
-          <div className="lg:col-span-4 sticky top-36 space-y-4">
-            <div className="bg-[#FFFFFF] rounded-2xl border-2 border-brand-primary/30 shadow-xl p-5 md:p-6 space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[#EAE2D5]">
-                <h3 className="font-extrabold text-base text-brand-slate">
+          <div className="lg:col-span-4 lg:sticky lg:top-36 space-y-4 min-w-0">
+            <div className="bg-[#FFFFFF] rounded-2xl border-2 border-brand-primary/30 shadow-xl p-4 sm:p-5 md:p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#EAE2D5] gap-2">
+                <h3 className="font-extrabold text-sm sm:text-base text-brand-slate truncate">
                   {lang === 'ta' ? 'மாதாந்திர பில் விவரம்' : 'Monthly Provision Summary'}
                 </h3>
-                <span className="text-xs font-bold text-brand-primary bg-brand-mint px-2.5 py-1 rounded-full border border-brand-primary/10">
+                <span className="text-[11px] sm:text-xs font-bold text-brand-primary bg-brand-mint px-2 py-0.5 rounded-full border border-brand-primary/10 shrink-0">
                   {checkedItems.length} {t('selectedItems', lang)}
                 </span>
               </div>
 
               {/* Price Calculation */}
-              <div className="space-y-2.5 text-sm">
+              <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between items-center text-brand-slate/70">
                   <span>{t('marketMrp', lang)}</span>
                   <span className="font-bold line-through text-gray-400">₹{totalMrp}</span>
                 </div>
                 <div className="flex justify-between items-center text-brand-slate">
                   <span className="font-semibold">{t('ourPrice', lang)}</span>
-                  <span className="font-extrabold text-lg text-brand-slate">₹{totalPrice}</span>
+                  <span className="font-extrabold text-base sm:text-lg text-brand-slate">₹{totalPrice}</span>
                 </div>
-                <div className="flex justify-between items-center text-brand-primary bg-brand-mint p-3 rounded-xl border border-brand-primary/20">
-                  <span className="font-extrabold text-sm">{t('youSave', lang)}</span>
-                  <span className="font-black text-xl text-brand-primary">₹{savings}</span>
+                <div className="flex justify-between items-center text-brand-primary bg-brand-mint p-2.5 sm:p-3 rounded-xl border border-brand-primary/20">
+                  <span className="font-extrabold text-xs sm:text-sm">{t('youSave', lang)}</span>
+                  <span className="font-black text-lg sm:text-xl text-brand-primary">₹{savings}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs text-brand-slate/70 pt-1">
+                <div className="flex justify-between items-center text-xs text-brand-slate/70 pt-0.5">
                   <span>{t('deliveryFee', lang)}</span>
                   <span className="text-brand-primary font-bold">{t('free', lang)}</span>
                 </div>
               </div>
 
               {/* Free Delivery Callout */}
-              <div className="flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-bold text-brand-primary">
+              <div className="flex items-center gap-2 p-2 sm:p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] sm:text-xs font-bold text-brand-primary">
                 <IconTruck className="w-4 h-4 text-brand-primary shrink-0" />
-                <span>{lang === 'ta' ? 'இலவச ஹோம் டெலிவரி & உடனடி பேக்கிங்!' : 'Free Delivery Included for Monthly List!'}</span>
+                <span className="leading-snug break-words">
+                  {lang === 'ta' ? 'இலவச ஹோம் டெலிவரி & உடனடி பேக்கிங்!' : 'Free Delivery Included for Monthly List!'}
+                </span>
               </div>
 
               {/* 1-Click Action Button */}
@@ -382,18 +387,18 @@ export default function MonthlyListPage() {
                 type="button"
                 onClick={addAllToCart}
                 disabled={checkedItems.length === 0}
-                className={`w-full py-4 rounded-xl text-sm md:text-base font-black transition-all touch-target shadow-lg flex items-center justify-center gap-2 ${
+                className={`w-full py-3.5 sm:py-4 rounded-xl text-sm md:text-base font-black transition-all touch-target shadow-lg flex items-center justify-center gap-2 ${
                   checkedItems.length > 0
                     ? 'bg-brand-primary hover:bg-brand-highlight text-white shadow-brand-primary/30 hover:scale-[1.01]'
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
-                style={{ minHeight: '54px' }}
+                style={{ minHeight: '48px' }}
               >
-                <IconZap className="w-5 h-5 text-yellow-300" />
-                <span>{t('addEntireList', lang)}</span>
+                <IconZap className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300 shrink-0" />
+                <span className="truncate">{t('addEntireList', lang)}</span>
               </button>
 
-              <p className="text-[11px] text-center text-brand-slate/50 leading-relaxed">
+              <p className="text-[10px] sm:text-[11px] text-center text-brand-slate/50 leading-relaxed">
                 {lang === 'ta'
                   ? 'ஆர்டர் செய்த பிறகு தேவைக்கேற்ப பொருட்களை மாற்றிக் கொள்ளலாம்.'
                   : 'Items will be double-packed cleanly and delivered in 30 minutes.'}
@@ -401,12 +406,12 @@ export default function MonthlyListPage() {
             </div>
 
             {/* Quality & Packing Assurance Card */}
-            <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-4 text-xs space-y-2 shadow-xs">
+            <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-3.5 sm:p-4 text-xs space-y-1.5 shadow-xs">
               <div className="flex items-center gap-2 font-bold text-brand-slate">
-                <IconShield className="w-4 h-4 text-brand-primary" />
+                <IconShield className="w-4 h-4 text-brand-primary shrink-0" />
                 <span>{lang === 'ta' ? 'பாதுகாப்பான பேக்கிங் உறுதி' : 'Safe Packaging Guarantee'}</span>
               </div>
-              <p className="text-brand-slate/65 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-brand-slate/65 leading-relaxed">
                 {lang === 'ta'
                   ? 'எண்ணெய் மற்றும் அரிசி பைகள் தனித்தனி தடிமனான பைகளில் சிந்தாமல் பேக் செய்யப்படும்.'
                   : 'Oils and grains are individually packed in heavy leak-proof bags to prevent any damage.'}
