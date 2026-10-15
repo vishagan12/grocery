@@ -124,13 +124,13 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="py-8 md:py-12 bg-[#FBF8F3] min-h-screen">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-brand-slate tracking-tight">
+    <section className="py-6 md:py-10 bg-[#FBF8F3] min-h-screen w-full max-w-full overflow-x-hidden touch-pan-y">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 w-full">
+        <div className="mb-6">
+          <h1 className="text-xl md:text-3xl font-extrabold text-brand-slate tracking-tight">
             {t('checkout', lang)}
           </h1>
-          <p className="text-xs md:text-sm text-brand-slate/60 mt-1 font-medium">
+          <p className="text-xs md:text-sm text-brand-slate/60 mt-0.5 font-medium">
             {lang === 'ta'
               ? 'மதுரை விரைவு ஹோம் டெலிவரி & பாதுகாப்பான ஆர்டர் உறுதிப்படுத்தல்'
               : 'Madurai Express 30-Minute Doorstep Delivery & Verified Order Processing'}
@@ -138,43 +138,9 @@ export default function CheckoutPage() {
         </div>
 
         {/* 2-Column Responsive Checkout Layout */}
-        <div className="grid lg:grid-cols-12 gap-8 items-start">
+        <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start w-full">
           {/* Left Column (Steps 1, 2, 3) */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Step Navigation Indicator */}
-            <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-4 shadow-xs flex items-center justify-between">
-              {[
-                { s: 1, label: lang === 'ta' ? 'மொபைல் சரிபார்ப்பு' : 'Mobile Verify' },
-                { s: 2, label: lang === 'ta' ? 'டெலிவரி முகவரி' : 'Address & Slot' },
-                { s: 3, label: lang === 'ta' ? 'கட்டணம் & உறுதி' : 'Payment' },
-              ].map((item, idx) => (
-                <div key={item.s} className="flex items-center gap-2 flex-1 last:flex-initial">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all shrink-0 ${
-                      step >= item.s
-                        ? 'bg-brand-primary text-white shadow-xs'
-                        : 'bg-[#EAE2D5] text-brand-slate/60'
-                    }`}
-                  >
-                    {step > item.s ? <IconCheck className="w-4 h-4 stroke-[3]" /> : item.s}
-                  </div>
-                  <span
-                    className={`hidden sm:inline text-xs font-bold ${
-                      step >= item.s ? 'text-brand-slate' : 'text-brand-slate/40'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                  {idx < 2 && (
-                    <div
-                      className={`flex-1 h-0.5 mx-2 rounded-full transition-all ${
-                        step > item.s ? 'bg-brand-primary' : 'bg-[#EAE2D5]'
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="lg:col-span-7 space-y-5 w-full">
 
             {/* STEP 1: Phone Verification */}
             {step === 1 && (
@@ -401,31 +367,31 @@ export default function CheckoutPage() {
 
             {/* STEP 3: Payment Method */}
             {step === 3 && (
-              <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-6 shadow-sm animate-fade-in space-y-5">
-                {/* Saved Address & User Details Summary Card */}
-                <div className="bg-[#F8F5EE] border border-[#EAE2D5] rounded-xl p-4 flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0 mt-0.5">
-                      <IconMapPin className="w-4 h-4" />
+              <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-5 sm:p-6 shadow-sm animate-fade-in space-y-4">
+                {/* Saved Address & User Details Summary Card - Perfectly Aligned */}
+                <div className="bg-[#F8F5EE] border border-[#EAE2D5] rounded-2xl p-4 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                      <IconMapPin className="w-4 h-4 text-emerald-800" />
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-extrabold text-xs text-brand-slate uppercase tracking-wide">
                           {lang === 'ta' ? 'டெலிவரி முகவரி' : 'Delivering To'}
                         </span>
-                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-emerald-100/90 text-emerald-900 text-[10px] font-black px-2 py-0.5 rounded-md">
                           {lang === 'ta' ? 'சேமிக்கப்பட்ட முகவரி' : 'Saved Address'}
                         </span>
                       </div>
-                      <p className="text-xs font-bold text-brand-slate mt-1">
+                      <p className="text-xs font-bold text-brand-slate mt-1.5 truncate">
                         {state.userName || 'Vishagan'} • {phone}
                       </p>
-                      <p className="text-xs text-brand-slate/70 mt-0.5 leading-snug">
+                      <p className="text-xs text-slate-700 mt-1 leading-relaxed break-words font-medium">
                         {houseNo}, {street}
                       </p>
                       {landmark && (
-                        <p className="text-[11px] text-brand-slate/50 mt-0.5">
-                          Landmark: {landmark}
+                        <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                          {lang === 'ta' ? 'அடையாளம்' : 'Landmark'}: {landmark}
                         </p>
                       )}
                     </div>
@@ -433,26 +399,24 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="text-xs font-bold text-brand-primary hover:underline shrink-0"
+                    className="text-xs font-bold text-brand-primary hover:underline shrink-0 pt-0.5"
                   >
                     {lang === 'ta' ? 'மாற்று' : 'Change'}
                   </button>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg md:text-xl font-extrabold text-brand-slate">
+                {/* Payment Options Header without instant checkout badge */}
+                <div className="pt-1">
+                  <h3 className="text-base md:text-lg font-extrabold text-brand-slate">
                     {t('step3Title', lang)}
                   </h3>
-                  <span className="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-bold border border-emerald-200">
-                    ⚡ Instant Checkout
-                  </span>
                 </div>
 
                 <div className="space-y-3">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('upi')}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
+                    className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
                       paymentMethod === 'upi'
                         ? 'border-brand-primary bg-brand-mint'
                         : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
@@ -463,7 +427,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-extrabold text-sm text-brand-slate">{t('payOnline', lang)}</p>
-                      <p className="text-xs text-brand-primary font-semibold mt-0.5">{t('zeroFee', lang)}</p>
+                      <p className="text-xs text-slate-500 font-semibold mt-0.5">via UPI / Card</p>
                     </div>
                     {paymentMethod === 'upi' && <IconCheckCircle className="w-5 h-5 text-brand-primary shrink-0" />}
                   </button>
@@ -471,7 +435,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('cod')}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
+                    className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
                       paymentMethod === 'cod'
                         ? 'border-brand-primary bg-brand-mint'
                         : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
@@ -488,21 +452,23 @@ export default function CheckoutPage() {
                   </button>
                 </div>
 
-                <div className="flex gap-3 pt-4 border-t border-[#EAE2D5]">
+                {/* Bottom Action Row: Back Button + Confirm & Place Order in Single Line */}
+                <div className="flex items-center gap-2 sm:gap-3 pt-3 border-t border-[#EAE2D5]">
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="px-5 py-3 rounded-xl border-2 border-[#EAE2D5] font-bold text-xs text-brand-slate hover:bg-[#F5EFE6] transition-all touch-target inline-flex items-center gap-1.5"
+                    className="px-3.5 sm:px-4 py-3 rounded-xl border-2 border-[#EAE2D5] font-bold text-xs text-brand-slate hover:bg-[#F5EFE6] transition-all touch-target inline-flex items-center justify-center gap-1 shrink-0"
+                    style={{ minHeight: '48px' }}
                   >
-                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
                     <span>{t('backBtn', lang)}</span>
                   </button>
                   <button
                     type="button"
                     onClick={handlePlaceOrder}
                     disabled={!paymentMethod}
-                    className="flex-1 py-4 rounded-xl font-black text-sm md:text-base bg-brand-primary hover:bg-brand-highlight text-white shadow-lg shadow-brand-primary/30 transition-all touch-target"
-                    style={{ minHeight: '52px' }}
+                    className="flex-1 px-3 sm:px-4 py-3 rounded-xl font-black text-xs xs:text-sm bg-brand-primary hover:bg-brand-highlight text-white shadow-md shadow-brand-primary/30 transition-all touch-target whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center text-center"
+                    style={{ minHeight: '48px' }}
                   >
                     {t('confirmOrder', lang)} (₹{getCartTotal()})
                   </button>

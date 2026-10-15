@@ -23,6 +23,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -30,6 +31,8 @@ body {
   max-width: 100vw;
   width: 100%;
   position: relative;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
 }
 
 /* Prevent auto-zooming on iOS Safari and mobile browsers by enforcing 16px minimum font size */
