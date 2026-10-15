@@ -10,6 +10,7 @@ import {
   User,
   ChevronDown,
   Languages,
+  ShoppingCart,
   ShoppingBag,
   Package,
   Leaf,
@@ -82,7 +83,7 @@ export default function Header() {
           <div className="flex items-center justify-between gap-2.5">
             {/* Left: SA Logo Badge + Clean Aligned Location Pill */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              {/* Home SA Logo Button - Clean icon badge only */}
+              {/* Home Logo Button - Sleek Grocery Shopping Cart Icon Badge */}
               <button
                 type="button"
                 onClick={() => {
@@ -90,11 +91,12 @@ export default function Header() {
                   dispatch({ type: 'SET_CATEGORY', category: 'all' });
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-[#1E4D12] flex items-center justify-center font-black text-xs sm:text-sm shadow-xs border border-yellow-300 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none"
-                title={lang === 'ta' ? 'முகப்பு பக்கம் செல்ல' : 'Go to Homepage'}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white text-[#1E4D12] flex items-center justify-center shadow-md border-2 border-emerald-300/80 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none group relative overflow-hidden"
+                title={lang === 'ta' ? 'ஸ்ரீ அம்மன் மளிகை முகப்பு' : 'Sri Amman Supermarket'}
                 aria-label="Sri Amman Supermarket Home"
               >
-                <span>SA</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-emerald-50 opacity-90" />
+                <ShoppingCart className="w-5 h-5 text-[#1E4D12] group-hover:text-[#4CB01E] relative z-10 transition-colors drop-shadow-2xs stroke-[2.2]" />
               </button>
 
               {/* Subtle vertical divider */}
