@@ -176,18 +176,18 @@ export default function ProductsPage() {
 
           {/* Inline Sort Control */}
           <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 px-1 sm:px-0">
-            <span className="text-xs font-extrabold text-slate-700">{filtered.length} {t('items', lang)}</span>
+            <span className="text-[11px] sm:text-xs font-extrabold text-slate-700">{filtered.length} {t('items', lang)}</span>
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] sm:text-xs font-bold text-slate-500">{t('sortBy', lang)}:</span>
+              <span className="text-[10px] sm:text-[11px] font-bold text-slate-500">{t('sortBy', lang)}:</span>
               <select
                 value={state.sortBy}
                 onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value })}
-                className="text-[11px] sm:text-xs font-semibold bg-white border border-slate-300 rounded-xl px-2.5 py-1 text-slate-700 outline-none focus:border-[#4CB01E] shadow-2xs cursor-pointer"
+                className="text-[10px] sm:text-[11px] font-medium bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-slate-700 outline-none focus:border-[#4CB01E] shadow-2xs cursor-pointer"
               >
-                <option value="popularity">{t('popularity', lang)}</option>
-                <option value="price-low">{t('priceLowHigh', lang)}</option>
-                <option value="price-high">{t('priceHighLow', lang)}</option>
-                <option value="discount">{t('discountPercent', lang)}</option>
+                <option value="popularity" className="text-[10px]">{t('popularity', lang)}</option>
+                <option value="price-low" className="text-[10px]">{t('priceLowHigh', lang)}</option>
+                <option value="price-high" className="text-[10px]">{t('priceHighLow', lang)}</option>
+                <option value="discount" className="text-[10px]">{t('discountPercent', lang)}</option>
               </select>
             </div>
           </div>
@@ -305,7 +305,7 @@ export default function ProductsPage() {
 
               {/* Sort By in Sidebar */}
               <div className="pt-4 border-t border-[#EAE2D5]">
-                <h4 className="font-bold text-xs uppercase tracking-wider text-brand-slate/60 mb-2">
+                <h4 className="font-bold text-[11px] uppercase tracking-wider text-brand-slate/60 mb-2">
                   {t('sortBy', lang)}
                 </h4>
                 <div className="space-y-1">
@@ -318,7 +318,7 @@ export default function ProductsPage() {
                     <button
                       key={opt.value}
                       onClick={() => dispatch({ type: 'SET_SORT', sort: opt.value })}
-                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                      className={`w-full text-left px-2.5 py-1 rounded-lg text-[11px] transition-all ${
                         state.sortBy === opt.value
                           ? 'text-brand-primary font-bold bg-[#F5EFE6]'
                           : 'text-brand-slate/75 hover:bg-[#F5EFE6]/60'
