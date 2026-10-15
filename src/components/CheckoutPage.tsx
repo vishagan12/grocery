@@ -553,7 +553,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('upi')}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-colors flex items-center gap-3.5 box-border ${
                       paymentMethod === 'upi'
                         ? 'border-brand-primary bg-brand-mint'
                         : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
@@ -563,29 +563,33 @@ export default function CheckoutPage() {
                       <IconCreditCard className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-extrabold text-sm text-brand-slate">{t('payOnline', lang)}</p>
-                      <p className="text-xs text-brand-primary font-semibold mt-0.5">{t('zeroFee', lang)}</p>
+                      <p className="font-extrabold text-sm text-brand-slate leading-tight">{t('payOnline', lang)}</p>
+                      <p className="text-xs text-brand-primary font-semibold mt-1 leading-tight">{t('zeroFee', lang)}</p>
                     </div>
-                    {paymentMethod === 'upi' && <IconCheckCircle className="w-5 h-5 text-brand-primary shrink-0" />}
+                    <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                      {paymentMethod === 'upi' && <IconCheckCircle className="w-5 h-5 text-brand-primary" />}
+                    </div>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('cod')}
-                    className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 ${
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-colors flex items-center gap-3.5 box-border ${
                       paymentMethod === 'cod'
                         ? 'border-brand-primary bg-brand-mint'
                         : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
                     }`}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0">
                       <IconHome className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-extrabold text-sm text-brand-slate">{t('cashOnDelivery', lang)}</p>
-                      <p className="text-xs text-brand-slate/60 mt-0.5">{t('codDesc', lang)}</p>
+                      <p className="font-extrabold text-sm text-brand-slate leading-tight">{t('cashOnDelivery', lang)}</p>
+                      <p className="text-xs text-brand-primary font-semibold mt-1 leading-tight">{t('codDesc', lang)}</p>
                     </div>
-                    {paymentMethod === 'cod' && <IconCheckCircle className="w-5 h-5 text-brand-primary shrink-0" />}
+                    <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                      {paymentMethod === 'cod' && <IconCheckCircle className="w-5 h-5 text-brand-primary" />}
+                    </div>
                   </button>
                 </div>
 
