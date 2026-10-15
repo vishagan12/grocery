@@ -207,49 +207,65 @@ button, a, input, select {
   @apply flex items-center justify-center;
 }
 
-/* Print Stylesheet: Isolate bill receipt, hide entire website UI, header, nav, and buttons */
+/* Print Stylesheet: Isolate bill receipt, start from top of page, and eliminate extra pages */
 @media print {
   @page {
-    margin: 10mm 15mm;
-    size: auto;
+    margin: 8mm auto;
+    size: portrait;
   }
 
-  /* Hide everything on the page by default */
-  body * {
-    visibility: hidden;
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
   }
 
-  /* Make printable receipt and its contents visible */
-  #printable-receipt,
-  #printable-receipt * {
-    visibility: visible;
+  /* Hide entire website structure from document flow to prevent extra pages */
+  body > * {
+    display: none !important;
   }
 
-  /* Position receipt cleanly at top-left of page and center it neatly */
+  /* Make main or body container allow visible receipt */
+  body {
+    display: block !important;
+  }
+
+  /* Re-display printable receipt from the top of the printed page without extra margins */
   #printable-receipt {
-    position: absolute;
-    left: 50% !important;
-    top: 0 !important;
-    transform: translateX(-50%) !important;
-    width: 380px !important;
-    max-width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
     margin: 0 auto !important;
-    padding: 24px !important;
+    top: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    width: 360px !important;
+    max-width: 100% !important;
+    padding: 16px 20px !important;
     background: #ffffff !important;
     color: #000000 !important;
-    border: 1px solid #000000 !important;
-    border-radius: 8px !important;
+    border: 1px dashed #333333 !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
-  /* Hide the print button itself */
+  /* Show all elements inside the printable receipt */
+  #printable-receipt * {
+    visibility: visible !important;
+  }
+
+  /* Ensure the print button inside the receipt is completely removed from flow */
   .print-receipt-btn,
   #printable-receipt button {
     display: none !important;
-    visibility: hidden !important;
   }
 
-  /* Ensure text colors print with high contrast and neat readability */
+  /* Crisp monochrome printing */
   #printable-receipt p,
   #printable-receipt span,
   #printable-receipt h3,

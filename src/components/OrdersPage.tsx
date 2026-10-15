@@ -311,10 +311,100 @@ export default function OrdersPage() {
                 {t('thankYouMessage', lang)}
               </div>
 
-              {/* Print Receipt Button (hidden during print) */}
+              {/* Print Receipt Button */}
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => {
+                  const receiptEl = document.getElementById('printable-receipt');
+                  if (!receiptEl) {
+                    window.print();
+                    return;
+                  }
+                  // Clone receipt and remove print button from clone
+                  const clone = receiptEl.cloneNode(true) as HTMLElement;
+                  const printBtn = clone.querySelector('.print-receipt-btn');
+                  if (printBtn) printBtn.remove();
+
+                  const printWindow = window.open('', '_blank', 'width=450,height=650');
+                  if (!printWindow) {
+                    window.print();
+                    return;
+                  }
+
+                  printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <title>Receipt - ${activeOrder.id}</title>
+                        <style>
+                          @page {
+                            margin: 10mm auto;
+                            size: portrait;
+                          }
+                          * {
+                            box-sizing: border-box;
+                            margin: 0;
+                            padding: 0;
+                          }
+                          body {
+                            font-family: monospace, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                            font-size: 11px;
+                            color: #000;
+                            background: #fff;
+                            padding: 10px;
+                            display: flex;
+                            justify-content: center;
+                          }
+                          .receipt-wrapper {
+                            width: 320px;
+                            max-width: 100%;
+                            border: 1px dashed #666;
+                            padding: 16px;
+                            border-radius: 4px;
+                          }
+                          .text-center { text-align: center; }
+                          .text-right { text-align: right; }
+                          .font-bold { font-weight: bold; }
+                          .font-extrabold { font-weight: 800; }
+                          .border-b { border-bottom: 1px dashed #999; }
+                          .border-t { border-top: 1px dashed #999; }
+                          .py-1 { padding-top: 4px; padding-bottom: 4px; }
+                          .py-2 { padding-top: 8px; padding-bottom: 8px; }
+                          .py-3 { padding-top: 12px; padding-bottom: 12px; }
+                          .pb-3 { padding-bottom: 12px; }
+                          .pt-2 { padding-top: 8px; }
+                          .flex { display: flex; }
+                          .justify-between { justify-content: space-between; }
+                          .items-start { align-items: flex-start; }
+                          .gap-2 { gap: 8px; }
+                          .text-xs { font-size: 11px; }
+                          .text-sm { font-size: 13px; }
+                          .text-base { font-size: 15px; }
+                          .text-sub { font-size: 10px; color: #444; }
+                          .space-y-1 > * + * { margin-top: 4px; }
+                          .space-y-2 > * + * { margin-top: 8px; }
+                          .items-list { margin: 8px 0; }
+                          .items-list > div { margin-bottom: 6px; }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="receipt-wrapper">
+                          ${clone.innerHTML}
+                        </div>
+                        <script>
+                          window.onload = function() {
+                            window.focus();
+                            window.print();
+                            window.onafterprint = function() {
+                              window.close();
+                            };
+                          };
+                        </script>
+                      </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                }}
                 className="print-receipt-btn mt-4 w-full bg-[#F5EFE6] hover:bg-[#EAE2D5] text-brand-slate py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-[#EAE2D5] font-sans"
               >
                 <IconReceipt className="w-3.5 h-3.5 text-brand-primary" />
