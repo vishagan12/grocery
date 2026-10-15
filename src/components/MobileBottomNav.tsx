@@ -45,17 +45,17 @@ export default function MobileBottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
       <div className="max-w-md md:max-w-xl mx-auto pointer-events-auto">
-        {/* Layer 1: Dark Free-Delivery Nudge Strip (when cart has items) */}
+        {/* Layer 1: Dark Free-Delivery Nudge Strip (when cart has items) with rounded-2xl corners */}
         {cartCount > 0 && (
-          <div className="mx-2 sm:mx-3 bg-[#1E293B] text-white text-xs px-3.5 py-2 rounded-t-2xl shadow-xl flex flex-col gap-1 border-t border-x border-slate-700/60 animate-slide-up">
+          <div className="mx-2 sm:mx-3 mb-1.5 bg-[#1E293B] text-white text-xs px-3.5 py-2.5 rounded-2xl shadow-xl flex flex-col gap-1.5 border border-slate-700/60 animate-slide-up">
             <div className="flex items-center justify-between font-bold text-[11px] sm:text-xs">
               {cartSubtotal < 499 ? (
-                <div className="flex items-start gap-1.5 flex-1 min-w-0">
-                  <Truck className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span className="leading-snug break-words">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <Truck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="leading-tight truncate">
                     {lang === 'ta'
                       ? `இலவச டெலிவரிக்கு மேலும் ₹${freeDeliveryDiff} சேருங்கள்`
-                      : `Shop for ₹${freeDeliveryDiff} more to unlock FREE delivery!`}
+                      : `Shop for ₹${freeDeliveryDiff} more for FREE delivery!`}
                   </span>
                 </div>
               ) : (

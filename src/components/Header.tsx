@@ -27,6 +27,7 @@ export default function Header() {
   const lang = state.lang;
   const [searchFocused, setSearchFocused] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const queryTrimmed = state.searchQuery.trim().toLowerCase();
@@ -40,6 +41,16 @@ export default function Header() {
           )
           .slice(0, 6)
       : [];
+
+  useEffect(() => {
+    function handleScroll() {
+      if (typeof window !== 'undefined') {
+        setIsScrolled(window.scrollY > 40);
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -138,8 +149,14 @@ export default function Header() {
         </div>
       </div>
 
-      {/* STICKY SEARCH & CATEGORIES HEADER: Smooth translucent frosted-glass blur with subtle gradient fade */}
-      <header className="sticky top-0 z-50 glass-header text-white shadow-md border-b border-white/10 transition-all duration-300 animate-smooth-fade">
+      {/* STICKY SEARCH & CATEGORIES HEADER: Solid green below top menu, smooth neutral frosted-glass blur when scrolled */}
+      <header
+        className={`sticky top-0 z-50 text-white border-b transition-all duration-300 ${
+          isScrolled
+            ? 'bg-slate-900/80 backdrop-blur-xl border-white/10 shadow-lg'
+            : 'bg-[#1E4D12] border-emerald-900/40 shadow-sm'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-1.5">
           {/* Row 2: Floating Pill Search Bar */}
           <div ref={searchRef} className="relative z-30 mb-2">

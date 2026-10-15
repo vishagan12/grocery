@@ -68,20 +68,30 @@ export default function ProductDetailPage() {
           <div className="grid md:grid-cols-12 gap-0">
             {/* Left Image Section (5 cols) */}
             <div className="md:col-span-5 p-6 md:p-10 bg-[#F8FAF7] border-b md:border-b-0 md:border-r border-slate-200/80 flex flex-col items-center justify-center relative">
-              {product.badge && (
-                <span className="absolute top-4 left-4 bg-[#C62828] text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-xs">
-                  {lang === 'ta' && product.badgeTa ? product.badgeTa : product.badge}
-                </span>
-              )}
+              {/* Badges Stack (Always on top with z-30) */}
+              <div className="absolute top-4 left-4 z-30 flex flex-col gap-1.5 pointer-events-none">
+                {product.badge && (
+                  <span className="bg-[#C62828] text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md">
+                    {lang === 'ta' && product.badgeTa ? product.badgeTa : product.badge}
+                  </span>
+                )}
+                {discount > 0 && (
+                  <span className="bg-blue-600 text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md">
+                    {discount}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
+                  </span>
+                )}
+              </div>
 
-              <ProductImage
-                src={product.image}
-                alt={lang === 'ta' ? product.nameTa : product.nameEn}
-                category={product.category}
-                className="w-full h-64 md:h-80 mx-auto"
-              />
+              <div className="w-full relative z-10 flex items-center justify-center pt-4">
+                <ProductImage
+                  src={product.image}
+                  alt={lang === 'ta' ? product.nameTa : product.nameEn}
+                  category={product.category}
+                  className="w-full h-64 md:h-80 mx-auto"
+                />
+              </div>
 
-              <div className="mt-4 flex items-center gap-2 text-xs font-black text-[#1E4D12] bg-[#F1F9EC] px-3.5 py-1.5 rounded-full border border-[#4CB01E]/20 shadow-2xs">
+              <div className="mt-4 flex items-center gap-2 text-xs font-black text-[#1E4D12] bg-[#F1F9EC] px-3.5 py-1.5 rounded-full border border-[#4CB01E]/20 shadow-2xs z-10">
                 <IconCheckCircle className="w-4 h-4 text-[#4CB01E]" />
                 <span>{lang === 'ta' ? '100% நேரடி கவுண்டர் தரம்' : '100% Genuine Counter Quality'}</span>
               </div>

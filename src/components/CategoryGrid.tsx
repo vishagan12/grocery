@@ -14,67 +14,132 @@ export default function CategoryGrid() {
     dispatch({ type: 'SET_PAGE', page: 'products' });
   };
 
+  // Grouped sections matching Blinkit's layout in the reference screenshot
+  const categorySections = [
+    {
+      titleEn: 'Grocery & Kitchen',
+      titleTa: 'மளிகை & சமையலறை பொருட்கள்',
+      items: [
+        {
+          id: 'vegetables-fruits',
+          nameEn: 'Vegetables & Fruits',
+          nameTa: 'காய்கறி & பழங்கள்',
+          image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 'rice-grains',
+          nameEn: 'Atta, Rice & Dal',
+          nameTa: 'மாவு, அரிசி & பருப்பு',
+          image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 'oils-ghee',
+          nameEn: 'Oil, Ghee & Masala',
+          nameTa: 'எண்ணெய் & மசாலா',
+          image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 'dairy-eggs',
+          nameEn: 'Dairy, Bread & Eggs',
+          nameTa: 'பால், ரொட்டி & முட்டை',
+          image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80',
+        },
+      ],
+    },
+    {
+      titleEn: 'Snacks & Drinks',
+      titleTa: 'சிற்றுண்டி & குளிர்பானங்கள்',
+      items: [
+        {
+          id: 'snacks-biscuits',
+          nameEn: 'Chips & Namkeen',
+          nameTa: 'சிப்ஸ் & முறுக்கு',
+          image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 'dals-pulses',
+          nameEn: 'Sweets & Chocolates',
+          nameTa: 'இனிப்புகள் & மிட்டாய்',
+          image: 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 'beverages',
+          nameEn: 'Tea, Coffee & Drinks',
+          nameTa: 'டீ, காபி & பானங்கள்',
+          image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=300&q=80',
+        },
+        {
+          id: 'household-pooja',
+          nameEn: 'Kitchenware & Pooja',
+          nameTa: 'வீட்டு உபயோகம் & பூஜை',
+          image: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80',
+        },
+      ],
+    },
+  ];
+
   return (
     <section className="py-4 sm:py-7 bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
-        {/* Section Heading - 100% visible text */}
-        <div className="flex items-center justify-between mb-3.5 sm:mb-5 pb-2.5 border-b border-slate-100 gap-2">
-          <div className="min-w-0">
-            <h3 className="text-lg sm:text-xl font-black text-[#0F172A] tracking-tight leading-snug">
-              {lang === 'ta' ? 'மளிகை & அத்தியாவசிய பொருட்கள்' : 'Grocery & Kitchen Essentials'}
-            </h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5 leading-snug">
-              {lang === 'ta'
-                ? 'அனைத்து புதிய பொருட்கள் 20 நிமிடத்தில் டெலிவரி'
-                : 'Direct from store counter • Delivered in 20 minutes'}
-            </p>
+        {categorySections.map((sec, secIdx) => (
+          <div key={sec.titleEn} className={secIdx > 0 ? 'mt-6 sm:mt-8' : ''}>
+            {/* Department Section Title matching Blinkit Screenshot 2 */}
+            <div className="flex items-center justify-between mb-3 pb-1 border-b border-slate-100">
+              <h3 className="text-base sm:text-xl font-black text-[#0F172A] tracking-tight">
+                {lang === 'ta' ? sec.titleTa : sec.titleEn}
+              </h3>
+              {secIdx === 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    dispatch({ type: 'SET_CATEGORY', category: 'all' });
+                    dispatch({ type: 'SET_PAGE', page: 'products' });
+                  }}
+                  className="text-xs sm:text-sm font-black text-[#4CB01E] hover:text-[#3D9415] transition-colors flex items-center gap-1"
+                >
+                  <span>{lang === 'ta' ? 'அனைத்தும்' : 'See all'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* 4-column rounded cards matching reference screenshot */}
+            <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-2 sm:gap-3.5">
+              {sec.items.map((cat) => {
+                const isSelected = state.activeCategory === cat.id;
+
+                return (
+                  <div
+                    key={cat.id}
+                    onClick={() => navigateCategory(cat.id)}
+                    className="flex flex-col items-center cursor-pointer group text-center select-none"
+                  >
+                    {/* Dark/Soft rounded square image container as shown in screenshot */}
+                    <div
+                      className={`w-full aspect-square rounded-2xl overflow-hidden p-2 mb-1.5 transition-all flex items-center justify-center ${
+                        isSelected
+                          ? 'bg-[#1E293B] ring-2 ring-[#4CB01E]'
+                          : 'bg-[#1E2430] hover:bg-[#2A3241]'
+                      } shadow-md`}
+                    >
+                      <img
+                        src={cat.image}
+                        alt={cat.nameEn}
+                        className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-sm"
+                        loading="lazy"
+                      />
+                    </div>
+
+                    {/* Category Label (2 lines max, no hidden text, centered) */}
+                    <p className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight text-center break-words w-full px-0.5 line-clamp-2">
+                      {lang === 'ta' ? cat.nameTa : cat.nameEn}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              dispatch({ type: 'SET_CATEGORY', category: 'all' });
-              dispatch({ type: 'SET_PAGE', page: 'products' });
-            }}
-            className="text-xs sm:text-sm font-black text-[#4CB01E] hover:text-[#3D9415] transition-colors bg-white px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs whitespace-nowrap flex items-center gap-1 shrink-0"
-          >
-            <span>{lang === 'ta' ? 'அனைத்தும்' : 'See All'}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* 8 Symmetrical Identical Category Cards: 4 columns on mobile, 8 columns on desktop */}
-        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-2.5 sm:gap-3.5">
-          {categories.map((cat) => {
-            const isSelected = state.activeCategory === cat.id;
-
-            return (
-              <div
-                key={cat.id}
-                onClick={() => navigateCategory(cat.id)}
-                className={`rounded-2xl p-2 sm:p-2.5 flex flex-col items-center justify-between cursor-pointer transition-all border group shadow-2xs hover:shadow-sm text-center select-none min-h-[110px] sm:min-h-[125px] ${
-                  isSelected
-                    ? 'bg-[#F1F9EC] border-[#4CB01E] ring-1 ring-[#4CB01E]'
-                    : 'bg-[#F8FAF7] hover:bg-[#F1F9EC] border-slate-200/80 hover:border-[#4CB01E]'
-                }`}
-              >
-                {/* Prominent Image Window */}
-                <div className="w-full aspect-square rounded-xl overflow-hidden bg-white p-1 mb-1.5 shadow-2xs flex items-center justify-center border border-slate-100/80">
-                  <img
-                    src={cat.image}
-                    alt={cat.nameEn}
-                    className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                </div>
-
-                {/* Clean Multi-Line Category Label (Zero hidden ellipsis) */}
-                <p className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight text-center break-words w-full px-0.5">
-                  {lang === 'ta' ? cat.nameTa : cat.nameEn}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+        ))}
       </div>
     </section>
   );
