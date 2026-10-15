@@ -115,25 +115,27 @@ export function CustomerReviews() {
     <section className="py-6 sm:py-10 bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Kudumba Monthly Provision Callout Banner */}
-        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#143B0D] via-[#1E4D12] to-[#2E7D32] rounded-2xl sm:rounded-3xl p-4 sm:p-8 text-white shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border border-white/20">
-          <div className="max-w-xl text-center sm:text-left min-w-0">
-            <span className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1.5 shadow-2xs whitespace-nowrap">
+        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#143B0D] via-[#1E4D12] to-[#2E7D32] rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-6 border border-emerald-500/30">
+          <div className="w-full sm:max-w-xl text-center sm:text-left min-w-0">
+            <span className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
               <IconZap className="w-3.5 h-3.5 text-[#143B0D] shrink-0" />
-              <span>{lang === 'ta' ? 'குடும்ப மெகா தொகுப்பு' : 'Family Bundle Deal'}</span>
+              <span>{lang === 'ta' ? 'குடும்ப மெகா சேமிப்பு' : 'Family Bundle Deal'}</span>
             </span>
-            <h3 className="text-xs xs:text-sm sm:text-2xl font-black tracking-tight mb-1 text-white whitespace-nowrap overflow-hidden text-ellipsis sm:whitespace-normal">
+            <h3 className={`font-black tracking-tight mb-1.5 text-white ${lang === 'ta' ? 'text-sm sm:text-2xl leading-normal' : 'text-base sm:text-2xl leading-tight'}`}>
               {lang === 'ta' ? '1-கிளிக் குடும்ப மாத மளிகை தொகுப்பு' : '1-Click Kudumba Monthly Grocery Bundle'}
             </h3>
-            <p className="text-white/85 text-[11px] sm:text-sm leading-relaxed text-pretty">
-              {t('kudumbaSubtitle', lang)}
+            <p className={`text-emerald-100/90 font-medium ${lang === 'ta' ? 'text-[11px] sm:text-sm leading-relaxed' : 'text-xs sm:text-sm leading-normal'}`}>
+              {lang === 'ta'
+                ? 'அரிசி, பருப்பு, எண்ணெய் & சமையல் சாமான்கள் அனைத்தும் ஒரே கூடை தொகுப்பாக வாங்குங்கள்.'
+                : t('kudumbaSubtitle', lang)}
             </p>
           </div>
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-            className="bg-white hover:bg-yellow-300 text-[#143B0D] font-black text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-xs transition-all whitespace-nowrap shrink-0 active:scale-95 inline-flex items-center gap-1.5"
+            className="w-full sm:w-auto justify-center bg-white hover:bg-yellow-300 text-[#143B0D] font-black text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-xs hover:shadow-md transition-all whitespace-nowrap shrink-0 active:scale-95 inline-flex items-center gap-2"
           >
-            <span>{t('monthlyListBtn', lang)}</span>
+            <span>{lang === 'ta' ? 'மாத மளிகை தேர்வு செய்' : t('monthlyListBtn', lang)}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

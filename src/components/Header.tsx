@@ -138,8 +138,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* STICKY SEARCH & CATEGORIES HEADER: Translucent frosted-glass backdrop blur over scrolling content */}
-      <header className="sticky top-0 z-50 bg-[#1E4D12]/85 backdrop-blur-xl text-white shadow-lg border-b border-white/15 transition-all">
+      {/* STICKY SEARCH & CATEGORIES HEADER: Smooth translucent frosted-glass blur with subtle gradient fade */}
+      <header className="sticky top-0 z-50 glass-header text-white shadow-md border-b border-white/10 transition-all duration-300 animate-smooth-fade">
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-1.5">
           {/* Row 2: Floating Pill Search Bar */}
           <div ref={searchRef} className="relative z-30 mb-2">
