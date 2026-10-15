@@ -54,8 +54,11 @@ export default function ProfilePage() {
   // Active sub-view inside the profile
   const [subView, setSubView] = useState<SubView>('none');
 
-  // Appearance state: 'Light' vs 'Clear Text'
-  const [appearance, setAppearance] = useState<'Light' | 'Clear Text'>('Light');
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const el = document.getElementById('profile-content-container');
+    if (el) el.scrollTop = 0;
+  }, [subView]);
 
   // Editable Identity fields
   const [name, setName] = useState(state.userName || 'Vishagan');
@@ -313,7 +316,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Dynamic Content: Sub-views vs Main Profile */}
-        <div className="flex-1 p-4 sm:p-5 overflow-y-auto">
+        <div id="profile-content-container" className="flex-1 p-4 sm:p-5 overflow-y-auto">
           {/* SUB-VIEW 1: Edit Identity */}
           {subView === 'edit-identity' && (
             <div className="space-y-4">
@@ -1127,31 +1130,8 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* D. Appearance & Preferences Cards */}
-              <div className="space-y-2.5 mb-6">
-                {/* 1. Appearance Row */}
-                <div className="border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between bg-white shadow-2xs">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">
-                      <Sun className="w-4 h-4" />
-                    </div>
-                    <span className="text-[15px] font-medium text-slate-800">Appearance</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = appearance === 'Light' ? 'Clear Text' : 'Light';
-                      setAppearance(next);
-                      showToast(`Appearance set to ${next}`);
-                    }}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
-                  >
-                    <span>{appearance}</span>
-                    <span className="text-[10px]">▾</span>
-                  </button>
-                </div>
-
-                {/* 2. Language Preferences Row */}
+              {/* D. Language Preferences Card */}
+              <div className="mb-6">
                 <div className="border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between bg-white shadow-2xs">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">

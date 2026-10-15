@@ -139,15 +139,15 @@ export default function HeroSection() {
   return (
     <section className="bg-gradient-to-b from-[#4CB01E]/15 via-[#F8FAF7] to-white pt-2.5 sm:pt-3.5 pb-5 sm:pb-7 px-3 sm:px-6">
       <div className="max-w-7xl mx-auto">
-        {/* Top Headline Banner: Super Saver Typography - Fully visible, wraps cleanly */}
-        <div className="py-2.5 px-3 mb-3 bg-white/95 rounded-2xl border border-[#4CB01E]/20 shadow-2xs flex items-center justify-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#4CB01E] shrink-0" />
-          <h2 className="text-xs sm:text-sm font-extrabold text-[#1E4D12] tracking-tight text-center leading-snug">
+        {/* Top Headline Banner: Super Saver Typography - Strictly single line */}
+        <div className="py-2.5 px-3 mb-3 bg-white/95 rounded-2xl border border-[#4CB01E]/20 shadow-2xs flex items-center justify-center gap-2 overflow-hidden">
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#4CB01E] shrink-0" />
+          <h2 className="text-xs sm:text-sm font-extrabold text-[#1E4D12] tracking-tight text-center whitespace-nowrap overflow-hidden text-ellipsis">
             {lang === 'ta'
               ? 'ஸ்ரீ அம்மன் சூப்பர் சேவர் • அத்தியாவசிய மளிகைக்கு 30% வரை தள்ளுபடி'
               : 'Sri Amman Super Saver • Up to 30% OFF Daily Essentials'}
           </h2>
-          <Sparkles className="w-4 h-4 text-[#4CB01E] shrink-0" />
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#4CB01E] shrink-0" />
         </div>
 
         {/* 3-Column Asymmetric Bento Grid (Mobile & Desktop) */}

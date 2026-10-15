@@ -64,5 +64,13 @@ export default function Home() {
     }
   };
 
+  if (state.currentPage === 'profile') {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 w-full">
+        <ProfilePage />
+      </div>
+    );
+  }
+
   return <AppShell>{renderPage()}</AppShell>;
 }
