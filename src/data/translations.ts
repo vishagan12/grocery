@@ -126,7 +126,7 @@ export const translations: TranslationMap = {
   filterByCategory: { en: 'Filter by Category', ta: 'வகைவாரியாக வடிகட்டு' },
   all: { en: 'All Items', ta: 'அனைத்து பொருட்கள்' },
   sortBy: { en: 'Sort by', ta: 'வரிசைப்படுத்து' },
-  popularity: { en: 'Popularity & Top Sellers', ta: 'அதிகம் வாங்கப்பட்டவை' },
+  popularity: { en: 'Popularity', ta: 'அதிகம் வாங்கப்பட்டவை' },
   priceLowHigh: { en: 'Price: Low to High', ta: 'விலை: குறைவு முதல் அதிகம் வரை' },
   priceHighLow: { en: 'Price: High to Low', ta: 'விலை: அதிகம் முதல் குறைவு வரை' },
   discountPercent: { en: 'Highest Discount %', ta: 'அதிக தள்ளுபடி %' },

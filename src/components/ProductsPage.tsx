@@ -178,11 +178,11 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 px-1 sm:px-0">
             <span className="text-xs font-extrabold text-slate-700">{filtered.length} {t('items', lang)}</span>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-slate-500">{t('sortBy', lang)}:</span>
+              <span className="text-[11px] sm:text-xs font-bold text-slate-500">{t('sortBy', lang)}:</span>
               <select
                 value={state.sortBy}
                 onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value })}
-                className="text-xs font-bold bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-primary shadow-2xs"
+                className="text-[11px] sm:text-xs font-semibold bg-white border border-slate-300 rounded-xl px-2.5 py-1 text-slate-700 outline-none focus:border-[#4CB01E] shadow-2xs cursor-pointer"
               >
                 <option value="popularity">{t('popularity', lang)}</option>
                 <option value="price-low">{t('priceLowHigh', lang)}</option>

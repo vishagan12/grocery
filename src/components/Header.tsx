@@ -76,111 +76,110 @@ export default function Header() {
 
   return (
     <>
-      {/* Sticky Combined Header: Solid brand green on top, lush emerald blur with shadow when scrolled down */}
-      <header
-        className={`sticky top-0 z-50 text-white transition-all duration-300 ${
-          isScrolled
-            ? 'bg-[#1E4D12]/95 backdrop-blur-xl border-b border-[#4CB01E]/40 shadow-lg'
-            : 'bg-[#1E4D12] border-b border-emerald-900/60 shadow-sm'
-        }`}
-      >
-        {/* Top Bar: Brand SA Icon, Location, Language Toggle, Wishlist & Profile */}
-        <div className="border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2">
-            <div className="flex items-center justify-between gap-2.5">
-              {/* Left: SA Logo Badge + Clean Aligned Location Pill */}
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                {/* Home SA Logo Button - Clean icon badge only */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    dispatch({ type: 'SET_PAGE', page: 'home' });
-                    dispatch({ type: 'SET_CATEGORY', category: 'all' });
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-[#1E4D12] flex items-center justify-center font-black text-xs sm:text-sm shadow-xs border border-yellow-300 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none"
-                  title={lang === 'ta' ? 'முகப்பு பக்கம் செல்ல' : 'Go to Homepage'}
-                  aria-label="Sri Amman Supermarket Home"
-                >
-                  <span>SA</span>
-                </button>
+      {/* Top Bar: Brand SA Icon, Location, Language Toggle, Wishlist & Profile (Scrolls away naturally) */}
+      <div className="bg-[#1E4D12] text-white relative z-40 border-b border-emerald-900/60">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2">
+          <div className="flex items-center justify-between gap-2.5">
+            {/* Left: SA Logo Badge + Clean Aligned Location Pill */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              {/* Home SA Logo Button - Clean icon badge only */}
+              <button
+                type="button"
+                onClick={() => {
+                  dispatch({ type: 'SET_PAGE', page: 'home' });
+                  dispatch({ type: 'SET_CATEGORY', category: 'all' });
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white text-[#1E4D12] flex items-center justify-center font-black text-xs sm:text-sm shadow-xs border border-yellow-300 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none"
+                title={lang === 'ta' ? 'முகப்பு பக்கம் செல்ல' : 'Go to Homepage'}
+                aria-label="Sri Amman Supermarket Home"
+              >
+                <span>SA</span>
+              </button>
 
-                {/* Subtle vertical divider */}
-                <div className="h-6 w-px bg-white/20 shrink-0" />
+              {/* Subtle vertical divider */}
+              <div className="h-6 w-px bg-white/20 shrink-0" />
 
-                {/* Clean, perfectly aligned location pill with MapPin */}
-                <button
-                  type="button"
-                  onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: true })}
-                  className="flex items-center gap-2 bg-black/20 hover:bg-black/30 border border-white/20 px-2.5 py-1 rounded-xl text-left group min-w-0 transition-all active:scale-95"
-                  title="Change delivery location"
-                >
-                  <MapPin className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
-                  <div className="flex flex-col leading-none min-w-0">
-                    <div className="flex items-center gap-1">
-                      <span className="font-extrabold text-white text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[200px]">
-                        {state.location.area || 'Madurai'}
-                      </span>
-                      <ChevronDown className="w-2.5 h-2.5 text-white/70 group-hover:translate-y-0.5 transition-transform shrink-0" />
-                    </div>
-                    <span className="text-yellow-300/90 font-bold text-[9px] sm:text-[10px] whitespace-nowrap mt-0.5">
-                      20 {lang === 'ta' ? 'நிமிடம்' : 'mins'}
+              {/* Clean, perfectly aligned location pill with MapPin */}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: true })}
+                className="flex items-center gap-2 bg-black/20 hover:bg-black/30 border border-white/20 px-2.5 py-1 rounded-xl text-left group min-w-0 transition-all active:scale-95"
+                title="Change delivery location"
+              >
+                <MapPin className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
+                <div className="flex flex-col leading-none min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="font-extrabold text-white text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[200px]">
+                      {state.location.area || 'Madurai'}
                     </span>
+                    <ChevronDown className="w-2.5 h-2.5 text-white/70 group-hover:translate-y-0.5 transition-transform shrink-0" />
                   </div>
-                </button>
-              </div>
+                  <span className="text-yellow-300/90 font-bold text-[9px] sm:text-[10px] whitespace-nowrap mt-0.5">
+                    20 {lang === 'ta' ? 'நிமிடம்' : 'mins'}
+                  </span>
+                </div>
+              </button>
+            </div>
 
-              {/* Right: Language Toggle, Wishlist & Profile Button */}
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                {/* Language Pill Switcher */}
-                <button
-                  type="button"
-                  onClick={() => dispatch({ type: 'SET_LANG', lang: lang === 'en' ? 'ta' : 'en' })}
-                  className="flex items-center gap-1.5 bg-black/25 hover:bg-black/35 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/30 text-[11px] sm:text-xs font-black text-white shadow-2xs transition-all active:scale-95"
-                  aria-label="Toggle Language"
-                >
-                  <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 shrink-0" />
-                  <span className="font-bold">{lang === 'en' ? 'தமிழ்' : 'English'}</span>
-                </button>
+            {/* Right: Language Toggle, Wishlist & Profile Button */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Language Pill Switcher */}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'SET_LANG', lang: lang === 'en' ? 'ta' : 'en' })}
+                className="flex items-center gap-1.5 bg-black/25 hover:bg-black/35 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/30 text-[11px] sm:text-xs font-black text-white shadow-2xs transition-all active:scale-95"
+                aria-label="Toggle Language"
+              >
+                <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 shrink-0" />
+                <span className="font-bold">{lang === 'en' ? 'தமிழ்' : 'English'}</span>
+              </button>
 
-                {/* Wishlist Button with Badge */}
-                <button
-                  type="button"
-                  onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
-                  className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
-                  aria-label="View Wishlist"
-                  title="Wishlist"
-                >
-                  <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${state.wishlist.length > 0 ? 'fill-rose-400 text-rose-300' : 'text-white'}`} />
-                  {state.wishlist.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
-                      {state.wishlist.length}
-                    </span>
-                  )}
-                </button>
+              {/* Wishlist Button with Badge */}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
+                className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
+                aria-label="View Wishlist"
+                title="Wishlist"
+              >
+                <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${state.wishlist.length > 0 ? 'fill-rose-400 text-rose-300' : 'text-white'}`} />
+                {state.wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
+                    {state.wishlist.length}
+                  </span>
+                )}
+              </button>
 
-                {/* User Profile / Login Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (state.isLoggedIn) {
-                      dispatch({ type: 'SET_PAGE', page: 'profile' });
-                    } else {
-                      setLoginOpen(true);
-                    }
-                  }}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
-                  aria-label="Account login and profile"
-                  title="Account"
-                >
-                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                </button>
-              </div>
+              {/* User Profile / Login Icon Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (state.isLoggedIn) {
+                    dispatch({ type: 'SET_PAGE', page: 'profile' });
+                  } else {
+                    setLoginOpen(true);
+                  }
+                }}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
+                aria-label="Account login and profile"
+                title="Account"
+              >
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Row 2: Search Bar & Row 3: Category Strip */}
+      {/* STICKY SEARCH & CATEGORIES HEADER: Stays fixed on top as you scroll down with vibrant emerald blur and shadow */}
+      <header
+        className={`sticky top-0 z-50 text-white transition-all duration-300 ${
+          isScrolled
+            ? 'bg-[#1E4D12]/90 backdrop-blur-xl border-b border-[#4CB01E]/40 shadow-xl'
+            : 'bg-[#1E4D12] border-b border-emerald-900/60 shadow-md'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 pt-2 pb-1.5">
           {/* Row 2: Floating Pill Search Bar */}
           <div ref={searchRef} className="relative z-30 mb-2">
@@ -342,6 +341,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
   const [otp, setOtp] = useState('');
   const [name, setName] = useState('');
+  const [dob, setDob] = useState('');
 
   const handleSendOtp = () => {
     if (phone.length >= 10) {
@@ -359,17 +359,18 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   const handleCompleteLogin = () => {
     const finalName = name.trim() || 'Vishagan';
     const finalPhone = `+91-${phone || '6379398981'}`;
+    const finalDob = dob.trim() || '12 Dec 2006';
 
     dispatch({
       type: 'SET_LOGIN',
       phone: finalPhone,
       name: finalName,
-      dob: '12 Dec 2006',
+      dob: finalDob,
       loggedIn: true,
     });
     showToast(lang === 'ta' ? `வரவேற்கிறோம், ${finalName}!` : `Welcome, ${finalName}!`);
     onClose();
-    dispatch({ type: 'SET_PAGE', page: 'profile' });
+    // User requested: the profile must open only when I click it, it must not open after I log in
   };
 
   return (
@@ -484,11 +485,24 @@ function LoginModal({ onClose }: { onClose: () => void }) {
               />
             </div>
 
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">
+                {lang === 'ta' ? 'பிறந்த தேதி' : 'Date of Birth'}
+              </label>
+              <input
+                type="text"
+                placeholder="12 Dec 2006"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#4CB01E]"
+              />
+            </div>
+
             <button
               onClick={handleCompleteLogin}
               className="w-full bg-[#4CB01E] text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
             >
-              {lang === 'ta' ? 'முடிக்கவும் & சுயவிவரம் செல்லவும்' : 'Done & Open Profile'}
+              {lang === 'ta' ? 'உள்நுழையவும்' : 'Complete & Log In'}
             </button>
           </div>
         )}
