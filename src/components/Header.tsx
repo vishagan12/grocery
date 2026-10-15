@@ -137,9 +137,15 @@ export default function Header() {
               {/* User Profile / Login Icon Button */}
               <button
                 type="button"
-                onClick={() => setLoginOpen(true)}
+                onClick={() => {
+                  if (state.isLoggedIn) {
+                    dispatch({ type: 'SET_PAGE', page: 'profile' });
+                  } else {
+                    setLoginOpen(true);
+                  }
+                }}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
-                aria-label="Account login"
+                aria-label="Account login and profile"
                 title="Account"
               >
                 <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
@@ -316,11 +322,41 @@ export default function Header() {
 }
 
 function LoginModal({ onClose }: { onClose: () => void }) {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, showToast } = useStore();
   const lang = state.lang;
   const [phone, setPhone] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
   const [otp, setOtp] = useState('');
+  const [name, setName] = useState('');
+
+  const handleSendOtp = () => {
+    if (phone.length >= 10) {
+      setStep('otp');
+    }
+  };
+
+  const handleVerifyOtp = () => {
+    // Accepts any OTP entered by user
+    if (otp.length > 0) {
+      setStep('name');
+    }
+  };
+
+  const handleCompleteLogin = () => {
+    const finalName = name.trim() || 'Vishagan';
+    const finalPhone = `+91-${phone || '6379398981'}`;
+
+    dispatch({
+      type: 'SET_LOGIN',
+      phone: finalPhone,
+      name: finalName,
+      dob: '12 Dec 2006',
+      loggedIn: true,
+    });
+    showToast(lang === 'ta' ? `வரவேற்கிறோம், ${finalName}!` : `Welcome, ${finalName}!`);
+    onClose();
+    dispatch({ type: 'SET_PAGE', page: 'profile' });
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
@@ -331,7 +367,13 @@ function LoginModal({ onClose }: { onClose: () => void }) {
               <User className="w-4 h-4" />
             </div>
             <h3 className="font-extrabold text-lg text-slate-900">
-              {lang === 'ta' ? 'ஸ்ரீ அம்மன் உள்நுழைவு' : 'Sri Amman Account'}
+              {step === 'name'
+                ? lang === 'ta'
+                  ? 'உங்கள் பெயர்'
+                  : "What's your name?"
+                : lang === 'ta'
+                ? 'ஸ்ரீ அம்மன் உள்நுழைவு'
+                : 'Sri Amman Account'}
             </h3>
           </div>
           <button
@@ -343,12 +385,20 @@ function LoginModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <p className="text-xs text-slate-500 mb-4">
-          {lang === 'ta'
+          {step === 'name'
+            ? lang === 'ta'
+              ? 'உங்கள் பெயரைக் கூறி உங்கள் கணக்கை தொடங்குங்கள்'
+              : 'Please enter your name to customize your grocery profile.'
+            : step === 'otp'
+            ? lang === 'ta'
+              ? `+91 ${phone} க்கு அனுப்பப்பட்ட OTP ஐ உள்ளிடவும் (எந்த எண்ணும் ஏற்கப்படும்)`
+              : `Enter the OTP sent to +91 ${phone} (any digits accepted)`
+            : lang === 'ta'
             ? 'உங்கள் மொபைல் எண்ணை உள்ளிட்டு விரைவாக உள்நுழையுங்கள்'
-            : 'Enter your phone number to access saved orders and express delivery.'}
+            : 'Enter your phone number to access saved addresses and express checkout.'}
         </p>
 
-        {!otpSent ? (
+        {step === 'phone' && (
           <div className="space-y-3">
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
@@ -361,7 +411,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                 <input
                   type="tel"
                   maxLength={10}
-                  placeholder="9876543210"
+                  placeholder="6379398981"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                   className="flex-1 px-3 py-2.5 text-sm outline-none font-medium text-slate-900"
@@ -371,22 +421,24 @@ function LoginModal({ onClose }: { onClose: () => void }) {
 
             <button
               disabled={phone.length < 10}
-              onClick={() => setOtpSent(true)}
-              className="w-full bg-[#4CB01E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl transition-all shadow-sm"
+              onClick={handleSendOtp}
+              className="w-full bg-[#4CB01E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl transition-all shadow-sm active:scale-98"
             >
-              {lang === 'ta' ? 'OTP அனுப்பவும்' : 'Send OTP'}
+              {lang === 'ta' ? 'OTP அனுப்பவும்' : 'Continue'}
             </button>
           </div>
-        ) : (
+        )}
+
+        {step === 'otp' && (
           <div className="space-y-3">
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
-                {lang === 'ta' ? 'OTP குறியீடு (டெமோ: 1234)' : 'Enter OTP (Demo: 1234)'}
+                {lang === 'ta' ? 'OTP குறியீடு (எந்த எண்ணும் ஏற்கப்படும்)' : 'Enter OTP (Any number accepted)'}
               </label>
               <input
                 type="text"
-                maxLength={4}
-                placeholder="1234"
+                maxLength={6}
+                placeholder="4829"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 className="w-full text-center tracking-widest text-lg font-bold border border-slate-200 rounded-xl py-2.5 outline-none focus:border-[#4CB01E]"
@@ -394,17 +446,35 @@ function LoginModal({ onClose }: { onClose: () => void }) {
             </div>
 
             <button
-              onClick={() => {
-                dispatch({
-                  type: 'SET_LOGIN',
-                  phone: `+91 ${phone || '9876543210'}`,
-                  loggedIn: true,
-                });
-                onClose();
-              }}
-              className="w-full bg-[#4CB01E] text-white font-extrabold py-3 rounded-xl shadow-sm"
+              disabled={otp.length === 0}
+              onClick={handleVerifyOtp}
+              className="w-full bg-[#4CB01E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
             >
               {lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}
+            </button>
+          </div>
+        )}
+
+        {step === 'name' && (
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">
+                {lang === 'ta' ? 'உங்கள் பெயர்' : 'Full Name'}
+              </label>
+              <input
+                type="text"
+                placeholder="Vishagan"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#4CB01E]"
+              />
+            </div>
+
+            <button
+              onClick={handleCompleteLogin}
+              className="w-full bg-[#4CB01E] text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
+            >
+              {lang === 'ta' ? 'முடிக்கவும் & சுயவிவரம் செல்லவும்' : 'Done & Open Profile'}
             </button>
           </div>
         )}

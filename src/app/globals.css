@@ -28,6 +28,13 @@ html, body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Prevent auto-zooming on iOS Safari and mobile browsers by enforcing 16px minimum font size */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 body {
   font-family: 'Inter', 'Noto Sans Tamil', system-ui, -apple-system, sans-serif;
   color: var(--brand-slate);

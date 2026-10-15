@@ -11,6 +11,7 @@ import MonthlyListPage from '@/components/MonthlyListPage';
 import CheckoutPage from '@/components/CheckoutPage';
 import OrdersPage from '@/components/OrdersPage';
 import ProductDetailPage from '@/components/ProductDetailPage';
+import ProfilePage from '@/components/ProfilePage';
 import AppShell from '@/components/AppShell';
 import { WhyChooseUs, CustomerReviews } from '@/components/HomeExtras';
 
@@ -44,6 +45,8 @@ export default function Home() {
         return <OrdersPage />;
       case 'product-detail':
         return <ProductDetailPage />;
+      case 'profile':
+        return <ProfilePage />;
       default:
         return (
           <>

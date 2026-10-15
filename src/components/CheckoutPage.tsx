@@ -30,36 +30,35 @@ export default function CheckoutPage() {
     showToast,
   } = useStore();
   const lang = state.lang;
-  const [step, setStep] = useState(1);
+  // Direct Payment Mode: Every order directly shows payment options, fetching saved address & profile data automatically
+  const [step, setStep] = useState(3);
 
-  // Step 1: Phone
-  const [phone, setPhone] = useState(state.loginPhone || '');
+  // User Profile & Mobile Information
+  const [phone, setPhone] = useState(state.loginPhone || '+91-6379398981');
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '']);
-  const [phoneVerified, setPhoneVerified] = useState(state.isLoggedIn);
+  const [phoneVerified, setPhoneVerified] = useState(true);
 
-  useEffect(() => {
-    if (state.isLoggedIn && state.loginPhone) {
-      setPhone(state.loginPhone);
-      setPhoneVerified(true);
-    }
-  }, [state.isLoggedIn, state.loginPhone]);
-
-  // Step 2: Address & Slot
-  const [addressDetected, setAddressDetected] = useState(false);
-  const [houseNo, setHouseNo] = useState('');
-  const [street, setStreet] = useState('');
-  const [landmark, setLandmark] = useState('');
+  // Address & Slot (pre-filled from saved addresses / location)
+  const [addressDetected, setAddressDetected] = useState(true);
+  const [houseNo, setHouseNo] = useState('12/B, Sri Meenakshi Residency');
+  const [street, setStreet] = useState(
+    state.location
+      ? `${state.location.area} Main Road, Madurai - ${state.location.pincode}`
+      : 'KK Nagar Main Road, Madurai - 625020'
+  );
+  const [landmark, setLandmark] = useState(state.location?.landmark || 'Near Temple');
   const [deliverySlot, setDeliverySlot] = useState('express');
 
   useEffect(() => {
-    if (step === 2 && !street && state.location) {
-      setHouseNo('12/B, Sri Meenakshi Residency');
-      setStreet(`${state.location.area} Main Road, Madurai - ${state.location.pincode}`);
-      setLandmark(state.location.landmark);
-      setAddressDetected(true);
+    if (state.loginPhone) {
+      setPhone(state.loginPhone);
     }
-  }, [step, state.location, street]);
+    if (state.location) {
+      setStreet(`${state.location.area} Main Road, Madurai - ${state.location.pincode}`);
+      if (state.location.landmark) setLandmark(state.location.landmark);
+    }
+  }, [state.loginPhone, state.location]);
 
   // Step 3: Payment
   const [paymentMethod, setPaymentMethod] = useState('upi');
@@ -403,9 +402,51 @@ export default function CheckoutPage() {
             {/* STEP 3: Payment Method */}
             {step === 3 && (
               <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-6 shadow-sm animate-fade-in space-y-5">
-                <h3 className="text-lg md:text-xl font-extrabold text-brand-slate">
-                  {t('step3Title', lang)}
-                </h3>
+                {/* Saved Address & User Details Summary Card */}
+                <div className="bg-[#F8F5EE] border border-[#EAE2D5] rounded-xl p-4 flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0 mt-0.5">
+                      <IconMapPin className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-xs text-brand-slate uppercase tracking-wide">
+                          {lang === 'ta' ? 'டெலிவரி முகவரி' : 'Delivering To'}
+                        </span>
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {lang === 'ta' ? 'சேமிக்கப்பட்ட முகவரி' : 'Saved Address'}
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-brand-slate mt-1">
+                        {state.userName || 'Vishagan'} • {phone}
+                      </p>
+                      <p className="text-xs text-brand-slate/70 mt-0.5 leading-snug">
+                        {houseNo}, {street}
+                      </p>
+                      {landmark && (
+                        <p className="text-[11px] text-brand-slate/50 mt-0.5">
+                          Landmark: {landmark}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="text-xs font-bold text-brand-primary hover:underline shrink-0"
+                  >
+                    {lang === 'ta' ? 'மாற்று' : 'Change'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-extrabold text-brand-slate">
+                    {t('step3Title', lang)}
+                  </h3>
+                  <span className="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-bold border border-emerald-200">
+                    ⚡ Instant Checkout
+                  </span>
+                </div>
 
                 <div className="space-y-3">
                   <button

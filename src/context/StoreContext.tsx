@@ -42,6 +42,8 @@ type StoreState = {
   activeCategory: string;
   currentPage: string;
   loginPhone: string;
+  userName: string;
+  userDob: string;
   isLoggedIn: boolean;
   toastMessage: string;
   productDetailId: string | null;
@@ -60,7 +62,8 @@ type StoreAction =
   | { type: 'SET_SEARCH'; query: string }
   | { type: 'SET_CATEGORY'; category: string }
   | { type: 'SET_PAGE'; page: string }
-  | { type: 'SET_LOGIN'; phone: string; loggedIn: boolean }
+  | { type: 'SET_LOGIN'; phone: string; name?: string; dob?: string; loggedIn: boolean }
+  | { type: 'LOGOUT' }
   | { type: 'SHOW_TOAST'; message: string }
   | { type: 'HIDE_TOAST' }
   | { type: 'SET_PRODUCT_DETAIL'; id: string | null }
@@ -88,8 +91,10 @@ const initialState: StoreState = {
   searchQuery: '',
   activeCategory: 'all',
   currentPage: 'home',
-  loginPhone: '',
-  isLoggedIn: false,
+  loginPhone: '+91-6379398981',
+  userName: 'Vishagan',
+  userDob: '12 Dec 2006',
+  isLoggedIn: true,
   toastMessage: '',
   productDetailId: null,
   sortBy: 'popularity',
@@ -165,7 +170,21 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
       return { ...state, currentPage: action.page, productDetailId: action.page === 'home' ? null : state.productDetailId };
 
     case 'SET_LOGIN':
-      return { ...state, loginPhone: action.phone, isLoggedIn: action.loggedIn };
+      return {
+        ...state,
+        loginPhone: action.phone,
+        userName: action.name || state.userName || 'Vishagan',
+        userDob: action.dob || state.userDob || '12 Dec 2006',
+        isLoggedIn: action.loggedIn,
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        isLoggedIn: false,
+        loginPhone: '',
+        userName: '',
+      };
 
     case 'SHOW_TOAST':
       return { ...state, toastMessage: action.message };
@@ -236,8 +255,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             cart: parsed.cart || [],
             orders: parsed.orders || [],
             lang: parsed.lang || 'en',
-            isLoggedIn: parsed.isLoggedIn || false,
-            loginPhone: parsed.loginPhone || '',
+            isLoggedIn: parsed.isLoggedIn !== undefined ? parsed.isLoggedIn : true,
+            loginPhone: parsed.loginPhone || '+91-6379398981',
+            userName: parsed.userName || 'Vishagan',
+            userDob: parsed.userDob || '12 Dec 2006',
             location: parsed.location || defaultLocation,
           },
         });
@@ -256,12 +277,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         lang: state.lang,
         isLoggedIn: state.isLoggedIn,
         loginPhone: state.loginPhone,
+        userName: state.userName,
+        userDob: state.userDob,
         location: state.location,
       }));
     } catch (e) {
       // ignore
     }
-  }, [state.cart, state.orders, state.lang, state.isLoggedIn, state.loginPhone, state.location, mounted]);
+  }, [state.cart, state.orders, state.lang, state.isLoggedIn, state.loginPhone, state.userName, state.userDob, state.location, mounted]);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
