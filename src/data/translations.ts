@@ -79,7 +79,7 @@ export const translations: TranslationMap = {
   byOurRiders: { en: 'Safe packaging by our dedicated store staff', ta: 'எங்கள் ஊழியர்கள் மூலம் பாதுகாப்பான பேக்கிங்' },
 
   // Featured & Deals
-  dealOfDay: { en: 'Deals of the Day', ta: 'இன்றைய அதிரடி சலுகைகள்' },
+  dealOfDay: { en: 'Deals of the Day', ta: 'இன்றைய சிறப்பு சலுகைகள்' },
   dealSubtitle: { en: 'Maximum savings on everyday kitchen staples', ta: 'தினசரி சமையல் பொருட்களுக்கு கூடுதல் சேமிப்பு' },
   viewAllDeals: { en: 'View All Deals', ta: 'அனைத்து சலுகைகளையும் பார்' },
   inStock: { en: 'In Stock at Counter', ta: 'கவுண்டரில் உள்ளது' },
