@@ -371,13 +371,30 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   const handleCompleteLogin = () => {
     const finalName = name.trim() || 'Vishagan';
     const finalPhone = `+91-${phone || '6379398981'}`;
-    const finalDob = dob.trim() || '12 Dec 2006';
+
+    let formattedDob = '12 Dec 2006';
+    if (dob) {
+      try {
+        const d = new Date(dob);
+        if (!isNaN(d.getTime())) {
+          formattedDob = d.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          });
+        } else {
+          formattedDob = dob;
+        }
+      } catch {
+        formattedDob = dob;
+      }
+    }
 
     dispatch({
       type: 'SET_LOGIN',
       phone: finalPhone,
       name: finalName,
-      dob: finalDob,
+      dob: formattedDob,
       loggedIn: true,
     });
     showToast(lang === 'ta' ? `வரவேற்கிறோம், ${finalName}!` : `Welcome, ${finalName}!`);
@@ -502,11 +519,11 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                 {lang === 'ta' ? 'பிறந்த தேதி' : 'Date of Birth'}
               </label>
               <input
-                type="text"
-                placeholder="12 Dec 2006"
+                type="date"
+                max={new Date().toISOString().split('T')[0]}
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#4CB01E]"
+                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#4CB01E] bg-white text-slate-800 cursor-pointer"
               />
             </div>
 
