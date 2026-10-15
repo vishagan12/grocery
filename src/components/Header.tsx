@@ -78,11 +78,11 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar: Brand SA Icon, Location, Language Toggle, Wishlist & Profile (Scrolls away naturally) */}
-      <div className="bg-[#1E4D12] text-white relative z-40 border-b border-emerald-900/60">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2">
+      {/* Top Bar: Brand Store Icon, Location, Language Toggle & Profile (Scrolls away naturally) */}
+      <div className="bg-[#1E4D12] text-white relative z-40">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2">
           <div className="flex items-center justify-between gap-2.5">
-            {/* Left: SA Logo Badge + Clean Aligned Location Pill */}
+            {/* Left: Store Logo Badge + Clean Aligned Location Pill */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               {/* Home Logo Button - Supermarket Store Icon Badge */}
               <button
@@ -163,24 +163,24 @@ export default function Header() {
       <header
         className={`sticky top-0 z-50 text-white transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#1E4D12]/90 backdrop-blur-xl border-b border-[#4CB01E]/40 shadow-xl'
-            : 'bg-[#1E4D12] border-b border-emerald-900/60 shadow-md'
+            ? 'bg-[#1E4D12]/95 backdrop-blur-xl shadow-xl'
+            : 'bg-[#1E4D12] shadow-md'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 pt-2 pb-1.5">
-          {/* Row 2: Search Bar + Wishlist Heart Button Layout */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-2 pb-1.5">
+          {/* Row 2: Search Bar + Wishlist Heart Button Layout (Equal symmetric spacing on both sides) */}
           <div ref={searchRef} className="relative z-30 mb-2 w-full">
-            <div className="flex items-center gap-1.5 sm:gap-2.5 w-full">
+            <div className="flex items-center gap-2 sm:gap-3 w-full">
               {/* Floating Pill Search Bar */}
               <div
-                className={`flex-1 min-w-0 flex items-center bg-white rounded-2xl shadow-md h-11 sm:h-12 px-2.5 sm:px-4 border-2 transition-all ${
+                className={`flex-1 min-w-0 flex items-center bg-white rounded-2xl shadow-md h-11 sm:h-12 px-3 sm:px-4 border-2 transition-all ${
                   searchFocused
                     ? 'border-yellow-400 ring-2 ring-yellow-400/30'
                     : 'border-transparent'
                 }`}
               >
                 {/* Green Magnifying Glass Icon */}
-                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#4CB01E] shrink-0 mr-1.5 sm:mr-2.5" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#4CB01E] shrink-0 mr-2 sm:mr-2.5" />
 
                 {/* Input with simple clean placeholder */}
                 <input
@@ -226,11 +226,11 @@ export default function Header() {
                 </button>
               </div>
 
-              {/* Wishlist Heart Button - Accurately constrained within screen bounds */}
+              {/* Wishlist Heart Button - Equal symmetric spacing on both sides */}
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
-                className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-100 flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 group mr-1"
+                className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-100 flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0 group"
                 aria-label="View Wishlist"
                 title="Wishlist"
               >
