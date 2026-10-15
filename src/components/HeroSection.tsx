@@ -65,13 +65,13 @@ export default function HeroSection() {
     },
   ];
 
-  // Auto-advance slide every 5 seconds
+  // Auto-advance slide every 5 seconds (resets whenever activeSlide changes so user gets full 5s)
   React.useEffect(() => {
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [activeSlide, heroSlides.length]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
@@ -204,24 +204,24 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <h3 className="text-base sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1">
+              <h3 className="text-sm xs:text-base sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1 line-clamp-2">
                 {lang === 'ta' ? currentSlide.titleTa : currentSlide.titleEn}
               </h3>
-              <p className="text-[11px] sm:text-sm text-emerald-100 font-medium leading-snug">
+              <p className="text-[10px] xs:text-[11px] sm:text-sm text-emerald-100 font-medium leading-snug line-clamp-2">
                 {lang === 'ta' ? currentSlide.subTa : currentSlide.subEn}
               </p>
             </div>
 
             {/* Content Bottom: Price Pill + Action Trigger */}
-            <div key={`bottom-${activeSlide}`} className="relative z-10 mt-2 sm:mt-4 flex items-center justify-between gap-2 pt-1.5 sm:pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
-              <div className="flex items-baseline gap-1.5 sm:gap-2 bg-black/45 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
+            <div key={`bottom-${activeSlide}`} className="relative z-10 mt-2 sm:mt-4 flex items-center justify-between gap-1.5 sm:gap-2 pt-1.5 sm:pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
+              <div className="flex items-baseline gap-1 sm:gap-2 bg-black/45 backdrop-blur-md px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
                 <span className="text-xs sm:text-lg font-black text-yellow-300">{currentSlide.price}</span>
-                <span className="text-[9px] sm:text-xs text-white/60 line-through">{currentSlide.mrp}</span>
+                <span className="text-[9px] sm:text-xs text-white/60 line-through hidden xs:inline">{currentSlide.mrp}</span>
                 <span className="text-[9px] sm:text-[10px] font-black text-emerald-300 bg-emerald-950/80 px-1.5 py-0.5 rounded">
                   {lang === 'ta' ? currentSlide.saveTa : currentSlide.saveEn}
                 </span>
               </div>
-              <span className="bg-white text-[#143B0D] font-black text-[10px] sm:text-xs px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap">
+              <span className="bg-white text-[#143B0D] font-black text-[10px] sm:text-xs px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1 shrink-0 whitespace-nowrap">
                 <span>{lang === 'ta' ? currentSlide.actionTa : currentSlide.actionEn}</span>
                 <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </span>

@@ -90,37 +90,68 @@ export default function ProductsPage() {
   return (
     <section className="py-6 md:py-10 bg-[#FBF8F3] min-h-screen">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Mobile Category Horizontal Scroll Bar (Seamless Edge-to-Edge) */}
-        <div className="md:hidden mb-4 -mx-4 px-4 overflow-x-auto hide-scrollbar edge-scroll">
-          <div className="flex gap-2 pb-2">
-            <button
-              onClick={() => dispatch({ type: 'SET_CATEGORY', category: 'all' })}
-              className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
-                state.activeCategory === 'all'
-                  ? 'bg-brand-primary text-white border-brand-primary shadow-sm'
-                  : 'bg-[#FFFFFF] text-brand-slate border-[#EAE2D5]'
-              }`}
-            >
-              {t('all', lang)} ({products.length})
-            </button>
-            {categories.map((cat) => {
-              const count = products.filter((p) => p.category === cat.id).length;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => dispatch({ type: 'SET_CATEGORY', category: cat.id })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 border ${
-                    state.activeCategory === cat.id
-                      ? 'bg-brand-primary text-white border-brand-primary shadow-sm'
-                      : 'bg-[#FFFFFF] text-brand-slate border-[#EAE2D5]'
-                  }`}
-                >
-                  <img src={cat.image} alt={cat.nameEn} className="w-4 h-4 rounded-full object-cover" />
-                  <span>{lang === 'ta' ? cat.nameTa : cat.nameEn}</span>
-                  <span className="opacity-70 text-[10px]">({count})</span>
-                </button>
-              );
-            })}
+        {/* Top Controls: Horizontal Category Scroll + Clean Inline Sort Dropdown */}
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          {/* Category Horizontal Scroll Bar (Seamless Edge-to-Edge with clean pills) */}
+          <div className="flex-1 -mx-4 px-4 overflow-x-auto hide-scrollbar edge-scroll">
+            <div className="flex items-center gap-2 pb-1">
+              <button
+                onClick={() => dispatch({ type: 'SET_CATEGORY', category: 'all' })}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-black whitespace-nowrap transition-all border shrink-0 flex items-center gap-1.5 ${
+                  state.activeCategory === 'all'
+                    ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
+                    : 'bg-[#FFFFFF] text-brand-slate border-slate-200 hover:border-brand-primary'
+                }`}
+              >
+                <span>{t('all', lang)}</span>
+                <span className={`text-[11px] px-1.5 py-0.2 rounded-full font-bold ${
+                  state.activeCategory === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {products.length}
+                </span>
+              </button>
+              {categories.map((cat) => {
+                const count = products.filter((p) => p.category === cat.id).length;
+                const isSelected = state.activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => dispatch({ type: 'SET_CATEGORY', category: cat.id })}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 border shrink-0 ${
+                      isSelected
+                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
+                        : 'bg-[#FFFFFF] text-brand-slate border-slate-200 hover:border-brand-primary'
+                    }`}
+                  >
+                    <img src={cat.image} alt={cat.nameEn} className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    <span className="truncate max-w-[140px]">{lang === 'ta' ? cat.nameTa : cat.nameEn}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ${
+                      isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Inline Sort Control */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 px-1 sm:px-0">
+            <span className="text-xs font-extrabold text-slate-700">{filtered.length} {t('items', lang)}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-500">{t('sortBy', lang)}:</span>
+              <select
+                value={state.sortBy}
+                onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value })}
+                className="text-xs font-bold bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 text-slate-800 outline-none focus:border-brand-primary shadow-2xs"
+              >
+                <option value="popularity">{t('popularity', lang)}</option>
+                <option value="price-low">{t('priceLowHigh', lang)}</option>
+                <option value="price-high">{t('priceHighLow', lang)}</option>
+                <option value="discount">{t('discountPercent', lang)}</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -278,37 +309,22 @@ export default function ProductsPage() {
 
           {/* Main Products Grid Column */}
           <main className="flex-1 min-w-0">
-            {/* Top Category Header Banner */}
-            <div className="bg-[#FFFFFF] border border-[#EAE2D5] rounded-2xl p-4 md:p-6 mb-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Desktop Only Title (Hidden on mobile so products appear immediately first) */}
+            <div className="hidden md:flex bg-[#FFFFFF] border border-[#EAE2D5] rounded-2xl p-4 md:p-5 mb-4 shadow-2xs items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl md:text-2xl font-extrabold text-brand-slate">
+                  <h2 className="text-xl font-extrabold text-brand-slate">
                     {activeCat ? (lang === 'ta' ? activeCat.nameTa : activeCat.nameEn) : t('allProducts', lang)}
                   </h2>
                   <span className="text-xs font-bold text-brand-primary bg-brand-mint px-2 py-0.5 rounded-full border border-brand-primary/10">
                     {filtered.length} {t('items', lang)}
                   </span>
                 </div>
-                <p className="text-xs md:text-sm text-brand-slate/60 mt-1 font-medium">
+                <p className="text-xs text-brand-slate/60 mt-0.5 font-medium">
                   {lang === 'ta'
                     ? 'மதுரையின் முதல் தர மளிகைகள், தூய்மையான பேக்கிங் மற்றும் நியாயமான மொத்த விலை.'
                     : 'Freshly stocked everyday kitchen staples with honest retail pricing.'}
                 </p>
-              </div>
-
-              {/* Mobile / Quick Sort Dropdown */}
-              <div className="flex items-center gap-2 self-start md:self-auto">
-                <span className="text-xs font-semibold text-brand-slate/60">{t('sortBy', lang)}:</span>
-                <select
-                  value={state.sortBy}
-                  onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value })}
-                  className="text-xs border border-[#EAE2D5] rounded-xl px-3 py-2 bg-[#FDFBF7] text-brand-slate font-bold outline-none focus:border-brand-primary"
-                >
-                  <option value="popularity">{t('popularity', lang)}</option>
-                  <option value="price-low">{t('priceLowHigh', lang)}</option>
-                  <option value="price-high">{t('priceHighLow', lang)}</option>
-                  <option value="discount">{t('discountPercent', lang)}</option>
-                </select>
               </div>
             </div>
 

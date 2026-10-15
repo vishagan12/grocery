@@ -114,18 +114,18 @@ export default function CategoryGrid() {
                     onClick={() => navigateCategory(cat.id)}
                     className="flex flex-col items-center cursor-pointer group text-center select-none"
                   >
-                    {/* Dark/Soft rounded square image container as shown in screenshot */}
+                    {/* Clean White/Light rounded square image container matching the background */}
                     <div
                       className={`w-full aspect-square rounded-2xl overflow-hidden p-2 mb-1.5 transition-all flex items-center justify-center ${
                         isSelected
-                          ? 'bg-[#1E293B] ring-2 ring-[#4CB01E]'
-                          : 'bg-[#1E2430] hover:bg-[#2A3241]'
-                      } shadow-md`}
+                          ? 'bg-[#F1F9EC] ring-2 ring-[#4CB01E] border border-[#4CB01E]/40'
+                          : 'bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-[#4CB01E]'
+                      } shadow-2xs hover:shadow-xs`}
                     >
                       <img
                         src={cat.image}
                         alt={cat.nameEn}
-                        className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-sm"
+                        className="w-full h-full object-contain group-hover:scale-108 transition-transform duration-300"
                         loading="lazy"
                       />
                     </div>
