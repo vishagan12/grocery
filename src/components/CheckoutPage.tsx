@@ -636,8 +636,8 @@ export default function CheckoutPage() {
 
                   return (
                     <div key={`${item.productId}-${item.variantIndex}`} className="py-2.5 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#F5EFE6] shrink-0 border border-[#EAE2D5] p-0.5">
-                        <img src={product.image} alt={product.nameEn} className="w-full h-full object-cover rounded" />
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#F5EFE6] shrink-0 border border-[#EAE2D5] relative">
+                        <img src={product.image} alt={product.nameEn} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0 text-xs">
                         <p className="font-bold text-brand-slate break-words leading-tight">

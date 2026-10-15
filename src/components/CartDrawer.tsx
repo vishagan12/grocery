@@ -163,11 +163,11 @@ export default function CartDrawer() {
                       key={`${item.productId}-${item.variantIndex}`}
                       className="flex items-center gap-3 bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs hover:shadow-xs transition-all"
                     >
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 shrink-0 p-1 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 shrink-0 relative flex items-center justify-center">
                         <img
                           src={product.image}
                           alt={lang === 'ta' ? product.nameTa : product.nameEn}
-                          className="w-full h-full object-contain rounded-lg"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="flex-1 min-w-0 text-xs">
@@ -253,8 +253,8 @@ export default function CartDrawer() {
                         key={prod.id}
                         className="w-40 shrink-0 bg-white border border-slate-200/90 rounded-2xl p-2.5 flex flex-col justify-between shadow-2xs hover:shadow-xs hover:border-[#4CB01E] transition-all"
                       >
-                        <div className="w-full h-20 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center p-1.5 mb-2">
-                          <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-contain" />
+                        <div className="w-full h-20 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center relative mb-2">
+                          <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-cover" />
                         </div>
                         <div className="min-w-0 mb-2">
                           <p className="font-bold text-xs text-slate-900 truncate leading-snug">
