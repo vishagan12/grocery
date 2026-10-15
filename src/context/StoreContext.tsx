@@ -36,6 +36,7 @@ export type UserLocation = {
 type StoreState = {
   lang: Lang;
   cart: CartItem[];
+  wishlist: string[]; // product IDs in wishlist
   orders: Order[];
   cartOpen: boolean;
   searchQuery: string;
@@ -59,6 +60,8 @@ type StoreAction =
   | { type: 'UPDATE_QUANTITY'; productId: string; variantIndex: number; quantity: number }
   | { type: 'CLEAR_CART' }
   | { type: 'SET_CART_OPEN'; open: boolean }
+  | { type: 'TOGGLE_WISHLIST'; productId: string }
+  | { type: 'CLEAR_WISHLIST' }
   | { type: 'SET_SEARCH'; query: string }
   | { type: 'SET_CATEGORY'; category: string }
   | { type: 'SET_PAGE'; page: string }
@@ -86,6 +89,7 @@ const defaultLocation: UserLocation = {
 const initialState: StoreState = {
   lang: 'en',
   cart: [],
+  wishlist: ['mil-1', 'ric-1', 'oil-1'], // curated initial wishlist items
   orders: [],
   cartOpen: false,
   searchQuery: '',
@@ -159,6 +163,19 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
 
     case 'SET_CART_OPEN':
       return { ...state, cartOpen: action.open };
+
+    case 'TOGGLE_WISHLIST': {
+      const exists = state.wishlist.includes(action.productId);
+      return {
+        ...state,
+        wishlist: exists
+          ? state.wishlist.filter((id) => id !== action.productId)
+          : [...state.wishlist, action.productId],
+      };
+    }
+
+    case 'CLEAR_WISHLIST':
+      return { ...state, wishlist: [] };
 
     case 'SET_SEARCH':
       return { ...state, searchQuery: action.query };
@@ -234,6 +251,8 @@ type StoreContextType = {
   getDeliveryFee: () => number;
   getCartTotal: () => number;
   getItemQuantity: (productId: string, variantIndex: number) => number;
+  isWishlisted: (productId: string) => boolean;
+  toggleWishlist: (productId: string) => void;
   showToast: (msg: string) => void;
 };
 
@@ -253,6 +272,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           type: 'LOAD_STATE',
           state: {
             cart: parsed.cart || [],
+            wishlist: Array.isArray(parsed.wishlist) ? parsed.wishlist : ['mil-1', 'ric-1', 'oil-1'],
             orders: parsed.orders || [],
             lang: parsed.lang || 'en',
             isLoggedIn: parsed.isLoggedIn !== undefined ? parsed.isLoggedIn : true,
@@ -273,6 +293,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem('sriAmmanStore', JSON.stringify({
         cart: state.cart,
+        wishlist: state.wishlist,
         orders: state.orders,
         lang: state.lang,
         isLoggedIn: state.isLoggedIn,
@@ -284,7 +305,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       // ignore
     }
-  }, [state.cart, state.orders, state.lang, state.isLoggedIn, state.loginPhone, state.userName, state.userDob, state.location, mounted]);
+  }, [state.cart, state.wishlist, state.orders, state.lang, state.isLoggedIn, state.loginPhone, state.userName, state.userDob, state.location, mounted]);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -339,9 +360,40 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const isWishlisted = useCallback((productId: string) => state.wishlist.includes(productId), [state.wishlist]);
+
+  const toggleWishlist = useCallback(
+    (productId: string) => {
+      const exists = state.wishlist.includes(productId);
+      dispatch({ type: 'TOGGLE_WISHLIST', productId });
+      const p = products.find((prod) => prod.id === productId);
+      const name = p ? (state.lang === 'ta' ? p.nameTa : p.nameEn) : 'Item';
+      if (exists) {
+        showToast(state.lang === 'ta' ? `${name} விருப்பப்பட்டியலில் இருந்து நீக்கப்பட்டது` : `${name} removed from wishlist`);
+      } else {
+        showToast(state.lang === 'ta' ? `❤️ ${name} விருப்பப்பட்டியலில் சேர்க்கப்பட்டது` : `❤️ ${name} added to wishlist`);
+      }
+    },
+    [state.wishlist, state.lang, showToast]
+  );
+
   return (
     <StoreContext.Provider
-      value={{ state, dispatch, getProduct, getCartItemCount, getCartSubtotal, getCartMrpTotal, getCartDiscount, getDeliveryFee, getCartTotal, getItemQuantity, showToast }}
+      value={{
+        state,
+        dispatch,
+        getProduct,
+        getCartItemCount,
+        getCartSubtotal,
+        getCartMrpTotal,
+        getCartDiscount,
+        getDeliveryFee,
+        getCartTotal,
+        getItemQuantity,
+        isWishlisted,
+        toggleWishlist,
+        showToast,
+      }}
     >
       {children}
     </StoreContext.Provider>

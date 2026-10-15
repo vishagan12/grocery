@@ -5,14 +5,14 @@ import { Product } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
 import ProductImage from './ProductImage';
-import { Clock, Plus, Minus } from 'lucide-react';
+import { Clock, Plus, Minus, Heart } from 'lucide-react';
 
 type Props = {
   product: Product;
 };
 
 export default function ProductCard({ product }: Props) {
-  const { state, dispatch, getItemQuantity, showToast } = useStore();
+  const { state, dispatch, getItemQuantity, isWishlisted, toggleWishlist, showToast } = useStore();
   const lang = state.lang;
   const [selectedVariant, setSelectedVariant] = useState(0);
 
@@ -20,6 +20,7 @@ export default function ProductCard({ product }: Props) {
   const variant = product.variants[activeVariantIndex] || product.variants[0];
   const quantity = getItemQuantity(product.id, activeVariantIndex);
   const discount = variant && variant.mrp > variant.price ? Math.round(((variant.mrp - variant.price) / variant.mrp) * 100) : 0;
+  const wishlisted = isWishlisted(product.id);
 
   return (
     <div className="rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md p-2 sm:p-2.5 flex flex-col justify-between relative bg-white transition-all duration-200 group select-none">
@@ -29,6 +30,28 @@ export default function ProductCard({ product }: Props) {
           {discount}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
         </span>
       )}
+
+      {/* Top-Right Wishlist Heart Button */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleWishlist(product.id);
+        }}
+        className={`absolute top-1.5 right-1.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-xs active:scale-90 ${
+          wishlisted
+            ? 'bg-rose-50 text-rose-500 border border-rose-200'
+            : 'bg-white/90 hover:bg-white text-slate-400 hover:text-rose-500 border border-slate-200/80'
+        }`}
+        aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+      >
+        <Heart
+          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 ${
+            wishlisted ? 'fill-rose-500 text-rose-500 scale-110' : 'text-slate-400 group-hover:text-slate-600'
+          }`}
+        />
+      </button>
 
       {/* Prominent Product Image Box */}
       <div

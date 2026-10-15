@@ -7,10 +7,10 @@ import { products } from '@/data/products';
 import ProductImage from './ProductImage';
 import ProductCard from './ProductCard';
 import { IconCart, IconSearch, IconCheckCircle, IconTruck, IconShield, IconRefresh } from './Icons';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 
 export default function ProductDetailPage() {
-  const { state, dispatch, getItemQuantity, showToast } = useStore();
+  const { state, dispatch, getItemQuantity, isWishlisted, toggleWishlist, showToast } = useStore();
   const lang = state.lang;
   const product = products.find((p) => p.id === state.productDetailId);
   const [selectedVariant, setSelectedVariant] = useState(0);
@@ -42,6 +42,7 @@ export default function ProductDetailPage() {
   const quantity = getItemQuantity(product.id, activeVariantIndex);
   const discount = Math.round(((variant.mrp - variant.price) / variant.mrp) * 100);
   const savings = variant.mrp - variant.price;
+  const wishlisted = isWishlisted(product.id);
 
   // Frequently bought together
   const related = products
@@ -80,6 +81,25 @@ export default function ProductDetailPage() {
                   </span>
                 ) : null}
               </div>
+
+              {/* Wishlist Button on Product Detail Image */}
+              <button
+                type="button"
+                onClick={() => toggleWishlist(product.id)}
+                className={`absolute top-4 right-4 z-30 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow-md active:scale-90 ${
+                  wishlisted
+                    ? 'bg-rose-50 text-rose-500 border-2 border-rose-200'
+                    : 'bg-white/95 hover:bg-white text-slate-500 hover:text-rose-500 border border-slate-200/80'
+                }`}
+                title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+              >
+                <Heart
+                  className={`w-5 h-5 transition-transform duration-200 ${
+                    wishlisted ? 'fill-rose-500 text-rose-500 scale-110' : 'text-slate-400'
+                  }`}
+                />
+              </button>
 
               <div className="w-full relative z-10 flex items-center justify-center pt-4">
                 <ProductImage

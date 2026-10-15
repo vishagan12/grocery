@@ -12,6 +12,7 @@ import CheckoutPage from '@/components/CheckoutPage';
 import OrdersPage from '@/components/OrdersPage';
 import ProductDetailPage from '@/components/ProductDetailPage';
 import ProfilePage from '@/components/ProfilePage';
+import WishlistPage from '@/components/WishlistPage';
 import AppShell from '@/components/AppShell';
 import { WhyChooseUs, CustomerReviews } from '@/components/HomeExtras';
 
@@ -47,6 +48,8 @@ export default function Home() {
         return <ProductDetailPage />;
       case 'profile':
         return <ProfilePage />;
+      case 'wishlist':
+        return <WishlistPage />;
       default:
         return (
           <>

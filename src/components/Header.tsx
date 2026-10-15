@@ -20,6 +20,7 @@ import {
   X,
   Plus,
   MapPin,
+  Heart,
 } from 'lucide-react';
 
 export default function Header() {
@@ -121,8 +122,8 @@ export default function Header() {
               </button>
             </div>
 
-            {/* Right: Language Toggle & Profile Button */}
-            <div className="flex items-center gap-2 shrink-0">
+            {/* Right: Language Toggle, Wishlist & Profile Button */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Language Pill Switcher */}
               <button
                 type="button"
@@ -132,6 +133,22 @@ export default function Header() {
               >
                 <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 shrink-0" />
                 <span className="font-bold">{lang === 'en' ? 'தமிழ்' : 'English'}</span>
+              </button>
+
+              {/* Wishlist Button with Badge */}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'SET_PAGE', page: 'wishlist' })}
+                className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
+                aria-label="View Wishlist"
+                title="Wishlist"
+              >
+                <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${state.wishlist.length > 0 ? 'fill-rose-400 text-rose-300' : 'text-white'}`} />
+                {state.wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white shadow-xs">
+                    {state.wishlist.length}
+                  </span>
+                )}
               </button>
 
               {/* User Profile / Login Icon Button */}

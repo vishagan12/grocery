@@ -173,9 +173,9 @@ export default function ProfilePage() {
               },
               {
                 Icon: Heart,
-                labelEn: 'Your wishlist',
-                labelTa: 'விருப்பப்பட்டியல்',
-                action: () => handleAction(lang === 'ta' ? 'விருப்பப்பட்டியல்' : 'Wishlist (3 items)'),
+                labelEn: `Your wishlist (${state.wishlist.length})`,
+                labelTa: `விருப்பப்பட்டியல் (${state.wishlist.length})`,
+                action: () => dispatch({ type: 'SET_PAGE', page: 'wishlist' }),
               },
               {
                 Icon: BookOpen,
