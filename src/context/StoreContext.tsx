@@ -268,11 +268,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem('sriAmmanStore');
       if (saved) {
         const parsed = JSON.parse(saved);
+        // Clear out legacy mock default wishlist if it contains the old mock 3 items
+        let initialWishlist: string[] = Array.isArray(parsed.wishlist) ? parsed.wishlist : [];
+        const isLegacyMock =
+          initialWishlist.length === 3 &&
+          initialWishlist.includes('mil-1') &&
+          initialWishlist.includes('ric-1') &&
+          initialWishlist.includes('oil-1');
+        if (isLegacyMock) {
+          initialWishlist = [];
+        }
+
         dispatch({
           type: 'LOAD_STATE',
           state: {
             cart: parsed.cart || [],
-            wishlist: Array.isArray(parsed.wishlist) ? parsed.wishlist : [],
+            wishlist: initialWishlist,
             orders: parsed.orders || [],
             lang: parsed.lang || 'en',
             isLoggedIn: false, // User requested: everytime I refresh I must logout and login again, it shouldn't show logged in the moment I open it
