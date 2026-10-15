@@ -163,7 +163,7 @@ export default function MobileBottomNav() {
                 {item.label}
               </span>
               {isActive && (
-                <div className="w-1 h-1 rounded-full bg-[#4CB01E] mt-0.5" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#4CB01E] mt-1 shadow-2xs" />
               )}
             </button>
           );

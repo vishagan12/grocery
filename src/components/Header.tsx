@@ -149,11 +149,11 @@ export default function Header() {
         </div>
       </div>
 
-      {/* STICKY SEARCH & CATEGORIES HEADER: Solid green below top menu, smooth neutral frosted-glass blur when scrolled */}
+      {/* STICKY SEARCH & CATEGORIES HEADER: Solid green below top menu, lush emerald green blur when scrolled */}
       <header
         className={`sticky top-0 z-50 text-white border-b transition-all duration-300 ${
           isScrolled
-            ? 'bg-slate-900/80 backdrop-blur-xl border-white/10 shadow-lg'
+            ? 'bg-[#1E4D12]/85 backdrop-blur-xl border-[#4CB01E]/30 shadow-lg'
             : 'bg-[#1E4D12] border-emerald-900/40 shadow-sm'
         }`}
       >

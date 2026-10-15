@@ -14,6 +14,36 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState<string>('all');
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [discountOnly, setDiscountOnly] = useState<boolean>(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const isDown = React.useRef(false);
+  const startX = React.useRef(0);
+  const scrollLeftPos = React.useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDown.current = true;
+    if (!scrollRef.current) return;
+    startX.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftPos.current = scrollRef.current.scrollLeft;
+  };
+
+  const handleMouseLeaveOrUp = () => {
+    isDown.current = false;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDown.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeftPos.current - walk;
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (!scrollRef.current) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      scrollRef.current.scrollLeft += e.deltaY;
+    }
+  };
 
   let filtered = [...products];
 
@@ -92,8 +122,16 @@ export default function ProductsPage() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Top Controls: Horizontal Category Scroll + Clean Inline Sort Dropdown */}
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          {/* Category Horizontal Scroll Bar (Seamless Edge-to-Edge with clean pills) */}
-          <div className="flex-1 min-w-0 -mx-4 px-4 overflow-x-auto overflow-y-hidden hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing select-none">
+          {/* Category Horizontal Scroll Bar (Seamless Edge-to-Edge with clean pills and multi-input scrolling) */}
+          <div
+            ref={scrollRef}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeaveOrUp}
+            onMouseUp={handleMouseLeaveOrUp}
+            onMouseMove={handleMouseMove}
+            onWheel={handleWheel}
+            className="flex-1 min-w-0 -mx-4 px-4 overflow-x-auto overflow-y-hidden hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing select-none"
+          >
             <div className="flex items-center gap-2 pb-1.5 w-max">
               <button
                 onClick={() => dispatch({ type: 'SET_CATEGORY', category: 'all' })}
