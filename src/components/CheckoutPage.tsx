@@ -120,7 +120,7 @@ export default function CheckoutPage() {
       id: orderId,
       items: [...state.cart],
       subtotal: getCartMrpTotal(),
-      discount: getCartDiscount(),
+      discount: getCartDiscount() + state.couponDiscount,
       deliveryFee: getDeliveryFee(),
       total: getCartTotal(),
       paymentMethod,
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
     showToast(t('orderPlacedToast', lang));
   };
 
-  if (getCartItemCount() === 0 && step < 3) {
+  if (getCartItemCount() === 0) {
     return (
       <section className="py-20 text-center min-h-screen bg-[#FBF8F3] flex flex-col items-center justify-center px-4">
         <div className="w-20 h-20 rounded-2xl bg-[#F5EFE6] border border-[#EAE2D5] flex items-center justify-center text-brand-primary mb-4 shadow-xs">
@@ -164,7 +164,7 @@ export default function CheckoutPage() {
           <p className="text-xs md:text-sm text-brand-slate/60 mt-0.5 font-medium">
             {lang === 'ta'
               ? 'மதுரை விரைவு ஹோம் டெலிவரி & பாதுகாப்பான ஆர்டர் உறுதிப்படுத்தல்'
-              : 'Madurai Express 30-Minute Doorstep Delivery & Verified Order Processing'}
+              : 'Madurai Express 20-Minute Doorstep Delivery & Verified Order Processing'}
           </p>
         </div>
 
@@ -342,7 +342,7 @@ export default function CheckoutPage() {
                   </p>
                   <div className="grid sm:grid-cols-3 gap-2">
                     {[
-                      { key: 'express', label: t('slotExpress', lang), sub: '25–30 Mins', isExpress: true },
+                      { key: 'express', label: t('slotExpress', lang), sub: '20 Mins', isExpress: true },
                       { key: 'evening', label: t('slotEvening', lang), sub: '6–8 PM', isExpress: false },
                       { key: 'morning', label: t('slotMorning', lang), sub: 'Tomorrow 8 AM', isExpress: false },
                     ].map((slot) => (
@@ -449,7 +449,7 @@ export default function CheckoutPage() {
                         <p className="text-[11px] text-slate-500 font-medium">
                           {lang === 'ta'
                             ? 'விரைவான டெலிவரிக்கு உங்கள் முகவரி விவரங்களை அளிக்கவும்'
-                            : 'Provide your address for 30-min express delivery'}
+                            : 'Provide your address for 20-min express delivery'}
                         </p>
                       </div>
                     </div>
@@ -465,7 +465,7 @@ export default function CheckoutPage() {
                           value={houseNo}
                           onChange={(e) => setHouseNo(e.target.value)}
                           placeholder="e.g. 12/B, Sri Amman Illam"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#4CB01E]"
+                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
                         />
                       </div>
 
@@ -479,7 +479,7 @@ export default function CheckoutPage() {
                           value={street}
                           onChange={(e) => setStreet(e.target.value)}
                           placeholder="e.g. KK Nagar Main Road"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#4CB01E]"
+                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
                         />
                       </div>
 
@@ -493,7 +493,7 @@ export default function CheckoutPage() {
                           value={area}
                           onChange={(e) => setArea(e.target.value)}
                           placeholder="e.g. KK Nagar"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#4CB01E]"
+                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
                         />
                       </div>
 
@@ -507,7 +507,7 @@ export default function CheckoutPage() {
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
                           placeholder="Madurai"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#4CB01E]"
+                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
                         />
                       </div>
 
@@ -522,7 +522,7 @@ export default function CheckoutPage() {
                           value={pincode}
                           onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                           placeholder="625020"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#4CB01E]"
+                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
                         />
                       </div>
 
@@ -535,7 +535,7 @@ export default function CheckoutPage() {
                           value={landmark}
                           onChange={(e) => setLandmark(e.target.value)}
                           placeholder="e.g. Near Meenakshi Temple"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#4CB01E]"
+                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
                         />
                       </div>
                     </div>
@@ -597,7 +597,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-2 sm:gap-3 pt-3 border-t border-[#EAE2D5]">
                   <button
                     type="button"
-                    onClick={() => setStep(2)}
+                    onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
                     className="px-3.5 sm:px-4 py-3 rounded-xl border-2 border-[#EAE2D5] font-bold text-xs text-brand-slate hover:bg-[#F5EFE6] transition-all touch-target inline-flex items-center justify-center gap-1 shrink-0"
                     style={{ minHeight: '48px' }}
                   >
@@ -667,6 +667,12 @@ export default function CheckoutPage() {
                   <span>{t('productDiscount', lang)}</span>
                   <span className="font-bold">-₹{getCartDiscount()}</span>
                 </div>
+                {state.couponDiscount > 0 && (
+                  <div className="flex justify-between text-brand-primary font-bold">
+                    <span>Promo ({state.appliedCoupon}) Discount</span>
+                    <span>-₹{state.couponDiscount}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-brand-slate/70">{t('deliveryFee', lang)}</span>
                   <span className="font-bold text-brand-slate">

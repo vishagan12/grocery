@@ -23,7 +23,7 @@ export default function PromoBanners() {
             className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none"
           >
             <img
-              src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80"
+              src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80"
               alt="Weekend Grocery Deals"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
@@ -53,7 +53,7 @@ export default function PromoBanners() {
             className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none"
           >
             <img
-              src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80"
+              src="https://images.unsplash.com/photo-1543168256-418811576931?auto=format&fit=crop&w=800&q=80"
               alt="Express Delivery Fresh Produce"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
@@ -61,7 +61,7 @@ export default function PromoBanners() {
             <div className="absolute inset-0 bg-gradient-to-r from-[#142C12]/95 via-[#1D3E1A]/85 to-transparent" />
 
             <div className="relative z-10 max-w-sm text-white min-w-0">
-              <span className="inline-flex items-center gap-1.5 bg-[#4CB01E] text-white text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
+              <span className="inline-flex items-center gap-1.5 bg-[#76CA3E] text-white text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
                 <IconTruck className="w-3 h-3 text-white shrink-0" />
                 <span>{t('expressRider', lang)}</span>
               </span>

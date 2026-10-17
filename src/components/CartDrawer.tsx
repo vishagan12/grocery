@@ -20,7 +20,6 @@ export default function CartDrawer() {
   } = useStore();
   const lang = state.lang;
   const [couponCode, setCouponCode] = useState('');
-  const [couponApplied, setCouponApplied] = useState(false);
 
   useEffect(() => {
     if (state.cartOpen) {
@@ -46,15 +45,21 @@ export default function CartDrawer() {
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
     const code = couponCode.trim().toUpperCase();
-    if (code === 'AMMAN50' || code === 'SAVE50' || code === 'MADURAI') {
-      setCouponApplied(true);
+    if (code === 'AMMAN50' || code === 'AMMA50' || code === 'SAVE50') {
+      dispatch({ type: 'APPLY_COUPON', code, discount: 50 });
       showToast(t('couponApplied', lang, { amount: 50 }));
+    } else if (code === 'FREEDEL') {
+      dispatch({ type: 'APPLY_COUPON', code, discount: 30 });
+      showToast(lang === 'ta' ? 'இலவச டெலிவரி கூப்பன் சேர்க்கப்பட்டது (ரூ. 30 தள்ளுபடி)' : 'Free delivery coupon applied (₹30 OFF)');
+    } else if (code === 'MALIGAI100') {
+      dispatch({ type: 'APPLY_COUPON', code, discount: 100 });
+      showToast(lang === 'ta' ? 'ரூ. 100 மளிகை தள்ளுபடி சேர்க்கப்பட்டது' : 'Flat ₹100 grocery discount applied');
     } else {
       showToast(lang === 'ta' ? 'தவறான கூப்பன் குறியீடு' : 'Invalid coupon code. Try AMMAN50');
     }
   };
 
-  const finalTotal = Math.max(0, getCartTotal() - (couponApplied ? 50 : 0));
+  const finalTotal = getCartTotal();
 
   return (
     <div
@@ -98,14 +103,14 @@ export default function CartDrawer() {
           <div className="mx-4 my-2.5 p-3.5 bg-gradient-to-r from-[#F1F9EC] to-emerald-50 rounded-2xl border-2 border-emerald-300/80 shadow-xs">
             <div className="flex items-center justify-between gap-2 text-xs font-black text-slate-800 mb-2">
               <div className="flex items-center gap-1.5 min-w-0">
-                <IconTruck className="w-4 h-4 text-[#1E4D12] shrink-0" />
+                <IconTruck className="w-4 h-4 text-[#143B0D] shrink-0" />
                 <span className="truncate text-xs font-bold text-slate-900">
                   {remaining > 0
                     ? t('addMoreForFree', lang, { amount: remaining })
                     : t('freeDeliveryUnlocked', lang)}
                 </span>
               </div>
-              <span className="text-[#1E4D12] text-[11px] font-black bg-white px-2.5 py-0.5 rounded-full border border-emerald-300 shadow-2xs shrink-0">
+              <span className="text-[#143B0D] text-[11px] font-black bg-white px-2.5 py-0.5 rounded-full border border-emerald-300 shadow-2xs shrink-0">
                 {Math.round(progress)}%
               </span>
             </div>
@@ -114,7 +119,7 @@ export default function CartDrawer() {
                 className="h-full rounded-full transition-all duration-500 shadow-xs"
                 style={{
                   width: `${progress}%`,
-                  backgroundColor: remaining > 0 ? '#F59E0B' : '#4CB01E',
+                  backgroundColor: remaining > 0 ? '#F59E0B' : '#76CA3E',
                 }}
               />
             </div>
@@ -189,7 +194,7 @@ export default function CartDrawer() {
 
                       {/* Quantity Stepper (Consistent clean green shade) */}
                       <div
-                        className="flex items-center bg-[#4CB01E] text-white rounded-lg overflow-hidden shrink-0 shadow-xs select-none"
+                        className="flex items-center bg-[#76CA3E] text-white rounded-lg overflow-hidden shrink-0 shadow-xs select-none"
                         style={{ minHeight: '34px' }}
                       >
                         <button
@@ -237,7 +242,7 @@ export default function CartDrawer() {
                   <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
                     {t('impulseAddTitle', lang)}
                   </h4>
-                  <span className="text-[10px] text-[#1E4D12] font-black bg-[#F1F9EC] px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="text-[10px] text-[#143B0D] font-black bg-[#F1F9EC] px-2 py-0.5 rounded-full border border-emerald-200">
                     {lang === 'ta' ? 'அத்தியாவசியம்' : 'Quick Add'}
                   </span>
                 </div>
@@ -251,7 +256,7 @@ export default function CartDrawer() {
                     return (
                       <div
                         key={prod.id}
-                        className="w-40 shrink-0 bg-white border border-slate-200/90 rounded-2xl p-2.5 flex flex-col justify-between shadow-2xs hover:shadow-xs hover:border-[#4CB01E] transition-all"
+                        className="w-40 shrink-0 bg-white border border-slate-200/90 rounded-2xl p-2.5 flex flex-col justify-between shadow-2xs hover:shadow-xs hover:border-[#76CA3E] transition-all"
                       >
                         <div className="w-full h-20 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center relative mb-2">
                           <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-cover" />
@@ -261,7 +266,7 @@ export default function CartDrawer() {
                             {lang === 'ta' ? prod.nameTa : prod.nameEn}
                           </p>
                           <p className="text-[10px] text-slate-500 font-semibold">{variant.label}</p>
-                          <p className="font-black text-xs text-[#1E4D12] mt-0.5">₹{variant.price}</p>
+                          <p className="font-black text-xs text-[#143B0D] mt-0.5">₹{variant.price}</p>
                         </div>
                         <button
                           type="button"
@@ -274,7 +279,7 @@ export default function CartDrawer() {
                             });
                             showToast(t('addedToCart', lang));
                           }}
-                          className="w-full bg-[#F1F9EC] hover:bg-[#4CB01E] hover:text-white text-[#1E4D12] font-black py-1.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-2xs active:scale-95"
+                          className="w-full bg-[#F1F9EC] hover:bg-[#76CA3E] hover:text-white text-[#143B0D] font-black py-1.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-2xs active:scale-95"
                         >
                           <span>+</span>
                           <span>{lang === 'ta' ? 'சேர்' : 'ADD'}</span>
@@ -317,10 +322,10 @@ export default function CartDrawer() {
                 <span>{t('productDiscount', lang)}</span>
                 <span className="font-bold">-₹{getCartDiscount()}</span>
               </div>
-              {couponApplied && (
+              {state.couponDiscount > 0 && (
                 <div className="flex justify-between text-brand-primary font-bold">
-                  <span>Promo AMMAN50 Discount</span>
-                  <span>-₹50</span>
+                  <span>Promo {state.appliedCoupon} Discount</span>
+                  <span>-₹{state.couponDiscount}</span>
                 </div>
               )}
               <div className="flex justify-between text-brand-slate/70">

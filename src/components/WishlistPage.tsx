@@ -39,7 +39,7 @@ export default function WishlistPage() {
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 hover:text-[#4CB01E] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 hover:text-[#76CA3E] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>{t('backToProducts', lang)}</span>

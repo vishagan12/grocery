@@ -86,10 +86,10 @@ export const products: Product[] = [
     nameTa: 'பொன்னி புழுங்கல் அரிசி',
     category: 'rice-grains',
     variants: [
-      { label: '1 kg', price: 52, mrp: 60 },
       { label: '5 kg', price: 245, mrp: 290 },
       { label: '10 kg', price: 470, mrp: 560 },
       { label: '25 kg', price: 1100, mrp: 1350 },
+      { label: '1 kg', price: 52, mrp: 60 },
     ],
     image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80',
     inStock: true,
@@ -123,7 +123,7 @@ export const products: Product[] = [
       { label: '1 kg', price: 48, mrp: 55 },
       { label: '5 kg', price: 225, mrp: 265 },
     ],
-    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1568651315180-f06e21f7e669?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '13% OFF',
     badgeTa: '13% தள்ளுபடி',
@@ -136,8 +136,8 @@ export const products: Product[] = [
     nameTa: 'ஆஷிர்வாத் கோதுமை மாவு',
     category: 'rice-grains',
     variants: [
-      { label: '1 kg', price: 52, mrp: 60 },
       { label: '5 kg', price: 240, mrp: 280 },
+      { label: '1 kg', price: 52, mrp: 60 },
       { label: '10 kg', price: 460, mrp: 540 },
     ],
     image: 'https://images.unsplash.com/photo-1627483262769-04d0a1401487?auto=format&fit=crop&w=500&q=80',
@@ -155,7 +155,7 @@ export const products: Product[] = [
     variants: [
       { label: '1 kg', price: 25, mrp: 28 },
     ],
-    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '11% OFF',
     badgeTa: '11% தள்ளுபடி',
@@ -170,8 +170,8 @@ export const products: Product[] = [
     nameTa: 'உதயம் துவரம் பருப்பு',
     category: 'dals-pulses',
     variants: [
-      { label: '500 g', price: 72, mrp: 85 },
       { label: '1 kg', price: 138, mrp: 165 },
+      { label: '500 g', price: 72, mrp: 85 },
     ],
     image: 'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?auto=format&fit=crop&w=500&q=80',
     inStock: true,
@@ -186,10 +186,10 @@ export const products: Product[] = [
     nameTa: 'உளுத்தம் பருப்பு',
     category: 'dals-pulses',
     variants: [
-      { label: '500 g', price: 78, mrp: 90 },
       { label: '1 kg', price: 150, mrp: 175 },
+      { label: '500 g', price: 78, mrp: 90 },
     ],
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1546548970-71785318a17b?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '14% OFF',
     badgeTa: '14% தள்ளுபடி',
@@ -202,10 +202,10 @@ export const products: Product[] = [
     nameTa: 'பாசிப்பருப்பு',
     category: 'dals-pulses',
     variants: [
-      { label: '500 g', price: 68, mrp: 80 },
       { label: '1 kg', price: 130, mrp: 155 },
+      { label: '500 g', price: 68, mrp: 80 },
     ],
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '16% OFF',
     badgeTa: '16% தள்ளுபடி',
@@ -237,7 +237,7 @@ export const products: Product[] = [
       { label: '100 g', price: 34, mrp: 40 },
       { label: '200 g', price: 65, mrp: 78 },
     ],
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '15% OFF',
     badgeTa: '15% தள்ளுபடி',
@@ -252,8 +252,8 @@ export const products: Product[] = [
     nameTa: 'கோல்ட் வின்னர் சன்ஃபிளவர் எண்ணெய்',
     category: 'oils-ghee',
     variants: [
-      { label: '500 ml', price: 72, mrp: 85 },
       { label: '1 Ltr', price: 135, mrp: 160 },
+      { label: '500 ml', price: 72, mrp: 85 },
       { label: '2 Ltr', price: 258, mrp: 310 },
       { label: '5 Ltr', price: 620, mrp: 750 },
     ],
@@ -270,11 +270,11 @@ export const products: Product[] = [
     nameTa: 'இதயம் நல்லெண்ணெய்',
     category: 'oils-ghee',
     variants: [
-      { label: '200 ml', price: 95, mrp: 110 },
-      { label: '500 ml', price: 220, mrp: 260 },
       { label: '1 Ltr', price: 420, mrp: 500 },
+      { label: '500 ml', price: 220, mrp: 260 },
+      { label: '200 ml', price: 95, mrp: 110 },
     ],
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '16% OFF',
     badgeTa: '16% தள்ளுபடி',
@@ -307,7 +307,7 @@ export const products: Product[] = [
       { label: '500 ml', price: 95, mrp: 115 },
       { label: '1 Ltr', price: 180, mrp: 215 },
     ],
-    image: 'https://images.unsplash.com/photo-1631451095765-2c91616fc9e6?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '16% OFF',
     badgeTa: '16% தள்ளுபடி',
@@ -374,7 +374,7 @@ export const products: Product[] = [
       { label: '200 g', price: 18, mrp: 20 },
       { label: '500 g', price: 38, mrp: 45 },
     ],
-    image: 'https://images.unsplash.com/photo-1559561853-08451507cbe7?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '16% OFF',
     badgeTa: '16% தள்ளுபடி',
@@ -457,7 +457,7 @@ export const products: Product[] = [
     variants: [
       { label: '1 bunch (100g)', price: 10, mrp: 15 },
     ],
-    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: 'Farm Fresh',
     badgeTa: 'பண்ணை வரத்து',
@@ -473,7 +473,7 @@ export const products: Product[] = [
       { label: '100 g', price: 12, mrp: 16 },
       { label: '250 g', price: 28, mrp: 35 },
     ],
-    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: 'Farm Fresh',
     badgeTa: 'பண்ணை வரத்து',
@@ -524,7 +524,7 @@ export const products: Product[] = [
       { label: '200 g', price: 55, mrp: 65 },
       { label: '500 g', price: 125, mrp: 150 },
     ],
-    image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '17% OFF',
     badgeTa: '17% தள்ளுபடி',
@@ -541,7 +541,7 @@ export const products: Product[] = [
       { label: '150 g', price: 55, mrp: 65 },
       { label: '300 g', price: 105, mrp: 125 },
     ],
-    image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '16% OFF',
     badgeTa: '16% தள்ளுபடி',
@@ -609,7 +609,7 @@ export const products: Product[] = [
       { label: '200 ml', price: 30, mrp: 35 },
       { label: '1 Ltr', price: 95, mrp: 115 },
     ],
-    image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '17% OFF',
     badgeTa: '17% தள்ளுபடி',
@@ -645,7 +645,7 @@ export const products: Product[] = [
       { label: '500 ml', price: 68, mrp: 82 },
       { label: '750 ml', price: 98, mrp: 118 },
     ],
-    image: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '17% OFF',
     badgeTa: '17% தள்ளுபடி',
@@ -677,7 +677,7 @@ export const products: Product[] = [
       { label: '50 g', price: 45, mrp: 55 },
       { label: '100 g', price: 82, mrp: 100 },
     ],
-    image: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?auto=format&fit=crop&w=500&q=80',
+    image: 'https://images.unsplash.com/photo-1602874801007-bd458bb1b8b6?auto=format&fit=crop&w=500&q=80',
     inStock: true,
     badge: '18% OFF',
     badgeTa: '18% தள்ளுபடி',
@@ -688,16 +688,16 @@ export const products: Product[] = [
 
 // Monthly list items
 export const monthlyListItems = [
-  { productId: 'ponni-boiled-rice', variantIndex: 2, defaultQty: 1 }, // 10 kg
-  { productId: 'gold-winner-oil', variantIndex: 2, defaultQty: 1 }, // 2 Ltr
-  { productId: 'udhaiyam-toor-dal', variantIndex: 1, defaultQty: 1 }, // 1 kg
-  { productId: 'aashirvaad-atta', variantIndex: 1, defaultQty: 1 }, // 5 kg
-  { productId: 'bru-coffee', variantIndex: 1, defaultQty: 1 }, // 100 g
-  { productId: 'aavin-milk', variantIndex: 1, defaultQty: 2 }, // 1 Ltr x2
-  { productId: 'surf-excel-matic', variantIndex: 0, defaultQty: 1 }, // 500 ml
-  { productId: '3-roses-tea', variantIndex: 1, defaultQty: 1 }, // 250 g
-  { productId: 'cycle-agarbatti', variantIndex: 0, defaultQty: 1 }, // 1 pack
-  { productId: 'vim-dishwash', variantIndex: 1, defaultQty: 1 }, // 500 ml
+  { productId: 'ponni-boiled-rice', variantIndex: 1, defaultQty: 1 }, // 10 kg (₹470 / MRP ₹560)
+  { productId: 'gold-winner-oil', variantIndex: 2, defaultQty: 1 },   // 2 Ltr (₹258 / MRP ₹310)
+  { productId: 'udhaiyam-toor-dal', variantIndex: 0, defaultQty: 1 }, // 1 kg (₹138 / MRP ₹165)
+  { productId: 'aashirvaad-atta', variantIndex: 0, defaultQty: 1 },   // 5 kg (₹240 / MRP ₹280)
+  { productId: 'bru-coffee', variantIndex: 1, defaultQty: 1 },        // 100 g (₹175 / MRP ₹210)
+  { productId: 'aavin-milk', variantIndex: 1, defaultQty: 2 },        // 1 Ltr x2 (₹108 / MRP ₹116)
+  { productId: 'surf-excel-matic', variantIndex: 0, defaultQty: 1 },  // 500 ml (₹135 / MRP ₹160)
+  { productId: '3-roses-tea', variantIndex: 1, defaultQty: 1 },       // 250 g (₹98 / MRP ₹120)
+  { productId: 'cycle-agarbatti', variantIndex: 0, defaultQty: 1 },   // 1 pack (₹35 / MRP ₹42)
+  { productId: 'vim-dishwash', variantIndex: 1, defaultQty: 1 },      // 500 ml (₹68 / MRP ₹82)
 ];
 
 // Quick impulse essentials for cart drawer

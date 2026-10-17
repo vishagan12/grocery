@@ -26,7 +26,7 @@ export default function ProductCard({ product }: Props) {
     <div className="rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md p-2 sm:p-2.5 flex flex-col justify-between relative bg-white transition-all duration-200 group select-none">
       {/* Top-Left Discount Ribbon */}
       {discount > 0 && (
-        <span className="bg-[#4CB01E] text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-tl-xl rounded-br-xl absolute top-0 left-0 z-10 shadow-2xs whitespace-nowrap">
+        <span className="bg-[#76CA3E] text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-tl-xl rounded-br-xl absolute top-0 left-0 z-10 shadow-2xs whitespace-nowrap">
           {discount}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
         </span>
       )}
@@ -79,7 +79,7 @@ export default function ProductCard({ product }: Props) {
 
         {/* Product Title - Prominent, natural font size for elders, fully visible */}
         <h3
-          className="text-xs xs:text-sm sm:text-base font-extrabold text-slate-900 leading-snug cursor-pointer hover:text-[#4CB01E] transition-colors break-words mb-1"
+          className="text-xs xs:text-sm sm:text-base font-extrabold text-slate-900 leading-snug cursor-pointer hover:text-[#4CB01E] transition-colors line-clamp-2 min-h-[2.5rem] sm:min-h-[2.75rem] mb-1"
           onClick={() => {
             dispatch({ type: 'SET_PRODUCT_DETAIL', id: product.id });
             dispatch({ type: 'SET_PAGE', page: 'product-detail' });
@@ -90,7 +90,7 @@ export default function ProductCard({ product }: Props) {
         </h3>
 
         {/* Pack Weight / Variant Pill Selector */}
-        <div className="my-1 sm:my-1.5">
+        <div className="min-h-[30px] flex items-center my-1">
           {product.variants.length > 1 ? (
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
               {product.variants.map((v, i) => (
@@ -101,7 +101,7 @@ export default function ProductCard({ product }: Props) {
                   className={`text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-lg border whitespace-nowrap transition-all ${
                     i === activeVariantIndex
                       ? 'bg-[#4CB01E] text-white border-[#4CB01E]'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-[#4CB01E]/40'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-[#4CB01E]/40'
                   }`}
                 >
                   {v.label}
@@ -109,7 +109,7 @@ export default function ProductCard({ product }: Props) {
               ))}
             </div>
           ) : (
-            <span className="inline-block text-[10px] sm:text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5 break-words">
+            <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
               {variant.label}
             </span>
           )}
@@ -136,7 +136,7 @@ export default function ProductCard({ product }: Props) {
                   dispatch({ type: 'ADD_TO_CART', productId: product.id, variantIndex: activeVariantIndex });
                   showToast(t('addedToCart', lang));
                 }}
-                className="w-full border-2 border-[#4CB01E] bg-[#F1F9EC] hover:bg-[#4CB01E] text-[#1E4D12] hover:text-white font-extrabold text-xs sm:text-sm px-2.5 min-h-[34px] sm:min-h-[40px] rounded-xl shadow-2xs transition-all flex items-center justify-center select-none active:scale-95 whitespace-nowrap"
+                className="w-full border-2 border-[#4CB01E] bg-[#F1F9EC] hover:bg-[#4CB01E] text-[#143B0D] hover:text-white font-extrabold text-xs sm:text-sm px-2.5 min-h-[34px] sm:min-h-[40px] rounded-xl shadow-2xs transition-all flex items-center justify-center select-none active:scale-95 whitespace-nowrap"
               >
                 {lang === 'ta' ? 'சேர்' : 'ADD'}
               </button>

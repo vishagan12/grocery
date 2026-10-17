@@ -76,7 +76,7 @@ export default function ProductDetailPage() {
                     {discount}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
                   </span>
                 ) : product.badge ? (
-                  <span className="bg-[#1E4D12] text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md">
+                  <span className="bg-[#143B0D] text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md">
                     {lang === 'ta' && product.badgeTa ? product.badgeTa : product.badge}
                   </span>
                 ) : null}
@@ -110,8 +110,8 @@ export default function ProductDetailPage() {
                 />
               </div>
 
-              <div className="mt-4 flex items-center gap-2 text-xs font-black text-[#1E4D12] bg-[#F1F9EC] px-3.5 py-1.5 rounded-full border border-[#4CB01E]/20 shadow-2xs z-10">
-                <IconCheckCircle className="w-4 h-4 text-[#4CB01E]" />
+              <div className="mt-4 flex items-center gap-2 text-xs font-black text-[#143B0D] bg-[#F1F9EC] px-3.5 py-1.5 rounded-full border border-[#76CA3E]/20 shadow-2xs z-10">
+                <IconCheckCircle className="w-4 h-4 text-[#76CA3E]" />
                 <span>{lang === 'ta' ? '100% நேரடி கவுண்டர் தரம்' : '100% Genuine Counter Quality'}</span>
               </div>
             </div>
@@ -120,8 +120,8 @@ export default function ProductDetailPage() {
             <div className="md:col-span-7 p-6 md:p-8 flex flex-col justify-between bg-white space-y-6">
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="inline-flex items-center gap-1.5 bg-[#F1F9EC] text-[#1E4D12] text-xs font-black px-3 py-1 rounded-full border border-[#4CB01E]/30">
-                    <span className="w-2 h-2 rounded-full bg-[#4CB01E] inline-block animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 bg-[#F1F9EC] text-[#143B0D] text-xs font-black px-3 py-1 rounded-full border border-[#76CA3E]/30">
+                    <span className="w-2 h-2 rounded-full bg-[#76CA3E] inline-block animate-pulse" />
                     <span>{t('inStock', lang)}</span>
                   </span>
                   <span className="text-xs text-slate-600 font-bold bg-slate-100 px-3 py-1 rounded-full">
@@ -155,8 +155,8 @@ export default function ProductDetailPage() {
                         onClick={() => setSelectedVariant(i)}
                         className={`px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm transition-all border-2 touch-target ${
                           i === activeVariantIndex
-                            ? 'bg-[#1E4D12] text-white border-[#1E4D12] shadow-sm'
-                            : 'bg-[#F8FAF7] text-slate-800 border-slate-200 hover:border-[#4CB01E]'
+                            ? 'bg-[#143B0D] text-white border-[#143B0D] shadow-sm'
+                            : 'bg-[#F8FAF7] text-slate-800 border-slate-200 hover:border-[#76CA3E]'
                         }`}
                       >
                         {v.label}
@@ -177,8 +177,8 @@ export default function ProductDetailPage() {
                     )}
                   </div>
                   {savings > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-[#1E4D12] pt-1">
-                      <IconCheckCircle className="w-4 h-4 text-[#4CB01E] shrink-0" />
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-[#143B0D] pt-1">
+                      <IconCheckCircle className="w-4 h-4 text-[#76CA3E] shrink-0" />
                       <span>{t('savingsCallout', lang, { amount: savings })}</span>
                     </div>
                   )}
@@ -199,7 +199,7 @@ export default function ProductDetailPage() {
                     <span>{t('addToCart', lang)}</span>
                   </button>
                 ) : (
-                  <div className="flex items-center justify-between bg-[#1E4D12] rounded-2xl overflow-hidden shadow-md px-5 py-2.5">
+                  <div className="flex items-center justify-between bg-[#143B0D] rounded-2xl overflow-hidden shadow-md px-5 py-2.5">
                     <span className="text-white text-xs sm:text-sm font-black">
                       {lang === 'ta' ? 'கூடையில் உள்ளது:' : 'In Cart:'}
                     </span>
@@ -240,7 +240,7 @@ export default function ProductDetailPage() {
                 {/* Assurance Points */}
                 <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-200 text-xs text-slate-600 font-semibold">
                   <div className="flex items-center gap-1.5">
-                    <IconTruck className="w-4 h-4 text-[#4CB01E] shrink-0" />
+                    <IconTruck className="w-4 h-4 text-[#76CA3E] shrink-0" />
                     <span>{t('delivery30', lang)}</span>
                   </div>
                   <div className="flex items-center gap-1.5">

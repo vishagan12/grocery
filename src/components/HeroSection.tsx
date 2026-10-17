@@ -19,10 +19,10 @@ export default function HeroSection() {
       titleTa: 'மாதாந்திர மளிகை தொகுப்பு',
       subEn: 'Rice, Dals, Oils & Masalas in 1 tap',
       subTa: 'அரிசி, பருப்பு, எண்ணெய் & மசாலா அனைத்தும் ஒரே கிளிக்கில்',
-      price: '₹1,540',
-      mrp: '₹1,890',
-      saveEn: 'SAVE ₹350',
-      saveTa: 'ரூ.350 மிச்சம்',
+      price: '₹1,725',
+      mrp: '₹2,045',
+      saveEn: 'SAVE ₹320',
+      saveTa: 'ரூ.320 மிச்சம்',
       actionEn: 'Order Now',
       actionTa: 'ஆர்டர் செய்',
       image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85',
@@ -44,6 +44,8 @@ export default function HeroSection() {
       actionTa: 'சலுகைகள் பார்',
       image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=900&q=85',
       targetPage: 'products',
+      targetCat: 'all',
+      targetSort: 'discount',
     },
     {
       id: 'fresh-farm-produce',
@@ -51,7 +53,7 @@ export default function HeroSection() {
       tagTa: 'நேரடி பண்ணை புதிய வரத்து',
       titleEn: 'Morning Fresh Vegetables',
       titleTa: 'காலை புதிய பண்ணை காய்கறிகள்',
-      subEn: 'Harvested fresh & delivered in 25 minutes',
+      subEn: 'Harvested fresh & delivered in 20 minutes',
       subTa: 'தினசரி காலை புதிய காய்கறிகள் உங்கள் வாசலில்',
       price: 'Daily Fresh',
       mrp: 'Clean & Inspected',
@@ -137,17 +139,17 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-[#4CB01E]/15 via-[#F8FAF7] to-white pt-2.5 sm:pt-3.5 pb-5 sm:pb-7 px-3 sm:px-6">
+    <section className="bg-gradient-to-b from-[#76CA3E]/30 via-[#76CA3E]/10 to-white pt-2.5 sm:pt-3.5 pb-5 sm:pb-7 px-3 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Top Headline Banner: Super Saver Typography - 100% full text visible without ellipses */}
-        <div className="py-2 px-3 mb-3 bg-white/95 rounded-2xl border border-[#4CB01E]/20 shadow-2xs flex items-center justify-center gap-1.5 sm:gap-2">
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#4CB01E] shrink-0" />
-          <h2 className="text-[11px] xs:text-xs sm:text-sm font-extrabold text-[#1E4D12] tracking-tight text-center whitespace-normal sm:whitespace-nowrap leading-tight">
+        <div className="py-2 px-3 mb-3 bg-white/95 rounded-2xl border border-[#76CA3E]/20 shadow-2xs flex items-center justify-center gap-1.5 sm:gap-2">
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#76CA3E] shrink-0" />
+          <h2 className="text-[11px] xs:text-xs sm:text-sm font-extrabold text-[#143B0D] tracking-tight text-center whitespace-normal sm:whitespace-nowrap leading-tight">
             {lang === 'ta'
               ? 'ஸ்ரீ அம்மன் சூப்பர் சேவர் • அத்தியாவசிய மளிகைக்கு 30% வரை தள்ளுபடி'
               : 'Sri Amman Super Saver • Up to 30% OFF Daily Essentials'}
           </h2>
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#4CB01E] shrink-0" />
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#76CA3E] shrink-0" />
         </div>
 
         {/* 3-Column Asymmetric Bento Grid (Mobile & Desktop) */}
@@ -159,6 +161,9 @@ export default function HeroSection() {
             onClick={() => {
               if (currentSlide.targetCat) {
                 dispatch({ type: 'SET_CATEGORY', category: currentSlide.targetCat });
+              }
+              if (currentSlide.targetSort) {
+                dispatch({ type: 'SET_SORT', sort: currentSlide.targetSort });
               }
               dispatch({ type: 'SET_PAGE', page: currentSlide.targetPage });
             }}
@@ -239,7 +244,7 @@ export default function HeroSection() {
                   dispatch({ type: 'SET_CATEGORY', category: card.id });
                   dispatch({ type: 'SET_PAGE', page: 'products' });
                 }}
-                className="relative rounded-2xl overflow-hidden bg-white p-3 sm:p-4 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all cursor-pointer border border-slate-200/80 hover:border-[#4CB01E] group min-h-[195px] sm:min-h-[215px] select-none"
+                className="relative rounded-2xl overflow-hidden bg-white p-3 sm:p-4 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all cursor-pointer border border-slate-200/80 hover:border-[#76CA3E] group min-h-[195px] sm:min-h-[215px] select-none"
               >
                 {/* Card Top: Badge & Full Title visible on multiple lines */}
                 <div className="min-w-0">
@@ -247,7 +252,7 @@ export default function HeroSection() {
                     <span className="text-[10px] sm:text-[11px] font-black text-emerald-900 bg-emerald-100/90 px-2 sm:px-2.5 py-0.5 rounded-full inline-block truncate max-w-[70%]">
                       {lang === 'ta' ? card.badgeTa : card.badgeEn}
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-bold text-[#4CB01E] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0 whitespace-nowrap">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-[#76CA3E] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0 whitespace-nowrap">
                       <span>{lang === 'ta' ? 'பார்க்க' : 'Shop'}</span>
                       <ArrowRight className="w-3 h-3 shrink-0" />
                     </span>
@@ -279,14 +284,14 @@ export default function HeroSection() {
         {/* Wide Action Strip Below Bento Grid: 1-Tap Reorder (Full text visible) */}
         <div
           onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-          className="mt-2.5 sm:mt-4 bg-[#F1F9EC] hover:bg-[#E6F5DE] border border-[#4CB01E]/30 rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 shadow-2xs transition-all cursor-pointer select-none group"
+          className="mt-2.5 sm:mt-4 bg-[#F1F9EC] hover:bg-[#E6F5DE] border border-[#76CA3E]/30 rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 shadow-2xs transition-all cursor-pointer select-none group"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[#4CB01E] text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-8 h-8 rounded-xl bg-[#76CA3E] text-white flex items-center justify-center shrink-0 shadow-2xs">
               <Zap className="w-4 h-4 text-yellow-300 fill-current" />
             </div>
             <p className="text-xs sm:text-sm text-slate-800 font-semibold leading-snug">
-              <strong className="font-extrabold text-[#1E4D12]">
+              <strong className="font-extrabold text-[#143B0D]">
                 {lang === 'ta'
                   ? 'கடந்த மாத மளிகையை 1 தட்டலில் மீண்டும் ஆர்டர் செய்'
                   : "Reorder Last Month's Groceries in 1 Tap"}
@@ -297,7 +302,7 @@ export default function HeroSection() {
               </span>
             </p>
           </div>
-          <div className="w-8 h-8 rounded-full bg-white border border-[#4CB01E]/30 flex items-center justify-center text-[#4CB01E] font-bold group-hover:bg-[#4CB01E] group-hover:text-white transition-all shrink-0">
+          <div className="w-8 h-8 rounded-full bg-white border border-[#76CA3E]/30 flex items-center justify-center text-[#76CA3E] font-bold group-hover:bg-[#76CA3E] group-hover:text-white transition-all shrink-0">
             <ArrowRight className="w-4 h-4" />
           </div>
         </div>

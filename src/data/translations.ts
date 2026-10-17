@@ -34,20 +34,20 @@ export const translations: TranslationMap = {
   heroBadge: { en: 'Your Trusted Neighbourhood Store', ta: 'மதுரையின் நம்பகமான பக்கத்து கடை' },
   heroTitle: { en: 'Fresh from Counter to Your Doorstep', ta: 'கவுண்டரிலிருந்து நேரடியாக உங்கள் வாசலுக்கு' },
   heroSubtitle: {
-    en: 'Trusted by 10,000+ Madurai families for over 15 years. Pure quality, wholesale price, delivered fresh in 30 minutes.',
-    ta: '15+ ஆண்டுகளாக 10,000+ மதுரை குடும்பங்களின் நம்பிக்கை. தூய தரம், நியாயமான மொத்த விலை, 30 நிமிடத்தில் புதிய டெலிவரி.'
+    en: 'Trusted by 10,000+ Madurai families for over 15 years. Pure quality, wholesale price, delivered fresh in 20 minutes.',
+    ta: '15+ ஆண்டுகளாக 10,000+ மதுரை குடும்பங்களின் நம்பிக்கை. தூய தரம், நியாயமான மொத்த விலை, 20 நிமிடத்தில் புதிய டெலிவரி.'
   },
   shopNow: { en: 'Shop Groceries Now', ta: 'இப்போது மளிகை வாங்குங்கள்' },
   monthlyListBtn: { en: 'Kudumba Monthly Bundle (Save Big)', ta: 'குடும்ப மாத மளிகை தொகுப்பு (அதிக சேமிப்பு)' },
   expressBadgeTitle: { en: 'Madurai Express Delivery', ta: 'மதுரை எக்ஸ்பிரஸ் டெலிவரி' },
-  expressBadgeDesc: { en: 'Fresh Farm Produce, Dals & Spices in 30 Min', ta: 'பண்ணை காய்கறிகள், பருப்பு & மளிகை 30 நிமிடத்தில்' },
+  expressBadgeDesc: { en: 'Fresh Farm Produce, Dals & Spices in 20 Min', ta: 'பண்ணை காய்கறிகள், பருப்பு & மளிகை 20 நிமிடத்தில்' },
   happyFamilies: { en: '10,000+ Happy Families', ta: '10,000+ திருப்தியான குடும்பங்கள்' },
   servingYears: { en: 'Serving Madurai with pride for 15+ years', ta: '15+ ஆண்டுகளாக மதுரையில் தரமான சேவை' },
 
   // Trust Badges
   farmFresh: { en: 'Farm Fresh Direct', ta: 'நேரடி பண்ணை புதியது' },
   farmFreshDesc: { en: 'Daily morning fresh farm arrivals', ta: 'தினசரி காலை புதிய வரத்து' },
-  delivery30: { en: '30-Min Local Delivery', ta: '30 நிமிட விரைவு டெலிவரி' },
+  delivery30: { en: '20-Min Local Delivery', ta: '20 நிமிட விரைவு டெலிவரி' },
   delivery30Desc: { en: 'Direct by our store riders', ta: 'கடை ஊழியர்கள் மூலம் உடனடி டெலிவரி' },
   cashUpi: { en: 'Cash / UPI on Delivery', ta: 'கேஷ் / UPI டெலிவரியில்' },
   cashUpiDesc: { en: 'Pay after checking items', ta: 'பொருட்களை சரிபார்த்து பணம் செலுத்தலாம்' },
@@ -75,7 +75,7 @@ export const translations: TranslationMap = {
   weekendSaver: { en: 'Weekend Super Saver', ta: 'வார இறுதி சூப்பர் சேவர்' },
   upTo30Off: { en: 'Up to 30% Off on Kitchen Essentials', ta: 'அத்தியாவசிய மளிகைக்கு 30% வரை தள்ளுபடி' },
   expressRider: { en: 'Express Store Delivery', ta: 'விரைவு ஸ்டோர் டெலிவரி' },
-  delivery30Min: { en: 'Doorstep Delivery in 30 Minutes', ta: '30 நிமிடத்தில் வீட்டு வாசல் டெலிவரி' },
+  delivery30Min: { en: 'Doorstep Delivery in 20 Minutes', ta: '20 நிமிடத்தில் வீட்டு வாசல் டெலிவரி' },
   byOurRiders: { en: 'Safe packaging by our dedicated store staff', ta: 'எங்கள் ஊழியர்கள் மூலம் பாதுகாப்பான பேக்கிங்' },
 
   // Featured & Deals
@@ -89,7 +89,7 @@ export const translations: TranslationMap = {
 
   // Why Choose Us Section
   whyTitle: { en: 'Why Madurai Trusts Sri Amman Supermarket', ta: 'மதுரை மக்கள் ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்டை நம்பக் காரணம்' },
-  whySubtitle: { en: 'We combine traditional neighbourhood care with modern 30-minute delivery speed.', ta: 'பழைய பக்கத்து கடையின் அன்பும், புதிய 30 நிமிட அதிவிரைவு டெலிவரியும்.' },
+  whySubtitle: { en: 'We combine traditional neighbourhood care with modern 20-minute delivery speed.', ta: 'பழைய பக்கத்து கடையின் அன்பும், புதிய 20 நிமிட அதிவிரைவு டெலிவரியும்.' },
   why1Title: { en: 'Counter Fresh & Hand-Inspected', ta: 'கைதேர்ந்த தரமான பொருட்கள்' },
   why1Desc: { en: 'Every grain, dal and vegetable is handpicked daily to ensure zero dust, zero stones, and pure freshness.', ta: 'தூசிகள், கற்கள் இன்றி தூய்மையான அரிசி, பருப்பு மற்றும் காய்கறிகள் மட்டுமே விநியோகிக்கப்படுகிறது.' },
   why2Title: { en: 'Honest Wholesale MRP Savings', ta: 'நேர்மையான மொத்த விலை சேமிப்பு' },
@@ -105,8 +105,8 @@ export const translations: TranslationMap = {
   rev1Name: { en: 'S. Meenakshi Sundaram', ta: 'எஸ். மீனாட்சி சுந்தரம்' },
   rev1Loc: { en: 'K.K. Nagar, Madurai', ta: 'கே.கே. நகர், மதுரை' },
   rev1Text: {
-    en: 'Best grocery store in Madurai. Idli rice and Udhaiyam toor dal are always top quality. Delivery arrives in 25 minutes hot and fresh!',
-    ta: 'மதுரையில் சிறந்த மளிகை கடை. இட்லி அரிசியும், உதயம் துவரம் பருப்பும் அருமையான தரம். 25 நிமிடத்தில் வீடு தேடி வந்தது!'
+    en: 'Best grocery store in Madurai. Idli rice and Udhaiyam toor dal are always top quality. Delivery arrives in 20 minutes neat, clean, and fresh!',
+    ta: 'மதுரையில் சிறந்த மளிகை கடை. இட்லி அரிசியும், உதயம் துவரம் பருப்பும் அருமையான தரம். 20 நிமிடத்தில் நேர்த்தியாக வீடு தேடி வந்தது!'
   },
   rev2Name: { en: 'V. Lakshmi Narayanan', ta: 'வி. லட்சுமி நாராயணன்' },
   rev2Loc: { en: 'Anna Nagar, Madurai', ta: 'அண்ணா நகர், மதுரை' },
@@ -154,7 +154,7 @@ export const translations: TranslationMap = {
     ta: 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்டின் 100% நேரடி கவுண்டர் தரம். சுகாதாரமாக சுத்தம் செய்யப்பட்டு, பேக் செய்யப்பட்டு அனுப்பப்படுகிறது.'
   },
   shelfLife: { en: 'Best Before: Fresh Stock with 6–12 Months Shelf Life', ta: 'பயன்பாட்டு காலம்: 6–12 மாதங்கள் வரை நீடிக்கும் புதிய இருப்பு' },
-  directReturn: { en: '30-Minute Counter Exchange if not satisfied', ta: 'திருப்தி இல்லையெனில் 30 நிமிடத்தில் எளிதான மாற்று' },
+  directReturn: { en: '20-Minute Counter Exchange if not satisfied', ta: 'திருப்தி இல்லையெனில் 20 நிமிடத்தில் எளிதான மாற்று' },
 
   // Monthly List (Kudumba Maligai)
   kudumbaTitle: { en: '1-Click Kudumba Monthly Grocery Bundle', ta: '1-கிளிக் குடும்ப மாத மளிகை தொகுப்பு' },
@@ -180,7 +180,7 @@ export const translations: TranslationMap = {
   myCart: { en: 'Shopping Cart', ta: 'ஷாப்பிங் கூடை' },
   viewCart: { en: 'View Cart', ta: 'கூடையைப் பார்' },
   cartEmpty: { en: 'Your cart is empty', ta: 'உங்கள் கூடை காலியாக உள்ளது' },
-  cartEmptyDesc: { en: 'Add fresh groceries from our store to get 30-min delivery!', ta: '30 நிமிட டெலிவரி பெற எங்கள் கடையின் புதிய மளிகைகளை சேர்க்கவும்!' },
+  cartEmptyDesc: { en: 'Add fresh groceries from our store to get 20-min delivery!', ta: '20 நிமிட டெலிவரி பெற எங்கள் கடையின் புதிய மளிகைகளை சேர்க்கவும்!' },
   addMoreForFree: { en: 'Add ₹{amount} more for FREE Delivery', ta: 'இலவச டெலிவரிக்கு இன்னும் ₹{amount} சேர்க்கவும்' },
   freeDeliveryUnlocked: { en: 'Free Delivery Unlocked!', ta: 'இலவச டெலிவரி சலுகை கிடைத்தது!' },
   itemTotal: { en: 'Item Total (Market MRP)', ta: 'பொருட்கள் மொத்தம் (MRP)' },
@@ -207,12 +207,12 @@ export const translations: TranslationMap = {
   enterOtpTitle: { en: 'Enter 4-digit verification code', ta: '4 இலக்க OTP குறியீட்டை உள்ளிடவும்' },
   verifying: { en: 'Verifying code...', ta: 'சரிபார்க்கப்படுகிறது...' },
   autoDetect: { en: 'Auto-Detect Current Madurai Location', ta: 'தற்போதைய மதுரை இருப்பிடத்தை கண்டறி' },
-  addressVerified: { en: 'Address is 1.8 km away — Inside 30-Min Express Zone', ta: 'முகவரி 1.8 கி.மீ. தொலைவு — 30-நிமிட விரைவு மண்டலத்தில் உள்ளது' },
+  addressVerified: { en: 'Address is 1.8 km away — Inside 20-Min Express Zone', ta: 'முகவரி 1.8 கி.மீ. தொலைவு — 20-நிமிட விரைவு மண்டலத்தில் உள்ளது' },
   houseNo: { en: 'House / Door No & Apartment Name *', ta: 'வீட்டு எண் / பிளாட் பெயர் *' },
   street: { en: 'Street & Area in Madurai *', ta: 'தெரு & பகுதி (மதுரை) *' },
   landmark: { en: 'Prominent Landmark (Temple, School, Bus Stop)', ta: 'அடையாளம் (கோவில், பள்ளி, பேருந்து நிறுத்தம்)' },
   deliverySlot: { en: 'Delivery Slot Preference', ta: 'டெலிவரி நேர விருப்பம்' },
-  slotExpress: { en: 'Instant Express (~25–30 Mins)', ta: 'உடனடி விரைவு டெலிவரி (~25-30 நிமிடம்)' },
+  slotExpress: { en: 'Instant Express (~20 Mins)', ta: 'உடனடி விரைவு டெலிவரி (~20 நிமிடம்)' },
   slotEvening: { en: 'Today Evening (6:00 PM – 8:00 PM)', ta: 'இன்று மாலை (6:00 – 8:00 மணி)' },
   slotMorning: { en: 'Tomorrow Morning (8:00 AM – 10:00 AM)', ta: 'நாளை காலை (8:00 – 10:00 மணி)' },
   payOnline: { en: 'Pay Online via UPI (GPay / PhonePe / Paytm / Card)', ta: 'UPI / ஆன்லைன் கட்டணம் (GPay, PhonePe, Paytm, கார்டு)' },
@@ -225,7 +225,7 @@ export const translations: TranslationMap = {
 
   // Orders Page (Tracking)
   orderConfirmed: { en: 'Order Confirmed & Being Prepared!', ta: 'ஆர்டர் உறுதி செய்யப்பட்டு தயாராகிறது!' },
-  reachingDoorstep: { en: 'Reaching your doorstep in ~25 Minutes', ta: 'உங்கள் வாசலுக்கு ~25 நிமிடத்தில் வந்து சேரும்' },
+  reachingDoorstep: { en: 'Reaching your doorstep in ~20 Minutes', ta: 'உங்கள் வாசலுக்கு ~20 நிமிடத்தில் வந்து சேரும்' },
   orderPlaced: { en: 'Order Placed', ta: 'ஆர்டர் பதிவானது' },
   acceptedByCounter: { en: 'Accepted by Counter', ta: 'கவுண்டரில் ஏற்கப்பட்டது' },
   packingItems: { en: 'Packing Fresh Items', ta: 'பொருட்கள் பேக் செய்யப்படுகிறது' },
@@ -244,14 +244,14 @@ export const translations: TranslationMap = {
 
   // Location Modal
   selectDeliveryArea: { en: 'Select Your Delivery Area in Madurai', ta: 'மதுரையில் உங்கள் டெலிவரி பகுதியை தேர்வு செய்யவும்' },
-  locationSubtitle: { en: 'We deliver fresh provisions across all major Madurai localities within 30 minutes', ta: 'அனைத்து முக்கிய மதுரை பகுதிகளிலும் 30 நிமிடத்தில் புதிய மளிகை டெலிவரி செய்கிறோம்' },
+  locationSubtitle: { en: 'We deliver fresh provisions across all major Madurai localities within 20 minutes', ta: 'அனைத்து முக்கிய மதுரை பகுதிகளிலும் 20 நிமிடத்தில் புதிய மளிகை டெலிவரி செய்கிறோம்' },
   approxDistance: { en: 'Distance from Store Counter', ta: 'கடையிலிருந்து தோராய தூரம்' },
   deliveryTimeEst: { en: 'Estimated Delivery Time', ta: 'எதிர்பார்க்கப்படும் டெலிவரி நேரம்' },
   confirmLocation: { en: 'Confirm Location', ta: 'இருப்பிடத்தை உறுதி செய்' },
 
   // Toast Messages
   addedToCart: { en: 'Added to cart successfully', ta: 'கூடையில் வெற்றிகரமாக சேர்க்கப்பட்டது' },
-  orderPlacedToast: { en: 'Order placed successfully! Reaching in 25 mins.', ta: 'ஆர்டர் பதிவானது! 25 நிமிடத்தில் உங்கள் வாசலில்.' },
+  orderPlacedToast: { en: 'Order placed successfully! Reaching in 20 mins.', ta: 'ஆர்டர் பதிவானது! 20 நிமிடத்தில் உங்கள் வாசலில்.' },
 
   // Footer
   footerTagline: { en: 'Your Trusted Neighbourhood Grocery Store in Madurai', ta: 'மதுரையின் உங்கள் நம்பகமான பக்கத்து மளிகை கடை' },

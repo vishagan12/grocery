@@ -13,7 +13,7 @@ export default function MonthlyListPage() {
   const { state, dispatch, showToast } = useStore();
   const lang = state.lang;
 
-  const [familySize, setFamilySize] = useState<FamilySize>('medium');
+  const [familySize, setFamilySize] = useState<FamilySize>('small');
   const [activeCatFilter, setActiveCatFilter] = useState<string>('all');
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [customizeSearch, setCustomizeSearch] = useState('');
@@ -401,7 +401,7 @@ export default function MonthlyListPage() {
               <p className="text-[10px] sm:text-[11px] text-center text-brand-slate/50 leading-relaxed">
                 {lang === 'ta'
                   ? 'ஆர்டர் செய்த பிறகு தேவைக்கேற்ப பொருட்களை மாற்றிக் கொள்ளலாம்.'
-                  : 'Items will be double-packed cleanly and delivered in 30 minutes.'}
+                  : 'Items will be double-packed cleanly and delivered in 20 minutes.'}
               </p>
             </div>
 
@@ -429,7 +429,7 @@ export default function MonthlyListPage() {
             <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-[#F8FAF7]">
               <div>
                 <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-                  <SlidersHorizontal className="w-5 h-5 text-[#4CB01E]" />
+                  <SlidersHorizontal className="w-5 h-5 text-[#76CA3E]" />
                   <span>{lang === 'ta' ? 'மாதாந்திர பட்டியலில் பொருட்கள் சேர்க்க' : 'Customize Monthly Provision List'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -449,8 +449,8 @@ export default function MonthlyListPage() {
 
             {/* Search Input Inside Modal */}
             <div className="p-4 border-b border-slate-100 bg-white">
-              <div className="flex items-center bg-[#F1F9EC] rounded-2xl px-3.5 py-2.5 border border-[#4CB01E]/30">
-                <Search className="w-4 h-4 text-[#4CB01E] mr-2 shrink-0" />
+              <div className="flex items-center bg-[#F1F9EC] rounded-2xl px-3.5 py-2.5 border border-[#76CA3E]/30">
+                <Search className="w-4 h-4 text-[#76CA3E] mr-2 shrink-0" />
                 <input
                   type="text"
                   placeholder={lang === 'ta' ? 'அரிசி, பருப்பு, எண்ணெய் தேடவும்...' : 'Search items to add (rice, oil, dal, snacks)...'}

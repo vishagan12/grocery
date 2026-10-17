@@ -14,25 +14,25 @@ export function WhyChooseUs() {
     {
       title: t('why1Title', lang),
       desc: t('why1Desc', lang),
-      icon: <IconCheckCircle className="w-5 h-5 text-[#4CB01E]" />,
+      icon: <IconCheckCircle className="w-5 h-5 text-[#76CA3E]" />,
       tag: lang === 'ta' ? '100% தரம்' : '100% Inspected',
     },
     {
       title: t('why2Title', lang),
       desc: t('why2Desc', lang),
-      icon: <IconShield className="w-5 h-5 text-[#4CB01E]" />,
+      icon: <IconShield className="w-5 h-5 text-[#76CA3E]" />,
       tag: lang === 'ta' ? 'மொத்த விலை' : 'Honest Pricing',
     },
     {
       title: t('why3Title', lang),
       desc: t('why3Desc', lang),
-      icon: <IconTruck className="w-5 h-5 text-[#4CB01E]" />,
+      icon: <IconTruck className="w-5 h-5 text-[#76CA3E]" />,
       tag: lang === 'ta' ? '20 நிமிட டெலிவரி' : '20-Min Express',
     },
     {
       title: t('why4Title', lang),
       desc: t('why4Desc', lang),
-      icon: <IconZap className="w-5 h-5 text-[#4CB01E]" />,
+      icon: <IconZap className="w-5 h-5 text-[#76CA3E]" />,
       tag: lang === 'ta' ? 'கூடுதல் சேமிப்பு' : 'Extra Savings',
     },
   ];
@@ -41,7 +41,7 @@ export function WhyChooseUs() {
     <section className="py-6 sm:py-10 bg-[#F1F9EC]/50 border-y border-slate-200/60">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         <div className="text-center max-w-xl mx-auto mb-5 sm:mb-8">
-          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#1E4D12] bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs mb-2 inline-block whitespace-nowrap">
+          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#143B0D] bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs mb-2 inline-block whitespace-nowrap">
             {lang === 'ta' ? 'ஸ்ரீ அம்மன் உறுதிமொழி' : 'The Sri Amman Promise'}
           </span>
           <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
@@ -59,7 +59,7 @@ export function WhyChooseUs() {
               key={i}
               className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-2xs hover:shadow-sm transition-all duration-300 flex items-start gap-3.5 sm:flex-col sm:items-stretch"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#F1F9EC] border border-[#4CB01E]/20 flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#F1F9EC] border border-[#76CA3E]/20 flex items-center justify-center shrink-0">
                 {f.icon}
               </div>
               <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ export function WhyChooseUs() {
                   <h4 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug break-words">
                     {f.title}
                   </h4>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-[#1E4D12] bg-[#F1F9EC] px-2 py-0.5 rounded-md border border-[#4CB01E]/20 shrink-0">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-[#143B0D] bg-[#F1F9EC] px-2 py-0.5 rounded-md border border-[#76CA3E]/20 shrink-0">
                     {f.tag}
                   </span>
                 </div>
@@ -115,7 +115,7 @@ export function CustomerReviews() {
     <section className="py-6 sm:py-10 bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Kudumba Monthly Provision Callout Banner */}
-        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#143B0D] via-[#1E4D12] to-[#2E7D32] rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-6 border border-emerald-500/30">
+        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#0D2608] via-[#143B0D] to-[#76CA3E] rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-6 border border-emerald-500/30">
           <div className="w-full sm:max-w-xl text-center sm:text-left min-w-0">
             <span className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
               <IconZap className="w-3.5 h-3.5 text-[#143B0D] shrink-0" />

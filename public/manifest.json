@@ -1,11 +1,11 @@
 {
   "name": "Sri Amman Supermarket",
   "short_name": "SriAmman",
-  "description": "Fresh Groceries Delivered in 30 Minutes",
+  "description": "Fresh Groceries Delivered in 20 Minutes",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FBF8F3",
-  "theme_color": "#2E7D32",
+  "theme_color": "#1E4D12",
   "icons": [
     {
       "src": "/icon.svg",

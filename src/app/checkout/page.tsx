@@ -2,8 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
-import AppShell from '@/components/AppShell';
-import CheckoutPage from '@/components/CheckoutPage';
+import Home from '@/app/page';
 
 export default function CheckoutRoute() {
   const { dispatch } = useStore();
@@ -12,9 +11,5 @@ export default function CheckoutRoute() {
     dispatch({ type: 'SET_PAGE', page: 'checkout' });
   }, [dispatch]);
 
-  return (
-    <AppShell>
-      <CheckoutPage />
-    </AppShell>
-  );
+  return <Home />;
 }

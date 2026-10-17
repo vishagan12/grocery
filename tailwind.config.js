@@ -9,15 +9,16 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          primary: '#2E7D32',
-          highlight: '#388E3C',
-          deep: '#1B4D1A',
-          cream: '#FBF8F3',
+          primary: '#4CB01E',
+          highlight: '#3D9415',
+          deep: '#1E4D12',
+          forest: '#143B0D',
+          cream: '#F8FAF7',
           creamCard: '#FFFFFF',
-          creamDark: '#EFE9DF',
+          creamDark: '#EAEFE7',
           creamHover: '#F5EFE6',
-          mint: '#EEF5EB',
-          slate: '#1C2A20',
+          mint: '#F1F9EC',
+          slate: '#0F172A',
         }
       },
       fontFamily: {

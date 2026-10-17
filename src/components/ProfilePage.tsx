@@ -109,8 +109,8 @@ export default function ProfilePage() {
 
   // Coupons
   const coupons = [
-    { code: 'AMMA50', desc: 'Flat ₹50 OFF on orders above ₹499', expires: 'Valid till 31 Oct' },
-    { code: 'FREEDEL', desc: 'Free express 30-min delivery on any order', expires: 'No minimum order' },
+    { code: 'AMMAN50', desc: 'Flat ₹50 OFF on orders above ₹499', expires: 'Valid till 31 Oct' },
+    { code: 'FREEDEL', desc: 'Free express 20-min delivery on any order', expires: 'No minimum order' },
     { code: 'MALIGAI100', desc: 'Flat ₹100 OFF on Monthly Kudumba Grocery Bundles', expires: 'Valid once per month' },
   ];
 
@@ -236,12 +236,12 @@ export default function ProfilePage() {
   };
 
   const handleShareApp = () => {
-    const url = typeof window !== 'undefined' ? window.location.origin : 'https://sriammasupermarket.com';
+    const url = typeof window !== 'undefined' ? window.location.origin : 'https://sriammansupermarket.com';
     if (navigator.share) {
       navigator
         .share({
-          title: 'Sri Amma Supermarket',
-          text: 'Order daily groceries with 30-min express delivery in Madurai from Sri Amma Supermarket!',
+          title: 'Sri Amman Supermarket',
+          text: 'Order daily groceries with 20-min express delivery in Madurai from Sri Amman Supermarket!',
           url,
         })
         .catch(() => {});
@@ -309,7 +309,7 @@ export default function ProfilePage() {
           </button>
 
           <h1 className="text-base font-bold text-slate-900 tracking-tight">
-            {subView === 'none' ? 'Profile' : 'Profile Details'}
+            {subView === 'none' ? (lang === 'ta' ? 'சுயவிவரம்' : 'Profile') : (lang === 'ta' ? 'விவரங்கள்' : 'Profile Details')}
           </h1>
 
           <div className="w-9" aria-hidden="true" />
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
                   />
                 </div>
 
@@ -354,7 +354,7 @@ export default function ProfilePage() {
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
                   />
                 </div>
 
@@ -367,7 +367,7 @@ export default function ProfilePage() {
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
                     placeholder="e.g. 12 Dec 2006"
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
                   />
                 </div>
 
@@ -385,13 +385,15 @@ export default function ProfilePage() {
           {subView === 'support' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-bold text-slate-900">Sri Amma Customer Support</h2>
+                <h2 className="text-base font-bold text-slate-900">
+                  {lang === 'ta' ? 'ஸ்ரீ அம்மன் வாடிக்கையாளர் சேவை' : 'Sri Amman Customer Support'}
+                </h2>
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -404,11 +406,11 @@ export default function ProfilePage() {
                 </p>
                 <div className="pt-2 border-t border-slate-200 flex flex-col gap-2.5 text-xs text-slate-700 font-medium">
                   <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-[#4CB01E]" />
+                    <Phone className="w-4 h-4 text-[#76CA3E]" />
                     <span>Store Helpline: +91 94432 10890 / +91 63793 98981</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-[#4CB01E]" />
+                    <MessageCircle className="w-4 h-4 text-[#76CA3E]" />
                     <span>WhatsApp: +91 63793 98981 (Instant Order Help)</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -440,7 +442,7 @@ export default function ProfilePage() {
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -454,7 +456,7 @@ export default function ProfilePage() {
                   onClick={() => handleSavePaymentPref('upi')}
                   className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
                     selectedPaymentPref === 'upi'
-                      ? 'border-[#4CB01E] bg-emerald-50/40 text-slate-900'
+                      ? 'border-[#76CA3E] bg-emerald-50/40 text-slate-900'
                       : 'border-slate-200 bg-white text-slate-700'
                   }`}
                 >
@@ -468,7 +470,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   {selectedPaymentPref === 'upi' && (
-                    <Check className="w-5 h-5 text-[#4CB01E]" />
+                    <Check className="w-5 h-5 text-[#76CA3E]" />
                   )}
                 </button>
 
@@ -477,7 +479,7 @@ export default function ProfilePage() {
                   onClick={() => handleSavePaymentPref('cod')}
                   className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
                     selectedPaymentPref === 'cod'
-                      ? 'border-[#4CB01E] bg-emerald-50/40 text-slate-900'
+                      ? 'border-[#76CA3E] bg-emerald-50/40 text-slate-900'
                       : 'border-slate-200 bg-white text-slate-700'
                   }`}
                 >
@@ -491,7 +493,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   {selectedPaymentPref === 'cod' && (
-                    <Check className="w-5 h-5 text-[#4CB01E]" />
+                    <Check className="w-5 h-5 text-[#76CA3E]" />
                   )}
                 </button>
               </div>
@@ -506,7 +508,7 @@ export default function ProfilePage() {
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     placeholder="yourname@upi"
-                    className="flex-1 border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#4CB01E]"
+                    className="flex-1 border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
                   />
                   <button
                     type="button"
@@ -532,7 +534,7 @@ export default function ProfilePage() {
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -560,7 +562,7 @@ export default function ProfilePage() {
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-900">{order.id}</span>
-                        <span className="text-[11px] font-bold text-[#4CB01E] bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-bold text-[#76CA3E] bg-emerald-50 px-2 py-0.5 rounded-full">
                           {order.status === 4 ? 'Delivered' : 'Order Placed'}
                         </span>
                       </div>
@@ -584,7 +586,7 @@ export default function ProfilePage() {
                             dispatch({ type: 'SET_CART_OPEN', open: true });
                             showToast('Items added to cart from previous order');
                           }}
-                          className="text-xs font-bold text-[#4CB01E] hover:underline"
+                          className="text-xs font-bold text-[#76CA3E] hover:underline"
                         >
                           Reorder All Items
                         </button>
@@ -615,7 +617,7 @@ export default function ProfilePage() {
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -701,7 +703,7 @@ export default function ProfilePage() {
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -750,7 +752,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setShowAddAddrForm(true)}
-                  className="w-full border-2 border-dashed border-slate-200 hover:border-[#4CB01E] text-slate-600 hover:text-[#4CB01E] py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full border-2 border-dashed border-slate-200 hover:border-[#76CA3E] text-slate-600 hover:text-[#76CA3E] py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Address</span>
@@ -778,7 +780,7 @@ export default function ProfilePage() {
                         onClick={() => setNewAddrTag(tag)}
                         className={`py-1.5 text-xs font-bold rounded-xl border transition-all ${
                           newAddrTag === tag
-                            ? 'bg-[#4CB01E] text-white border-[#4CB01E]'
+                            ? 'bg-[#76CA3E] text-white border-[#76CA3E]'
                             : 'bg-white text-slate-700 border-slate-200'
                         }`}
                       >
@@ -792,7 +794,7 @@ export default function ProfilePage() {
                     placeholder="House / Flat / Door Number"
                     value={newAddrHouse}
                     onChange={(e) => setNewAddrHouse(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#76CA3E]"
                   />
                   <input
                     type="text"
@@ -800,7 +802,7 @@ export default function ProfilePage() {
                     placeholder="Street / Area / Road Name"
                     value={newAddrStreet}
                     onChange={(e) => setNewAddrStreet(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#76CA3E]"
                   />
                   <input
                     type="text"
@@ -808,7 +810,7 @@ export default function ProfilePage() {
                     placeholder="Pincode (e.g. 625020)"
                     value={newAddrPincode}
                     onChange={(e) => setNewAddrPincode(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#76CA3E]"
                   />
                   <button
                     type="submit"
@@ -831,7 +833,7 @@ export default function ProfilePage() {
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -848,7 +850,7 @@ export default function ProfilePage() {
                     type="text"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="e.g. Sri Amma Enterprises"
+                    placeholder="e.g. Sri Amman Enterprises"
                     className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#4CB01E]"
                   />
                 </div>
@@ -863,7 +865,7 @@ export default function ProfilePage() {
                     value={gstin}
                     onChange={(e) => setGstin(e.target.value.toUpperCase())}
                     placeholder="33AAAAA0000A1Z5"
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 uppercase focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 uppercase focus:outline-none focus:border-[#76CA3E]"
                   />
                 </div>
 
@@ -887,7 +889,7 @@ export default function ProfilePage() {
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -899,7 +901,7 @@ export default function ProfilePage() {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm font-black text-[#1E4D12] tracking-wider bg-white border border-emerald-200 px-2 py-0.5 rounded-md">
+                        <span className="font-mono text-sm font-black text-[#143B0D] tracking-wider bg-white border border-emerald-200 px-2 py-0.5 rounded-md">
                           {c.code}
                         </span>
                       </div>
@@ -924,13 +926,15 @@ export default function ProfilePage() {
           {subView === 'about' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-bold text-slate-900">About Sri Amma Supermarket</h2>
+                <h2 className="text-base font-bold text-slate-900">
+                  {lang === 'ta' ? 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட் பற்றி' : 'About Sri Amman Supermarket'}
+                </h2>
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -939,13 +943,13 @@ export default function ProfilePage() {
                   Madurai’s Trusted Neighborhood Supermarket
                 </p>
                 <p>
-                  Sri Amma Supermarket is a premier grocery and daily essentials destination in Madurai, Tamil Nadu. We specialize in farm-fresh produce, authentic regional staples, traditional millets, cold-pressed oils, and monthly provision maligai bundles.
+                  Sri Amman Supermarket is a premier grocery and daily essentials destination in Madurai, Tamil Nadu. We specialize in farm-fresh produce, authentic regional staples, traditional millets, cold-pressed oils, and monthly provision maligai bundles.
                 </p>
                 <div className="pt-2 border-t border-slate-200 space-y-1.5 text-slate-700">
                   <p><strong>Head Office:</strong> 12/B, K.K. Nagar Main Road, Madurai - 625020</p>
                   <p><strong>Operating Hours:</strong> 8:00 AM – 9:30 PM (Daily)</p>
                   <p><strong>FSSAI License:</strong> 12423012000456 (Certified Food Safety)</p>
-                  <p><strong>Delivery Guarantee:</strong> 30-Minute Counter-Fresh Delivery</p>
+                  <p><strong>Delivery Guarantee:</strong> 20-Minute Counter-Fresh Delivery</p>
                 </div>
               </div>
             </div>
@@ -955,20 +959,22 @@ export default function ProfilePage() {
           {subView === 'privacy' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-bold text-slate-900">Account Privacy</h2>
+                <h2 className="text-base font-bold text-slate-900">
+                  {lang === 'ta' ? 'கணக்கு பாதுகாப்பு' : 'Account Privacy'}
+                </h2>
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 text-xs text-slate-600 leading-relaxed">
                 <p className="text-sm font-bold text-slate-900">Data Privacy & Local Storage</p>
                 <p>
-                  All your cart items, past orders, address book, and preferences are securely persisted in your device browser storage. Sri Amma Supermarket does not share your phone number or data with third-party telemarketers.
+                  All your cart items, past orders, address book, and preferences are securely persisted in your device browser storage. Sri Amman Supermarket does not share your phone number or data with third-party telemarketers.
                 </p>
               </div>
 
@@ -988,13 +994,15 @@ export default function ProfilePage() {
           {subView === 'notifications' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h2 className="text-base font-bold text-slate-900">Notification Preferences</h2>
+                <h2 className="text-base font-bold text-slate-900">
+                  {lang === 'ta' ? 'அறிவிப்பு அமைப்புகள்' : 'Notification Preferences'}
+                </h2>
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
                   className="text-xs font-bold text-[#4CB01E]"
                 >
-                  Back to Profile
+                  {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
               </div>
 
@@ -1022,7 +1030,7 @@ export default function ProfilePage() {
                   <div
                     key={item.key}
                     onClick={() => handleToggleNotif(item.key)}
-                    className="border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-3 bg-white cursor-pointer hover:border-[#4CB01E] transition-all"
+                    className="border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-3 bg-white cursor-pointer hover:border-[#76CA3E] transition-all"
                   >
                     <div>
                       <p className="text-xs font-bold text-slate-900">{item.label}</p>
@@ -1030,7 +1038,7 @@ export default function ProfilePage() {
                     </div>
                     <div
                       className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-                        item.active ? 'bg-[#4CB01E]' : 'bg-slate-300'
+                        item.active ? 'bg-[#76CA3E]' : 'bg-slate-300'
                       }`}
                     >
                       <div
@@ -1083,7 +1091,7 @@ export default function ProfilePage() {
                     onClick={handleLogBackIn}
                     className="text-xs font-bold text-[#4CB01E] hover:underline mt-1 inline-block"
                   >
-                    Log in as Vishagan
+                    {lang === 'ta' ? 'விஷாகன் ஆக உள்நுழையவும்' : 'Log in as Vishagan'}
                   </button>
                 )}
               </div>
@@ -1099,7 +1107,7 @@ export default function ProfilePage() {
                     <ClipboardList className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 text-center leading-tight">
-                    Monthly List
+                    {lang === 'ta' ? 'மாத மளிகை' : 'Monthly List'}
                   </span>
                 </div>
 
@@ -1112,7 +1120,7 @@ export default function ProfilePage() {
                     <MessageSquareText className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 text-center leading-tight">
-                    Support
+                    {lang === 'ta' ? 'உதவி மையம்' : 'Support'}
                   </span>
                 </div>
 
@@ -1125,7 +1133,7 @@ export default function ProfilePage() {
                     <CreditCard className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 text-center leading-tight">
-                    Payments
+                    {lang === 'ta' ? 'கட்டணம்' : 'Payments'}
                   </span>
                 </div>
               </div>
@@ -1138,7 +1146,7 @@ export default function ProfilePage() {
                       <SlidersHorizontal className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800">
-                      Language preferences
+                      {lang === 'ta' ? 'மொழி தேர்வு' : 'Language preferences'}
                     </span>
                   </div>
                   <button
@@ -1158,7 +1166,7 @@ export default function ProfilePage() {
               {/* SECTION 1: YOUR INFORMATION */}
               <div>
                 <h3 className="text-xs font-bold tracking-wider uppercase text-slate-400 mb-2">
-                  YOUR INFORMATION
+                  {lang === 'ta' ? 'உங்கள் விவரங்கள்' : 'YOUR INFORMATION'}
                 </h3>
                 <div className="divide-y divide-slate-100">
                   {/* Your orders */}
@@ -1171,7 +1179,7 @@ export default function ProfilePage() {
                       <ShoppingBag className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Your orders
+                      {lang === 'ta' ? 'உங்கள் ஆர்டர்கள்' : 'Your orders'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1186,7 +1194,7 @@ export default function ProfilePage() {
                       <Heart className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Your wishlist ({state.wishlist.length})
+                      {lang === 'ta' ? 'விருப்பப்பட்டியல்' : 'Your wishlist'} ({state.wishlist.length})
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1201,7 +1209,7 @@ export default function ProfilePage() {
                       <MapPin className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Address book
+                      {lang === 'ta' ? 'முகவரி புத்தகம்' : 'Address book'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1216,7 +1224,7 @@ export default function ProfilePage() {
                       <FileText className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      GST details
+                      {lang === 'ta' ? 'GST விவரங்கள்' : 'GST details'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1226,7 +1234,7 @@ export default function ProfilePage() {
               {/* SECTION 2: PAYMENT AND COUPONS */}
               <div>
                 <h3 className="text-xs font-bold tracking-wider uppercase text-slate-400 mb-2">
-                  PAYMENT AND COUPONS
+                  {lang === 'ta' ? 'கட்டணம் & கூப்பன்கள்' : 'PAYMENT AND COUPONS'}
                 </h3>
                 <div className="divide-y divide-slate-100">
                   {/* Payment settings */}
@@ -1239,7 +1247,7 @@ export default function ProfilePage() {
                       <CreditCard className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Payment settings
+                      {lang === 'ta' ? 'கட்டண அமைப்புகள்' : 'Payment settings'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1254,7 +1262,7 @@ export default function ProfilePage() {
                       <Percent className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Your collected rewards / Coupons
+                      {lang === 'ta' ? 'கூப்பன்கள் & சலுகைகள்' : 'Your collected rewards / Coupons'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1264,7 +1272,7 @@ export default function ProfilePage() {
               {/* SECTION 3: OTHER INFORMATION */}
               <div>
                 <h3 className="text-xs font-bold tracking-wider uppercase text-slate-400 mb-2">
-                  OTHER INFORMATION
+                  {lang === 'ta' ? 'மற்ற விவரங்கள்' : 'OTHER INFORMATION'}
                 </h3>
                 <div className="divide-y divide-slate-100">
                   {/* Share the app */}
@@ -1277,7 +1285,7 @@ export default function ProfilePage() {
                       <Share2 className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Share the app
+                      {lang === 'ta' ? 'செயலியை பகிரவும்' : 'Share the app'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1292,7 +1300,7 @@ export default function ProfilePage() {
                       <Info className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      About us
+                      {lang === 'ta' ? 'எங்களைப் பற்றி' : 'About us'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1307,7 +1315,7 @@ export default function ProfilePage() {
                       <Lock className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Account privacy
+                      {lang === 'ta' ? 'கணக்கு பாதுகாப்பு' : 'Account privacy'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1322,7 +1330,7 @@ export default function ProfilePage() {
                       <Bell className="w-4 h-4" />
                     </div>
                     <span className="text-[15px] font-medium text-slate-800 flex-1 ml-3.5 text-left">
-                      Notification preferences
+                      {lang === 'ta' ? 'அறிவிப்பு அமைப்புகள்' : 'Notification preferences'}
                     </span>
                     <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                   </button>
@@ -1338,7 +1346,7 @@ export default function ProfilePage() {
                         <LogOut className="w-4 h-4" />
                       </div>
                       <span className="text-[15px] font-medium text-rose-600 flex-1 ml-3.5 text-left">
-                        Log out
+                        {lang === 'ta' ? 'வெளியேறு' : 'Log out'}
                       </span>
                       <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                     </button>
@@ -1352,7 +1360,7 @@ export default function ProfilePage() {
                         <Check className="w-4 h-4" />
                       </div>
                       <span className="text-[15px] font-medium text-[#4CB01E] flex-1 ml-3.5 text-left">
-                        Log back in as Vishagan
+                        {lang === 'ta' ? 'விஷாகன் ஆக உள்நுழையவும்' : 'Log back in as Vishagan'}
                       </span>
                       <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
                     </button>

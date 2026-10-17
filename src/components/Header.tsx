@@ -78,8 +78,8 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar: Brand Store Icon, Location, Language Toggle & Profile (Scrolls away naturally) */}
-      <div className="bg-[#1E4D12] text-white relative z-40">
+      {/* Top Bar: Brand Store Icon, Location, Language Toggle & Profile (Apple Green #76CA3E) */}
+      <div className="bg-[#76CA3E] text-[#143B0D] relative z-40 border-b border-[#143B0D]/10">
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-2">
           <div className="flex items-center justify-between gap-2.5">
             {/* Left: Store Logo Badge + Clean Aligned Location Pill */}
@@ -92,34 +92,33 @@ export default function Header() {
                   dispatch({ type: 'SET_CATEGORY', category: 'all' });
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-white text-[#1E4D12] flex items-center justify-center shadow-md border-2 border-emerald-300/80 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none group relative overflow-hidden"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#143B0D] text-[#76CA3E] flex items-center justify-center shadow-md border-2 border-[#143B0D]/30 hover:scale-105 active:scale-95 transition-all shrink-0 focus:outline-none group relative overflow-hidden"
                 title={lang === 'ta' ? 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட் முகப்பு' : 'Sri Amman Supermarket'}
                 aria-label="Sri Amman Supermarket Home"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-emerald-50 opacity-90" />
-                <Store className="w-5 h-5 text-[#1E4D12] group-hover:text-[#4CB01E] relative z-10 transition-colors drop-shadow-2xs stroke-[2.2]" />
+                <Store className="w-5 h-5 text-[#76CA3E] group-hover:scale-110 relative z-10 transition-transform drop-shadow-2xs stroke-[2.2]" />
               </button>
 
               {/* Subtle vertical divider */}
-              <div className="h-6 w-px bg-white/20 shrink-0" />
+              <div className="h-6 w-px bg-[#143B0D]/20 shrink-0" />
 
               {/* Clean, perfectly aligned location pill with MapPin */}
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: true })}
-                className="flex items-center gap-2 bg-black/20 hover:bg-black/30 border border-white/20 px-2.5 py-1 rounded-xl text-left group min-w-0 transition-all active:scale-95"
+                className="flex items-center gap-2 bg-[#143B0D]/15 hover:bg-[#143B0D]/25 border border-[#143B0D]/20 px-2.5 py-1 rounded-xl text-left group min-w-0 transition-all active:scale-95"
                 title="Change delivery location"
               >
-                <MapPin className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#143B0D] shrink-0" />
                 <div className="flex flex-col leading-none min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="font-extrabold text-white text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[200px]">
+                    <span className="font-extrabold text-[#143B0D] text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[200px]">
                       {state.location.area || 'Madurai'}
                     </span>
-                    <ChevronDown className="w-2.5 h-2.5 text-white/70 group-hover:translate-y-0.5 transition-transform shrink-0" />
+                    <ChevronDown className="w-2.5 h-2.5 text-[#143B0D]/80 group-hover:translate-y-0.5 transition-transform shrink-0" />
                   </div>
-                  <span className="text-yellow-300/90 font-bold text-[9px] sm:text-[10px] whitespace-nowrap mt-0.5">
-                    20 {lang === 'ta' ? 'நிமிடம்' : 'mins'}
+                  <span className="text-[#143B0D] font-extrabold text-[9px] sm:text-[10px] whitespace-nowrap mt-0.5">
+                    {state.location.deliveryMins} {lang === 'ta' ? 'நிமிடம்' : 'mins'}
                   </span>
                 </div>
               </button>
@@ -131,11 +130,11 @@ export default function Header() {
               <button
                 type="button"
                 onClick={() => dispatch({ type: 'SET_LANG', lang: lang === 'en' ? 'ta' : 'en' })}
-                className="flex items-center gap-1.5 bg-black/25 hover:bg-black/35 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/30 text-[11px] sm:text-xs font-black text-white shadow-2xs transition-all active:scale-95"
+                className="flex items-center gap-1.5 bg-[#143B0D]/15 hover:bg-[#143B0D]/25 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-[#143B0D]/25 text-[11px] sm:text-xs font-black text-[#143B0D] shadow-2xs transition-all active:scale-95"
                 aria-label="Toggle Language"
               >
-                <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 shrink-0" />
-                <span className="font-bold">{lang === 'en' ? 'தமிழ்' : 'English'}</span>
+                <Languages className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#143B0D] shrink-0" />
+                <span className="font-extrabold">{lang === 'en' ? 'தமிழ்' : 'English'}</span>
               </button>
 
               {/* User Profile / Login Icon Button */}
@@ -148,23 +147,23 @@ export default function Header() {
                     setLoginOpen(true);
                   }
                 }}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-all shadow-2xs active:scale-95"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#143B0D]/15 hover:bg-[#143B0D]/25 border border-[#143B0D]/25 flex items-center justify-center text-[#143B0D] transition-all shadow-2xs active:scale-95"
                 aria-label="Account login and profile"
                 title="Account"
               >
-                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#143B0D]" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* STICKY SEARCH & CATEGORIES HEADER: Stays fixed on top as you scroll down with vibrant emerald blur and shadow */}
+      {/* STICKY SEARCH & CATEGORIES HEADER in Light Apple Green #76CA3E */}
       <header
-        className={`sticky top-0 z-50 text-white transition-all duration-300 ${
+        className={`sticky top-0 z-50 text-[#143B0D] transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#1E4D12]/95 backdrop-blur-xl shadow-xl'
-            : 'bg-[#1E4D12] shadow-md'
+            ? 'bg-[#76CA3E]/95 backdrop-blur-xl shadow-xl border-b border-[#143B0D]/15'
+            : 'bg-[#76CA3E] shadow-md border-b border-[#143B0D]/10'
         }`}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-2 pb-1.5">
@@ -180,7 +179,7 @@ export default function Header() {
                 }`}
               >
                 {/* Green Magnifying Glass Icon */}
-                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#4CB01E] shrink-0 mr-2 sm:mr-2.5" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[#76CA3E] shrink-0 mr-2 sm:mr-2.5" />
 
                 {/* Input with simple clean placeholder */}
                 <input
@@ -214,7 +213,7 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-                  className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#1E4D12] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-black transition-all shrink-0 border border-[#4CB01E]/30"
+                  className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#143B0D] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-black transition-all shrink-0 border border-[#76CA3E]/30"
                 >
                   <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-600 fill-current shrink-0" />
                   <span className="whitespace-nowrap hidden xs:inline">
@@ -288,7 +287,7 @@ export default function Header() {
                           dispatch({ type: 'ADD_TO_CART', productId: p.id, variantIndex: 0 });
                           showToast(t('addedToCart', lang));
                         }}
-                        className="bg-[#4CB01E] hover:bg-[#3D9415] text-white px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap shadow-xs flex items-center gap-1"
+                        className="bg-[#76CA3E] hover:bg-[#60B328] text-white px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap shadow-xs flex items-center gap-1"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>{lang === 'ta' ? 'சேர்' : 'ADD'}</span>
@@ -301,7 +300,7 @@ export default function Header() {
           </div>
 
           {/* Row 3: Blinkit-Style Horizontal Icon Category Strip with Lucide Icons (Seamless Edge-to-Edge) */}
-          <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-1 text-white -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 touch-pan-x cursor-grab active:cursor-grabbing select-none">
+          <div className="flex items-center gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-1 text-[#143B0D] -mx-3.5 sm:-mx-6 px-3.5 sm:px-6 touch-pan-x cursor-grab active:cursor-grabbing select-none">
             {quickTabs.map((tab) => {
               const TabIcon = tab.Icon;
               const isActive =
@@ -324,15 +323,12 @@ export default function Header() {
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all shrink-0 relative ${
                     isActive
-                      ? 'bg-white text-[#1E4D12] shadow-sm font-black'
-                      : 'bg-white/15 text-white/90 hover:bg-white/25'
+                      ? 'bg-[#143B0D] text-white shadow-md font-black'
+                      : 'bg-[#143B0D]/10 hover:bg-[#143B0D]/20 text-[#143B0D] font-bold'
                   }`}
                 >
                   <TabIcon className="w-3.5 h-3.5 shrink-0" />
                   <span>{lang === 'ta' ? tab.labelTa : tab.labelEn}</span>
-                  {isActive && (
-                    <div className="absolute -bottom-1 left-3 right-3 h-0.5 bg-yellow-300 rounded-full" />
-                  )}
                 </button>
               );
             })}
@@ -407,7 +403,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#F1F9EC] flex items-center justify-center text-[#4CB01E]">
+            <div className="w-8 h-8 rounded-xl bg-[#F1F9EC] flex items-center justify-center text-[#76CA3E]">
               <User className="w-4 h-4" />
             </div>
             <h3 className="font-extrabold text-lg text-slate-900">
@@ -448,7 +444,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
               <label className="text-xs font-bold text-slate-700 block mb-1">
                 {lang === 'ta' ? 'மொபைல் எண்' : 'Phone Number'}
               </label>
-              <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#4CB01E]">
+              <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#76CA3E]">
                 <span className="bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-600 border-r border-slate-200">
                   +91
                 </span>
@@ -466,7 +462,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
             <button
               disabled={phone.length < 10}
               onClick={handleSendOtp}
-              className="w-full bg-[#4CB01E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl transition-all shadow-sm active:scale-98"
+              className="w-full bg-[#76CA3E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl transition-all shadow-sm active:scale-98"
             >
               {lang === 'ta' ? 'OTP அனுப்பவும்' : 'Continue'}
             </button>
@@ -485,14 +481,14 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                 placeholder="4829"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="w-full text-center tracking-widest text-lg font-bold border border-slate-200 rounded-xl py-2.5 outline-none focus:border-[#4CB01E]"
+                className="w-full text-center tracking-widest text-lg font-bold border border-slate-200 rounded-xl py-2.5 outline-none focus:border-[#76CA3E]"
               />
             </div>
 
             <button
               disabled={otp.length === 0}
               onClick={handleVerifyOtp}
-              className="w-full bg-[#4CB01E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
+              className="w-full bg-[#76CA3E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
             >
               {lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}
             </button>
@@ -510,7 +506,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                 placeholder="Vishagan"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#4CB01E]"
+                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#76CA3E]"
               />
             </div>
 
@@ -523,13 +519,13 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                 max={new Date().toISOString().split('T')[0]}
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
-                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#4CB01E] bg-white text-slate-800 cursor-pointer"
+                className="w-full px-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl outline-none focus:border-[#76CA3E] bg-white text-slate-800 cursor-pointer"
               />
             </div>
 
             <button
               onClick={handleCompleteLogin}
-              className="w-full bg-[#4CB01E] text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
+              className="w-full bg-[#76CA3E] text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
             >
               {lang === 'ta' ? 'உள்நுழையவும்' : 'Complete & Log In'}
             </button>

@@ -51,6 +51,8 @@ type StoreState = {
   sortBy: string;
   location: UserLocation;
   locationModalOpen: boolean;
+  appliedCoupon: string | null;
+  couponDiscount: number;
 };
 
 type StoreAction =
@@ -59,6 +61,8 @@ type StoreAction =
   | { type: 'REMOVE_FROM_CART'; productId: string; variantIndex: number }
   | { type: 'UPDATE_QUANTITY'; productId: string; variantIndex: number; quantity: number }
   | { type: 'CLEAR_CART' }
+  | { type: 'APPLY_COUPON'; code: string; discount: number }
+  | { type: 'REMOVE_COUPON' }
   | { type: 'SET_CART_OPEN'; open: boolean }
   | { type: 'TOGGLE_WISHLIST'; productId: string }
   | { type: 'CLEAR_WISHLIST' }
@@ -83,7 +87,7 @@ const defaultLocation: UserLocation = {
   pincode: '625020',
   landmark: 'Near Meenakshi Temple',
   distanceKm: 1.8,
-  deliveryMins: 25,
+  deliveryMins: 20,
 };
 
 const initialState: StoreState = {
@@ -104,6 +108,8 @@ const initialState: StoreState = {
   sortBy: 'popularity',
   location: defaultLocation,
   locationModalOpen: false,
+  appliedCoupon: null,
+  couponDiscount: 0,
 };
 
 function reducer(state: StoreState, action: StoreAction): StoreState {
@@ -159,7 +165,13 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
     }
 
     case 'CLEAR_CART':
-      return { ...state, cart: [] };
+      return { ...state, cart: [], appliedCoupon: null, couponDiscount: 0 };
+
+    case 'APPLY_COUPON':
+      return { ...state, appliedCoupon: action.code, couponDiscount: action.discount };
+
+    case 'REMOVE_COUPON':
+      return { ...state, appliedCoupon: null, couponDiscount: 0 };
 
     case 'SET_CART_OPEN':
       return { ...state, cartOpen: action.open };
@@ -353,7 +365,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const getDeliveryFee = useCallback(() => (state.cart.length === 0 || getCartSubtotal() >= 499 ? 0 : 30), [state.cart.length, getCartSubtotal]);
 
-  const getCartTotal = useCallback(() => (state.cart.length === 0 ? 0 : getCartSubtotal() + getDeliveryFee()), [state.cart.length, getCartSubtotal, getDeliveryFee]);
+  const getCartTotal = useCallback(() => {
+    if (state.cart.length === 0) return 0;
+    const rawTotal = getCartSubtotal() + getDeliveryFee();
+    return Math.max(0, rawTotal - state.couponDiscount);
+  }, [state.cart.length, getCartSubtotal, getDeliveryFee, state.couponDiscount]);
 
   const getItemQuantity = useCallback(
     (productId: string, variantIndex: number) => {
@@ -382,7 +398,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       if (exists) {
         showToast(state.lang === 'ta' ? `${name} விருப்பப்பட்டியலில் இருந்து நீக்கப்பட்டது` : `${name} removed from wishlist`);
       } else {
-        showToast(state.lang === 'ta' ? `❤️ ${name} விருப்பப்பட்டியலில் சேர்க்கப்பட்டது` : `❤️ ${name} added to wishlist`);
+        showToast(state.lang === 'ta' ? `${name} விருப்பப்பட்டியலில் சேர்க்கப்பட்டது` : `${name} added to wishlist`);
       }
     },
     [state.wishlist, state.lang, showToast]

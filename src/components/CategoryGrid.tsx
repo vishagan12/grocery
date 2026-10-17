@@ -58,9 +58,9 @@ export default function CategoryGrid() {
         },
         {
           id: 'dals-pulses',
-          nameEn: 'Sweets & Chocolates',
-          nameTa: 'இனிப்புகள் & மிட்டாய்',
-          image: 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=300&q=80',
+          nameEn: 'Dals, Pulses & Spices',
+          nameTa: 'பருப்பு & மசாலா',
+          image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80',
         },
         {
           id: 'beverages',
@@ -95,7 +95,7 @@ export default function CategoryGrid() {
                     dispatch({ type: 'SET_CATEGORY', category: 'all' });
                     dispatch({ type: 'SET_PAGE', page: 'products' });
                   }}
-                  className="text-xs sm:text-sm font-black text-[#4CB01E] hover:text-[#3D9415] transition-colors flex items-center gap-1"
+                  className="text-xs sm:text-sm font-black text-[#76CA3E] hover:text-[#60B328] transition-colors flex items-center gap-1"
                 >
                   <span>{lang === 'ta' ? 'அனைத்தும்' : 'See all'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -118,8 +118,8 @@ export default function CategoryGrid() {
                     <div
                       className={`w-full aspect-square rounded-2xl overflow-hidden mb-1.5 transition-all flex items-center justify-center ${
                         isSelected
-                          ? 'ring-2 ring-[#4CB01E] border-2 border-[#4CB01E]'
-                          : 'border border-slate-200/90 hover:border-[#4CB01E]'
+                          ? 'ring-2 ring-[#76CA3E] border-2 border-[#76CA3E]'
+                          : 'border border-slate-200/90 hover:border-[#76CA3E]'
                       } shadow-2xs hover:shadow-xs bg-slate-100`}
                     >
                       <img

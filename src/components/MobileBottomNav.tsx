@@ -64,7 +64,7 @@ export default function MobileBottomNav() {
             {/* Mini Lime Progress Bar */}
             <div className="w-full bg-slate-700/80 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-[#4CB01E] h-full rounded-full transition-all duration-300"
+                className="bg-[#76CA3E] h-full rounded-full transition-all duration-300"
                 style={{ width: `${freeDeliveryProgress}%` }}
               />
             </div>
@@ -75,7 +75,7 @@ export default function MobileBottomNav() {
         {cartCount > 0 && (
           <div
             onClick={() => dispatch({ type: 'SET_CART_OPEN', open: true })}
-            className="mx-2 sm:mx-3 mb-2 bg-[#4CB01E] hover:bg-[#3D9415] text-white rounded-2xl p-2.5 sm:p-3 shadow-2xl flex items-center justify-between border border-white/25 cursor-pointer transition-all active:scale-[0.99] select-none gap-2"
+            className="mx-2 sm:mx-3 mb-2 bg-[#76CA3E] hover:bg-[#60B328] text-white rounded-2xl p-2.5 sm:p-3 shadow-2xl flex items-center justify-between border border-white/25 cursor-pointer transition-all active:scale-[0.99] select-none gap-2"
           >
             {/* Left: Overlapping circular thumbnails + item count & subtotal */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -112,7 +112,7 @@ export default function MobileBottomNav() {
             </div>
 
             {/* Right: Bold View Cart CTA with Lucide Arrow */}
-            <div className="flex items-center gap-1 sm:gap-1.5 bg-white text-[#1E4D12] font-black text-xs sm:text-sm px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-md shrink-0 whitespace-nowrap">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-white text-[#143B0D] font-black text-xs sm:text-sm px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-md shrink-0 whitespace-nowrap">
               <span>{lang === 'ta' ? 'கூடை பார்க்க' : 'View Cart'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -138,12 +138,12 @@ export default function MobileBottomNav() {
                 }
               }}
               className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition-all relative ${
-                isActive ? 'text-[#1E4D12] font-extrabold' : 'text-slate-500 hover:text-slate-900'
+                isActive ? 'text-[#143B0D] font-extrabold' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <div
                 className={`p-1.5 rounded-xl transition-colors ${
-                  isActive ? 'bg-[#F1F9EC] text-[#4CB01E]' : ''
+                  isActive ? 'bg-[#F1F9EC] text-[#76CA3E]' : ''
                 }`}
               >
                 <NavIcon className="w-5 h-5" />
@@ -152,7 +152,7 @@ export default function MobileBottomNav() {
                 {item.label}
               </span>
               {isActive && (
-                <div className="w-1.5 h-1.5 rounded-full bg-[#4CB01E] mt-1 shadow-2xs" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#76CA3E] mt-1 shadow-2xs" />
               )}
             </button>
           );

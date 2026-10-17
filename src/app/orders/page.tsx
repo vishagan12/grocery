@@ -2,8 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
-import AppShell from '@/components/AppShell';
-import OrdersPage from '@/components/OrdersPage';
+import Home from '@/app/page';
 
 export default function OrdersRoute() {
   const { dispatch } = useStore();
@@ -12,9 +11,5 @@ export default function OrdersRoute() {
     dispatch({ type: 'SET_PAGE', page: 'orders' });
   }, [dispatch]);
 
-  return (
-    <AppShell>
-      <OrdersPage />
-    </AppShell>
-  );
+  return <Home />;
 }

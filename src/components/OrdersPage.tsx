@@ -47,8 +47,8 @@ export default function OrdersPage() {
         <h2 className="text-xl font-bold text-brand-slate mb-1">{t('noOrdersYet', lang)}</h2>
         <p className="text-sm text-brand-slate/60 mb-5 max-w-sm">
           {lang === 'ta'
-            ? 'உங்கள் அன்றாட மளிகைப் பொருட்களை உடனடியாக ஆர்டர் செய்து 30 நிமிடத்தில் பெறுங்கள்!'
-            : 'Order fresh provisions from our store and get them delivered to your doorstep in 30 minutes!'}
+            ? 'உங்கள் அன்றாட மளிகைப் பொருட்களை உடனடியாக ஆர்டர் செய்து 20 நிமிடத்தில் பெறுங்கள்!'
+            : 'Order fresh provisions from our store and get them delivered to your doorstep in 20 minutes!'}
         </p>
         <button
           type="button"
@@ -145,7 +145,7 @@ export default function OrdersPage() {
                 <p className="text-[10px] text-white/80 font-bold uppercase tracking-wider">
                   {lang === 'ta' ? 'எதிர்பார்க்கப்படும் நேரம்' : 'Estimated Arrival'}
                 </p>
-                <p className="text-xl font-black text-amber-300">~25 Mins</p>
+                <p className="text-xl font-black text-amber-300">~{state.location.deliveryMins || 20} Mins</p>
               </div>
             </div>
 
