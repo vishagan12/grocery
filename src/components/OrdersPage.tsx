@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
 import { products } from '@/data/products';
+import { supabase } from '@/lib/supabase';
 import {
   IconCheckCircle,
   IconPackage,
@@ -61,7 +62,8 @@ export default function OrdersPage() {
     );
   }
 
-  const handleAdvanceStatus = () => {
+  const handleAdvanceStatus = async () => {
+    const nextStatus = activeOrder.status >= 4 ? 0 : activeOrder.status + 1;
     if (activeOrder.status >= 4) {
       dispatch({
         type: 'LOAD_STATE',
@@ -71,6 +73,11 @@ export default function OrdersPage() {
       });
     } else {
       dispatch({ type: 'ADVANCE_ORDER', orderId: activeOrder.id });
+    }
+    try {
+      await supabase.from('orders').update({ status: nextStatus }).eq('id', activeOrder.id);
+    } catch {
+      // offline / mock fallback
     }
   };
 

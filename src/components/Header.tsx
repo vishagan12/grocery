@@ -3,7 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
-import { products, categories } from '@/data/products';
+import { products, categories, Product } from '@/data/products';
+import { searchCatalogFast } from '@/lib/searchProducts';
 import {
   Zap,
   Search,
@@ -33,17 +34,34 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const queryTrimmed = state.searchQuery.trim().toLowerCase();
-  const filteredSearch =
-    queryTrimmed.length >= 2
-      ? products
-          .filter(
-            (p) =>
-              p.nameEn.toLowerCase().includes(queryTrimmed) ||
-              p.nameTa.includes(state.searchQuery.trim())
-          )
-          .slice(0, 6)
-      : [];
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const queryTrimmed = state.searchQuery.trim();
+
+  useEffect(() => {
+    if (queryTrimmed.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    let isMounted = true;
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchCatalogFast(queryTrimmed, 6);
+        if (isMounted) {
+          setSuggestions(results);
+        }
+      } catch {
+        if (isMounted) {
+          setSuggestions([]);
+        }
+      }
+    }, 150);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [queryTrimmed]);
 
   useEffect(() => {
     function handleScroll() {
@@ -249,10 +267,11 @@ export default function Header() {
             </div>
 
             {/* Search Autocomplete Dropdown */}
-            {searchFocused && filteredSearch.length > 0 && (
+            {searchFocused && suggestions.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-fade-in text-slate-900">
-                {filteredSearch.map((p) => {
+                {suggestions.map((p) => {
                   const cat = categories.find((c) => c.id === p.category);
+                  const firstVariant = p.variants?.[0] || { price: 0, label: '1 pack' };
                   return (
                     <div
                       key={p.id}
@@ -277,7 +296,7 @@ export default function Header() {
                           {lang === 'ta' ? p.nameTa : p.nameEn}
                         </p>
                         <p className="text-xs text-slate-500 font-medium">
-                          ₹{p.variants[0].price} — {p.variants[0].label}
+                          ₹{firstVariant.price} — {firstVariant.label}
                         </p>
                       </div>
                       <button

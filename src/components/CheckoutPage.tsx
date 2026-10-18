@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
 import { products } from '@/data/products';
+import { supabase } from '@/lib/supabase';
 import {
   IconCart,
   IconCheck,
@@ -105,7 +106,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!savedProfileAddress && (!houseNo.trim() || !street.trim() || !pincode.trim())) {
       showToast(lang === 'ta' ? 'தயவுசெய்து முழு முகவரியை உள்ளிடவும்' : 'Please complete your delivery address');
       return;
@@ -129,6 +130,42 @@ export default function CheckoutPage() {
       status: 0,
       timestamp: Date.now(),
     };
+
+    // Save order & items to Supabase PostgreSQL database
+    try {
+      await supabase.from('orders').insert({
+        id: order.id,
+        phone,
+        address: fullAddressString,
+        subtotal: getCartSubtotal(),
+        discount: getCartDiscount() + (state.couponDiscount || 0),
+        delivery_fee: getDeliveryFee(),
+        total: getCartTotal(),
+        payment_method: paymentMethod,
+        payment_status: paymentMethod === 'upi' ? 'paid' : 'pending',
+        status: 0,
+        delivery_slot: deliverySlot || 'express',
+      });
+
+      const orderItemsPayload = state.cart.map((item) => {
+        const product = (state.catalog || products).find((p) => p.id === item.productId) || products.find((p) => p.id === item.productId);
+        const variant = product?.variants[item.variantIndex];
+        return {
+          order_id: order.id,
+          product_id: item.productId,
+          variant_label: variant?.label || '1 pack',
+          price: variant?.price || 0,
+          quantity: item.quantity,
+        };
+      });
+
+      if (orderItemsPayload.length > 0) {
+        await supabase.from('order_items').insert(orderItemsPayload);
+      }
+    } catch (err) {
+      console.warn('Supabase order insert failed, proceeding with local order:', err);
+    }
+
     dispatch({ type: 'ADD_ORDER', order });
     dispatch({ type: 'CLEAR_CART' });
     dispatch({ type: 'SET_PAGE', page: 'orders' });

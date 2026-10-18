@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
 import { products, Product } from '@/data/products';
 import { Lang } from '@/data/translations';
+import { supabase } from '@/lib/supabase';
 
 export type CartItem = {
   productId: string;
@@ -35,6 +36,7 @@ export type UserLocation = {
 
 type StoreState = {
   lang: Lang;
+  catalog: Product[];
   cart: CartItem[];
   wishlist: string[]; // product IDs in wishlist
   orders: Order[];
@@ -79,6 +81,8 @@ type StoreAction =
   | { type: 'SET_SORT'; sort: string }
   | { type: 'SET_LOCATION'; location: UserLocation }
   | { type: 'SET_LOCATION_MODAL'; open: boolean }
+  | { type: 'SET_CATALOG'; products: Product[] }
+  | { type: 'UPDATE_ORDER_STATUS_LIVE'; orderId: string; status: number }
   | { type: 'LOAD_STATE'; state: Partial<StoreState> };
 
 const defaultLocation: UserLocation = {
@@ -92,6 +96,7 @@ const defaultLocation: UserLocation = {
 
 const initialState: StoreState = {
   lang: 'en',
+  catalog: products,
   cart: [],
   wishlist: [],
   orders: [],
@@ -235,6 +240,17 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
         ),
       };
 
+    case 'SET_CATALOG':
+      return { ...state, catalog: action.products };
+
+    case 'UPDATE_ORDER_STATUS_LIVE':
+      return {
+        ...state,
+        orders: state.orders.map((o) =>
+          o.id === action.orderId ? { ...o, status: action.status } : o
+        ),
+      };
+
     case 'SET_SORT':
       return { ...state, sortBy: action.sort };
 
@@ -337,29 +353,96 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.lang]);
 
-  const getProduct = useCallback((id: string) => products.find((p) => p.id === id), []);
+  // Live Supabase Catalog & Real-Time Orders Sync
+  useEffect(() => {
+    let isSubscribed = true;
+
+    async function fetchLiveCatalog() {
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*, product_variants(label, price, mrp, stock_qty)');
+
+        if (!error && data && data.length > 0 && isSubscribed) {
+          const liveProducts: Product[] = data.map((row: any) => ({
+            id: row.id,
+            nameEn: row.name_en,
+            nameTa: row.name_ta,
+            category: row.category_id,
+            image: row.image,
+            inStock: Boolean(row.in_stock),
+            badge: row.badge || undefined,
+            badgeTa: row.badge_ta || undefined,
+            variants:
+              Array.isArray(row.product_variants) && row.product_variants.length > 0
+                ? row.product_variants.map((v: any) => ({
+                    label: v.label,
+                    price: Number(v.price),
+                    mrp: Number(v.mrp),
+                    stock_qty: typeof v.stock_qty === 'number' ? v.stock_qty : undefined,
+                  }))
+                : Array.isArray(row.variants) && row.variants.length > 0
+                ? row.variants
+                : [{ label: '1 pack', price: 50, mrp: 60 }],
+          }));
+          dispatch({ type: 'SET_CATALOG', products: liveProducts });
+        }
+      } catch {
+        // Fallback gracefully to default local products
+      }
+    }
+
+    fetchLiveCatalog();
+
+    const channel = supabase
+      .channel('live-orders')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (payload.new && payload.new.id && typeof payload.new.status === 'number') {
+            dispatch({
+              type: 'UPDATE_ORDER_STATUS_LIVE',
+              orderId: payload.new.id,
+              status: payload.new.status,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isSubscribed = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const getProduct = useCallback(
+    (id: string) => (state.catalog || products).find((p) => p.id === id) || products.find((p) => p.id === id),
+    [state.catalog]
+  );
 
   const getCartItemCount = useCallback(() => state.cart.reduce((sum, i) => sum + i.quantity, 0), [state.cart]);
 
   const getCartSubtotal = useCallback(() => {
     return state.cart.reduce((sum, item) => {
-      const product = products.find((p) => p.id === item.productId);
+      const product = (state.catalog || products).find((p) => p.id === item.productId) || products.find((p) => p.id === item.productId);
       if (!product) return sum;
       const variant = product.variants[item.variantIndex];
       if (!variant) return sum;
       return sum + variant.price * item.quantity;
     }, 0);
-  }, [state.cart]);
+  }, [state.cart, state.catalog]);
 
   const getCartMrpTotal = useCallback(() => {
     return state.cart.reduce((sum, item) => {
-      const product = products.find((p) => p.id === item.productId);
+      const product = (state.catalog || products).find((p) => p.id === item.productId) || products.find((p) => p.id === item.productId);
       if (!product) return sum;
       const variant = product.variants[item.variantIndex];
       if (!variant) return sum;
       return sum + variant.mrp * item.quantity;
     }, 0);
-  }, [state.cart]);
+  }, [state.cart, state.catalog]);
 
   const getCartDiscount = useCallback(() => getCartMrpTotal() - getCartSubtotal(), [getCartMrpTotal, getCartSubtotal]);
 
