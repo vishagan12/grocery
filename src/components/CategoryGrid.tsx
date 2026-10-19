@@ -130,8 +130,8 @@ export default function CategoryGrid() {
                       />
                     </div>
 
-                    {/* Category Label (2 lines max, no hidden text, centered) */}
-                    <p className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight text-center break-words w-full px-0.5 line-clamp-2">
+                    {/* Category Label (Full text visible, no ellipsis, centered) */}
+                    <p className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight text-center break-words w-full px-0.5">
                       {lang === 'ta' ? cat.nameTa : cat.nameEn}
                     </p>
                   </div>

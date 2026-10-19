@@ -66,28 +66,7 @@ export default function ProfilePage() {
   const [dob, setDob] = useState(state.userDob || '12 Dec 2006');
 
   // Address Book state
-  const [addresses, setAddresses] = useState([
-    {
-      id: 'addr-1',
-      tag: 'Home',
-      house: '12/B, Sri Meenakshi Residency',
-      street: 'K.K. Nagar Main Road',
-      city: 'Madurai',
-      pincode: '625020',
-      landmark: 'Near Meenakshi Temple',
-      isDefault: true,
-    },
-    {
-      id: 'addr-2',
-      tag: 'Work',
-      house: 'Plot 45, Anna Nagar East',
-      street: '80 Feet Road',
-      city: 'Madurai',
-      pincode: '625020',
-      landmark: 'Opposite State Bank',
-      isDefault: false,
-    },
-  ]);
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [newAddrTag, setNewAddrTag] = useState('Home');
   const [newAddrHouse, setNewAddrHouse] = useState('');
   const [newAddrStreet, setNewAddrStreet] = useState('');
@@ -289,8 +268,8 @@ export default function ProfilePage() {
   const wishlistedItems = products.filter((p) => state.wishlist.includes(p.id));
 
   return (
-    <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-      <div className="w-full max-w-xl mx-auto min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 pb-28 pt-2">
+      <div className="w-full max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200/80 flex flex-col overflow-hidden my-2 sm:my-4">
         {/* A. Top Sticky Bar */}
         <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3.5 flex items-center justify-between">
           <button
@@ -570,7 +549,7 @@ export default function ProfilePage() {
                         {order.items.length} items • ₹{order.total} •{' '}
                         {order.paymentMethod.toUpperCase()}
                       </p>
-                      <p className="text-[11px] text-slate-400 truncate">{order.address}</p>
+                      <p className="text-[11px] text-slate-400 break-words">{order.address}</p>
                       <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                         <button
                           type="button"
@@ -649,8 +628,8 @@ export default function ProfilePage() {
                           alt={prod.nameEn}
                           className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-100 p-1"
                         />
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-900 break-words">
                             {lang === 'ta' ? prod.nameTa : prod.nameEn}
                           </p>
                           <p className="text-xs text-slate-500 font-semibold mt-0.5">

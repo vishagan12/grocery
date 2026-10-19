@@ -11,7 +11,7 @@ export default function Footer() {
   const lang = state.lang;
 
   return (
-    <footer className="bg-brand-deep text-white py-10 md:py-14 pb-24 md:pb-12 border-t border-emerald-950">
+    <footer className="bg-brand-deep text-white py-10 md:py-14 pb-28 md:pb-24 border-t border-emerald-950">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8">
           {/* Brand */}
@@ -61,7 +61,7 @@ export default function Footer() {
                 }}
                 className="hover:text-white transition-colors"
               >
-                {t('monthlyList', lang)}
+                {lang === 'ta' ? 'மீண்டும் ஆர்டர்' : 'Order Again'}
               </button>
               <button
                 type="button"

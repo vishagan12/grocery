@@ -4,6 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect, useState, useC
 import { products, Product } from '@/data/products';
 import { Lang } from '@/data/translations';
 import { supabase } from '@/lib/supabase';
+import { DEFAULT_SHOP_COORDS, SHOP_MAPS_URL } from '@/lib/geofence';
 
 export type CartItem = {
   productId: string;
@@ -32,7 +33,25 @@ export type UserLocation = {
   landmark: string;
   distanceKm: number;
   deliveryMins: number;
+  lat?: number;
+  lng?: number;
 };
+
+export interface SavedAddress {
+  id: string;
+  tag: 'Home' | 'Work' | 'Other';
+  customLabel?: string; // Used when tag === 'Other' (e.g., "Mom's House", "Shop")
+  houseNo: string;      // Door / Flat No. / Building Name
+  street: string;       // Street / Road Name
+  area: string;         // Locality / Area
+  landmark?: string;
+  city: string;         // 'Madurai'
+  pincode: string;      // 6-digit pincode
+  lat: number;
+  lng: number;
+  distanceKm: number;
+  isDefault: boolean;
+}
 
 type StoreState = {
   lang: Lang;
@@ -55,6 +74,9 @@ type StoreState = {
   locationModalOpen: boolean;
   appliedCoupon: string | null;
   couponDiscount: number;
+  savedAddresses: SavedAddress[];
+  selectedAddressId: string | null;
+  shopCoords: { lat: number; lng: number; shopUrl: string };
 };
 
 type StoreAction =
@@ -77,20 +99,26 @@ type StoreAction =
   | { type: 'HIDE_TOAST' }
   | { type: 'SET_PRODUCT_DETAIL'; id: string | null }
   | { type: 'ADD_ORDER'; order: Order }
+  | { type: 'PLACE_ORDER'; order: Order }
   | { type: 'ADVANCE_ORDER'; orderId: string }
   | { type: 'SET_SORT'; sort: string }
   | { type: 'SET_LOCATION'; location: UserLocation }
   | { type: 'SET_LOCATION_MODAL'; open: boolean }
   | { type: 'SET_CATALOG'; products: Product[] }
   | { type: 'UPDATE_ORDER_STATUS_LIVE'; orderId: string; status: number }
+  | { type: 'SET_ADDRESSES'; addresses: SavedAddress[]; selectedId?: string | null }
+  | { type: 'ADD_ADDRESS'; address: SavedAddress }
+  | { type: 'SELECT_ADDRESS'; id: string }
+  | { type: 'DELETE_ADDRESS'; id: string }
+  | { type: 'SET_SHOP_COORDS'; coords: { lat: number; lng: number; shopUrl: string } }
   | { type: 'LOAD_STATE'; state: Partial<StoreState> };
 
 const defaultLocation: UserLocation = {
-  area: 'K.K. Nagar',
+  area: '',
   city: 'Madurai',
-  pincode: '625020',
-  landmark: 'Near Meenakshi Temple',
-  distanceKm: 1.8,
+  pincode: '',
+  landmark: '',
+  distanceKm: 0,
   deliveryMins: 20,
 };
 
@@ -115,6 +143,9 @@ const initialState: StoreState = {
   locationModalOpen: false,
   appliedCoupon: null,
   couponDiscount: 0,
+  savedAddresses: [],
+  selectedAddressId: null,
+  shopCoords: { ...DEFAULT_SHOP_COORDS, shopUrl: SHOP_MAPS_URL },
 };
 
 function reducer(state: StoreState, action: StoreAction): StoreState {
@@ -218,6 +249,8 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
         isLoggedIn: false,
         loginPhone: '',
         userName: '',
+        savedAddresses: [],
+        selectedAddressId: null,
       };
 
     case 'SHOW_TOAST':
@@ -230,6 +263,7 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
       return { ...state, productDetailId: action.id };
 
     case 'ADD_ORDER':
+    case 'PLACE_ORDER':
       return { ...state, orders: [action.order, ...state.orders] };
 
     case 'ADVANCE_ORDER':
@@ -260,6 +294,68 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
     case 'SET_LOCATION_MODAL':
       return { ...state, locationModalOpen: action.open };
 
+    case 'SET_ADDRESSES': {
+      const selectedId =
+        action.selectedId !== undefined
+          ? action.selectedId
+          : action.addresses.find((a) => a.isDefault && a.distanceKm <= 3.0)?.id ||
+            action.addresses.find((a) => a.distanceKm <= 3.0)?.id ||
+            action.addresses[0]?.id ||
+            null;
+      return {
+        ...state,
+        savedAddresses: action.addresses,
+        selectedAddressId: selectedId,
+      };
+    }
+
+    case 'ADD_ADDRESS': {
+      const updated = [action.address, ...state.savedAddresses.filter((a) => a.id !== action.address.id)];
+      if (action.address.isDefault) {
+        updated.forEach((a) => {
+          if (a.id !== action.address.id) a.isDefault = false;
+        });
+      }
+      return {
+        ...state,
+        savedAddresses: updated,
+        selectedAddressId: action.address.id,
+      };
+    }
+
+    case 'SELECT_ADDRESS': {
+      const chosen = state.savedAddresses.find((a) => a.id === action.id);
+      return {
+        ...state,
+        selectedAddressId: action.id,
+        location: chosen
+          ? {
+              area: chosen.area || chosen.street,
+              city: chosen.city || 'Madurai',
+              pincode: chosen.pincode,
+              landmark: chosen.landmark || '',
+              distanceKm: chosen.distanceKm,
+              deliveryMins: Math.min(30, Math.max(15, Math.round(chosen.distanceKm * 7))),
+              lat: chosen.lat,
+              lng: chosen.lng,
+            }
+          : state.location,
+      };
+    }
+
+    case 'DELETE_ADDRESS': {
+      const remaining = state.savedAddresses.filter((a) => a.id !== action.id);
+      const newSelected = state.selectedAddressId === action.id ? remaining[0]?.id || null : state.selectedAddressId;
+      return {
+        ...state,
+        savedAddresses: remaining,
+        selectedAddressId: newSelected,
+      };
+    }
+
+    case 'SET_SHOP_COORDS':
+      return { ...state, shopCoords: action.coords };
+
     case 'LOAD_STATE':
       return { ...state, ...action.state };
 
@@ -282,6 +378,9 @@ type StoreContextType = {
   isWishlisted: (productId: string) => boolean;
   toggleWishlist: (productId: string) => void;
   showToast: (msg: string) => void;
+  saveAddress: (addr: Omit<SavedAddress, 'id'>) => Promise<SavedAddress>;
+  deleteAddress: (id: string) => Promise<void>;
+  selectAddress: (id: string) => void;
 };
 
 const StoreContext = createContext<StoreContextType | null>(null);
@@ -290,13 +389,32 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [mounted, setMounted] = useState(false);
 
+  // Load shop coordinates from dynamic resolver
+  useEffect(() => {
+    fetch('/api/resolve-shop')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && typeof data.lat === 'number' && typeof data.lng === 'number') {
+          dispatch({
+            type: 'SET_SHOP_COORDS',
+            coords: {
+              lat: data.lat,
+              lng: data.lng,
+              shopUrl: data.shopUrl || SHOP_MAPS_URL,
+            },
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Initial local state restoration
   useEffect(() => {
     setMounted(true);
     try {
       const saved = localStorage.getItem('sriAmmanStore');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Clear out legacy mock default wishlist if it contains the old mock 3 items
         let initialWishlist: string[] = Array.isArray(parsed.wishlist) ? parsed.wishlist : [];
         const isLegacyMock =
           initialWishlist.length === 3 &&
@@ -307,6 +425,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           initialWishlist = [];
         }
 
+        // Clean out legacy mock default location if it has the old hardcoded 1.8km mock
+        const parsedLoc = parsed.location;
+        const isLegacyLoc = parsedLoc && parsedLoc.area === 'K.K. Nagar' && parsedLoc.distanceKm === 1.8;
+
         dispatch({
           type: 'LOAD_STATE',
           state: {
@@ -314,11 +436,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             wishlist: initialWishlist,
             orders: parsed.orders || [],
             lang: parsed.lang || 'en',
-            isLoggedIn: false, // User requested: everytime I refresh I must logout and login again, it shouldn't show logged in the moment I open it
+            isLoggedIn: false,
             loginPhone: parsed.loginPhone || '',
             userName: parsed.userName || 'Vishagan',
             userDob: parsed.userDob || '12 Dec 2006',
-            location: parsed.location || defaultLocation,
+            location: isLegacyLoc ? defaultLocation : parsed.location || defaultLocation,
           },
         });
       }
@@ -327,20 +449,95 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Sync addresses whenever loginPhone changes or on initial mount
+  useEffect(() => {
+    const currentPhone = state.loginPhone || 'guest';
+    let loadedAddresses: SavedAddress[] = [];
+
+    try {
+      const local = localStorage.getItem(`sas_addresses_${currentPhone}`);
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) {
+          loadedAddresses = parsed;
+        }
+      }
+    } catch {}
+
+    // Also fetch from Supabase if phone is set
+    async function fetchSupabaseAddresses() {
+      if (!state.loginPhone) {
+        if (loadedAddresses.length > 0) {
+          dispatch({ type: 'SET_ADDRESSES', addresses: loadedAddresses });
+        }
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('addresses')
+          .select('*')
+          .eq('phone', state.loginPhone);
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const supaList: SavedAddress[] = data.map((row: any) => ({
+            id: String(row.id),
+            tag: row.tag || 'Home',
+            customLabel: row.custom_label || undefined,
+            houseNo: row.house_no || '',
+            street: row.street || '',
+            area: row.area || '',
+            landmark: row.landmark || undefined,
+            city: row.city || 'Madurai',
+            pincode: row.pincode || '',
+            lat: Number(row.lat) || 0,
+            lng: Number(row.lng) || 0,
+            distanceKm: Number(row.distance_km) || 0,
+            isDefault: Boolean(row.is_default),
+          }));
+
+          const mergedMap = new Map<string, SavedAddress>();
+          [...supaList, ...loadedAddresses].forEach((a) => {
+            const key = `${a.houseNo.toLowerCase().trim()}_${a.street.toLowerCase().trim()}`;
+            if (!mergedMap.has(key)) {
+              mergedMap.set(key, a);
+            }
+          });
+          const merged = Array.from(mergedMap.values());
+          dispatch({ type: 'SET_ADDRESSES', addresses: merged });
+          localStorage.setItem(`sas_addresses_${currentPhone}`, JSON.stringify(merged));
+          return;
+        }
+      } catch (err) {
+        // Fallback to local
+      }
+
+      if (loadedAddresses.length > 0) {
+        dispatch({ type: 'SET_ADDRESSES', addresses: loadedAddresses });
+      }
+    }
+
+    fetchSupabaseAddresses();
+  }, [state.loginPhone]);
+
+  // Persist store state to localStorage
   useEffect(() => {
     if (!mounted) return;
     try {
-      localStorage.setItem('sriAmmanStore', JSON.stringify({
-        cart: state.cart,
-        wishlist: state.wishlist,
-        orders: state.orders,
-        lang: state.lang,
-        isLoggedIn: state.isLoggedIn,
-        loginPhone: state.loginPhone,
-        userName: state.userName,
-        userDob: state.userDob,
-        location: state.location,
-      }));
+      localStorage.setItem(
+        'sriAmmanStore',
+        JSON.stringify({
+          cart: state.cart,
+          wishlist: state.wishlist,
+          orders: state.orders,
+          lang: state.lang,
+          isLoggedIn: state.isLoggedIn,
+          loginPhone: state.loginPhone,
+          userName: state.userName,
+          userDob: state.userDob,
+          location: state.location,
+        })
+      );
     } catch (e) {
       // ignore
     }
@@ -487,6 +684,99 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [state.wishlist, state.lang, showToast]
   );
 
+  const saveAddress = useCallback(
+    async (addr: Omit<SavedAddress, 'id'>): Promise<SavedAddress> => {
+      const newAddr: SavedAddress = {
+        id: `addr-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+        ...addr,
+      };
+
+      dispatch({ type: 'ADD_ADDRESS', address: newAddr });
+
+      // Update location immediately to this address
+      dispatch({
+        type: 'SET_LOCATION',
+        location: {
+          area: newAddr.area || newAddr.street,
+          city: newAddr.city || 'Madurai',
+          pincode: newAddr.pincode,
+          landmark: newAddr.landmark || '',
+          distanceKm: newAddr.distanceKm,
+          deliveryMins: Math.min(30, Math.max(15, Math.round(newAddr.distanceKm * 7))),
+          lat: newAddr.lat,
+          lng: newAddr.lng,
+        },
+      });
+
+      // Update localStorage
+      const currentPhone = state.loginPhone || 'guest';
+      const existing = state.savedAddresses.filter((a) => a.id !== newAddr.id);
+      if (newAddr.isDefault) {
+        existing.forEach((a) => {
+          a.isDefault = false;
+        });
+      }
+      const updated = [newAddr, ...existing];
+      try {
+        localStorage.setItem(`sas_addresses_${currentPhone}`, JSON.stringify(updated));
+      } catch {}
+
+      // Sync to Supabase
+      if (state.loginPhone) {
+        try {
+          await supabase.from('addresses').insert({
+            phone: state.loginPhone,
+            tag: newAddr.tag,
+            custom_label: newAddr.customLabel || null,
+            house_no: newAddr.houseNo,
+            street: newAddr.street,
+            area: newAddr.area,
+            landmark: newAddr.landmark || null,
+            city: newAddr.city || 'Madurai',
+            pincode: newAddr.pincode,
+            lat: newAddr.lat,
+            lng: newAddr.lng,
+            distance_km: newAddr.distanceKm,
+            is_default: newAddr.isDefault,
+          });
+        } catch (err) {
+          console.warn('Supabase address insert failed:', err);
+        }
+      }
+
+      return newAddr;
+    },
+    [state.loginPhone, state.savedAddresses]
+  );
+
+  const deleteAddress = useCallback(
+    async (id: string): Promise<void> => {
+      dispatch({ type: 'DELETE_ADDRESS', id });
+
+      const currentPhone = state.loginPhone || 'guest';
+      const updated = state.savedAddresses.filter((a) => a.id !== id);
+      try {
+        localStorage.setItem(`sas_addresses_${currentPhone}`, JSON.stringify(updated));
+      } catch {}
+
+      if (state.loginPhone) {
+        try {
+          await supabase.from('addresses').delete().eq('id', id);
+        } catch (err) {
+          console.warn('Supabase address delete failed:', err);
+        }
+      }
+    },
+    [state.loginPhone, state.savedAddresses]
+  );
+
+  const selectAddress = useCallback(
+    (id: string) => {
+      dispatch({ type: 'SELECT_ADDRESS', id });
+    },
+    []
+  );
+
   return (
     <StoreContext.Provider
       value={{
@@ -503,6 +793,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         isWishlisted,
         toggleWishlist,
         showToast,
+        saveAddress,
+        deleteAddress,
+        selectAddress,
       }}
     >
       {children}

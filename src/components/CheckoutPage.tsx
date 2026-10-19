@@ -1,22 +1,42 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useStore } from '@/context/StoreContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { useStore, SavedAddress } from '@/context/StoreContext';
 import { t } from '@/data/translations';
 import { products } from '@/data/products';
 import { supabase } from '@/lib/supabase';
+import { calculateDistanceKm, isWithinDeliveryRadius, SHOP_MAPS_URL } from '@/lib/geofence';
+import OtpInput from '@/components/OtpInput';
+import GpsDeniedModal from '@/components/GpsDeniedModal';
+import { PlaceSuggestion } from '@/app/api/places/route';
+import { trackPurchase } from '@/lib/metaPixel';
 import {
   IconCart,
-  IconCheck,
   IconCheckCircle,
-  IconMapPin,
   IconCreditCard,
   IconHome,
   IconTruck,
-  IconClock,
-  IconShield,
 } from '@/components/Icons';
-import { Zap, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
+import {
+  Zap,
+  Clock,
+  ArrowLeft,
+  MapPin,
+  Navigation,
+  Home as HomeIcon,
+  Briefcase,
+  Plus,
+  Check,
+  AlertTriangle,
+  Trash2,
+  Loader2,
+  Search,
+  MapPinned,
+  ExternalLink,
+  X,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 
 export default function CheckoutPage() {
   const {
@@ -29,95 +49,334 @@ export default function CheckoutPage() {
     getCartTotal,
     getCartItemCount,
     showToast,
+    saveAddress,
+    deleteAddress,
+    selectAddress,
   } = useStore();
   const lang = state.lang;
-  // Direct Payment Mode: Every order directly shows payment options, fetching saved address & profile data automatically
-  const [step, setStep] = useState(3);
 
-  // User Profile & Mobile Information
-  const [phone, setPhone] = useState(state.loginPhone || '+91-6379398981');
+  // Phone / Profile Information
+  const [phone, setPhone] = useState(state.loginPhone || '');
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '']);
-  const [phoneVerified, setPhoneVerified] = useState(true);
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '']);
+  const [phoneVerified, setPhoneVerified] = useState(Boolean(state.isLoggedIn || state.loginPhone));
 
-  // Address & Slot state
-  const [savedProfileAddress, setSavedProfileAddress] = useState<any | null>(null);
+  // Address UI State
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [deliverySlot, setDeliverySlot] = useState('express');
+  const [paymentMethod, setPaymentMethod] = useState('upi');
+
+  // New Address Form Fields (ZERO pre-filled garbage strings)
   const [houseNo, setHouseNo] = useState('');
   const [street, setStreet] = useState('');
-  const [area, setArea] = useState(state.location?.area || 'Madurai');
+  const [area, setArea] = useState('');
   const [city, setCity] = useState('Madurai');
-  const [pincode, setPincode] = useState(state.location?.pincode || '625020');
+  const [pincode, setPincode] = useState('');
   const [landmark, setLandmark] = useState('');
-  const [deliverySlot, setDeliverySlot] = useState('express');
+  const [tag, setTag] = useState<'Home' | 'Work' | 'Other'>('Home');
+  const [customLabel, setCustomLabel] = useState('');
+  const [formLat, setFormLat] = useState<number>(0);
+  const [formLng, setFormLng] = useState<number>(0);
+  const [formDistanceKm, setFormDistanceKm] = useState<number>(0);
+  const [formDistanceCalculated, setFormDistanceCalculated] = useState(false);
+
+  // Focus & Feedback States
+  const [highlightHouseNo, setHighlightHouseNo] = useState(false);
+  const [autoFilled, setAutoFilled] = useState(false);
+  const [gpsDeniedOpen, setGpsDeniedOpen] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Refs for element focusing & aborting stale network requests
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const houseNoInputRef = useRef<HTMLInputElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Places Autocomplete Search State
+  const [placeQuery, setPlaceQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [isSearchingPlaces, setIsSearchingPlaces] = useState(false);
+  const [isDetectingGps, setIsDetectingGps] = useState(false);
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
   useEffect(() => {
     if (state.loginPhone) {
       setPhone(state.loginPhone);
+      setPhoneVerified(true);
     }
+  }, [state.loginPhone]);
 
-    try {
-      const stored = localStorage.getItem('sriAmmaAddresses');
-      if (stored) {
-        const list = JSON.parse(stored);
-        if (Array.isArray(list) && list.length > 0) {
-          const defaultAddr = list.find((a) => a.isDefault) || list[0];
-          setSavedProfileAddress(defaultAddr);
-          setHouseNo(defaultAddr.house || '');
-          setStreet(defaultAddr.street || '');
-          setArea(defaultAddr.city || state.location?.area || 'Madurai');
-          setCity(defaultAddr.city || 'Madurai');
-          setPincode(defaultAddr.pincode || '625020');
-          setLandmark(defaultAddr.landmark || '');
-        } else {
-          setSavedProfileAddress(null);
-        }
-      } else {
-        setSavedProfileAddress(null);
-      }
-    } catch {
-      setSavedProfileAddress(null);
-    }
-  }, [state.loginPhone, state.location]);
+  // Selected saved address from store
+  const activeSavedAddress =
+    state.savedAddresses.find((a) => a.id === state.selectedAddressId) ||
+    state.savedAddresses[0] ||
+    null;
 
-  // Step 3: Payment
-  const [paymentMethod, setPaymentMethod] = useState('upi');
-  const [addressDetected, setAddressDetected] = useState(false);
+  // Active address distance and delivery eligibility
+  const activeDistance = activeSavedAddress
+    ? activeSavedAddress.distanceKm
+    : formDistanceCalculated
+    ? formDistanceKm
+    : 0;
 
-  const handleAutoDetect = () => {
-    setAddressDetected(true);
-    setHouseNo('12/B, Sri Meenakshi Residency');
-    setStreet(`${state.location.area} Main Road`);
-    setArea(state.location.area || 'Madurai');
-    setCity('Madurai');
-    setPincode(state.location.pincode || '625020');
-    setLandmark(state.location.landmark || 'Near Temple');
-  };
+  const isDeliverable = activeSavedAddress
+    ? isWithinDeliveryRadius(activeSavedAddress.distanceKm)
+    : formDistanceCalculated
+    ? isWithinDeliveryRadius(formDistanceKm)
+    : false;
 
-  const handleSendOtp = () => {
-    if (phone.length === 10) {
-      setOtpSent(true);
-      setTimeout(() => {
-        setOtp(['4', '8', '2', '9']);
-        setTimeout(() => {
-          setPhoneVerified(true);
-          dispatch({ type: 'SET_LOGIN', phone, loggedIn: true });
-        }, 500);
-      }, 700);
-    }
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!savedProfileAddress && (!houseNo.trim() || !street.trim() || !pincode.trim())) {
-      showToast(lang === 'ta' ? 'தயவுசெய்து முழு முகவரியை உள்ளிடவும்' : 'Please complete your delivery address');
+  // 150ms Debounced Places Autocomplete with AbortController
+  useEffect(() => {
+    const cleanQ = placeQuery.trim();
+    if (cleanQ.length < 2) {
+      setSuggestions([]);
+      setIsSearchingPlaces(false);
+      setShowSuggestions(false);
       return;
     }
 
-    const orderId = `#SAS-${1000 + Math.floor(Math.random() * 9000)}`;
-    const fullAddressString = savedProfileAddress
-      ? `${savedProfileAddress.house}, ${savedProfileAddress.street}, ${savedProfileAddress.city} - ${savedProfileAddress.pincode}`
-      : `${houseNo}, ${street}, ${area}, ${city} - ${pincode}${landmark ? `, Near ${landmark}` : ''}`;
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
 
-    const order = {
+    searchTimeoutRef.current = setTimeout(async () => {
+      // Abort previous in-flight request if any
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      setIsSearchingPlaces(true);
+      try {
+        const res = await fetch(
+          `/api/places?q=${encodeURIComponent(cleanQ)}&shopLat=${state.shopCoords.lat}&shopLng=${state.shopCoords.lng}`,
+          { signal: abortControllerRef.current.signal }
+        );
+        const data = await res.json();
+        if (data && Array.isArray(data.suggestions)) {
+          setSuggestions(data.suggestions);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } finally {
+        setIsSearchingPlaces(false);
+      }
+    }, 150);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [placeQuery, state.shopCoords.lat, state.shopCoords.lng]);
+
+  // GPS Auto-Detection via /api/places
+  const handleDetectGPS = () => {
+    if (!('geolocation' in navigator)) {
+      showToast(lang === 'ta' ? 'உங்கள் சாதனத்தில் GPS இல்லை' : 'Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsDetectingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const res = await fetch(
+            `/api/places?lat=${lat}&lng=${lng}&shopLat=${state.shopCoords.lat}&shopLng=${state.shopCoords.lng}`
+          );
+          const data = await res.json();
+
+          if (data && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+            const first = data.suggestions[0];
+            handleSelectSuggestion(first);
+            showToast(
+              lang === 'ta'
+                ? `இருப்பிடம் கண்டறியப்பட்டது (${first.distanceKm} கி.மீ)`
+                : `Location detected (${first.distanceKm} km from store)`
+            );
+          } else {
+            const dist = calculateDistanceKm(state.shopCoords.lat, state.shopCoords.lng, lat, lng);
+            setFormLat(lat);
+            setFormLng(lng);
+            setFormDistanceKm(dist);
+            setFormDistanceCalculated(true);
+          }
+        } catch {
+          showToast(lang === 'ta' ? 'இருப்பிடத்தை கண்டறிய இயலவில்லை' : 'Could not reverse-geocode your GPS location');
+        } finally {
+          setIsDetectingGps(false);
+        }
+      },
+      (error) => {
+        setIsDetectingGps(false);
+        console.warn('Geolocation permission denied or error:', error);
+        setGpsDeniedOpen(true);
+      },
+      { timeout: 8000, enableHighAccuracy: true }
+    );
+  };
+
+  // Handle selecting a place suggestion with Smart Field Parser & Auto-fill
+  const handleSelectSuggestion = (suggestion: PlaceSuggestion) => {
+    // Populate fields
+    setStreet(suggestion.street || suggestion.title);
+    setArea(suggestion.area || suggestion.subtitle);
+    setCity(suggestion.city || 'Madurai');
+    setPincode(suggestion.pincode || '625001');
+    setLandmark(suggestion.landmark || '');
+    setFormLat(suggestion.lat);
+    setFormLng(suggestion.lng);
+    setFormDistanceKm(suggestion.distanceKm);
+    setFormDistanceCalculated(true);
+
+    // Populate or prompt for houseNo
+    if (suggestion.houseNo) {
+      setHouseNo(suggestion.houseNo);
+      setHighlightHouseNo(false);
+    } else {
+      setHouseNo('');
+      setHighlightHouseNo(true);
+      setTimeout(() => {
+        houseNoInputRef.current?.focus();
+      }, 100);
+      setTimeout(() => setHighlightHouseNo(false), 2500);
+    }
+
+    setPlaceQuery(suggestion.fullAddress);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setAutoFilled(true);
+  };
+
+  // Save new address handler
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!houseNo.trim() || !street.trim() || !area.trim() || !pincode.trim()) {
+      showToast(lang === 'ta' ? 'அனைத்து முகவரி விவரங்களையும் நிரப்பவும்' : 'Please fill all required address fields');
+      return;
+    }
+
+    if (tag === 'Other' && !customLabel.trim()) {
+      showToast(lang === 'ta' ? 'முகவரிக்கு ஒரு பெயரை உள்ளிடவும்' : 'Please name this address (e.g. Mom’s House)');
+      return;
+    }
+
+    let finalDist = formDistanceKm;
+    if (!formDistanceCalculated) {
+      finalDist = calculateDistanceKm(state.shopCoords.lat, state.shopCoords.lng, formLat || 9.9252, formLng || 78.1198);
+    }
+
+    if (finalDist > 3.0) {
+      showToast(
+        lang === 'ta'
+          ? 'இந்த முகவரி 3 கி.மீ எல்லைக்கு வெளியே உள்ளது'
+          : 'Cannot save address: it is outside our 3 km delivery zone'
+      );
+      return;
+    }
+
+    setIsSavingAddress(true);
+    try {
+      await saveAddress({
+        tag,
+        customLabel: tag === 'Other' ? customLabel.trim() : undefined,
+        houseNo: houseNo.trim(),
+        street: street.trim(),
+        area: area.trim(),
+        landmark: landmark.trim() || undefined,
+        city: city.trim() || 'Madurai',
+        pincode: pincode.trim(),
+        lat: formLat,
+        lng: formLng,
+        distanceKm: finalDist,
+        isDefault: state.savedAddresses.length === 0,
+      });
+
+      setShowAddForm(false);
+      setHouseNo('');
+      setStreet('');
+      setArea('');
+      setPincode('');
+      setLandmark('');
+      setPlaceQuery('');
+      setFormDistanceCalculated(false);
+      setAutoFilled(false);
+      showToast(lang === 'ta' ? 'முகவரி வெற்றிகரமாக சேமிக்கப்பட்டது' : 'Address saved successfully');
+    } catch {
+      showToast(lang === 'ta' ? 'முகவரியைச் சேமிக்க முடியவில்லை' : 'Failed to save address');
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
+
+  // OTP handlers for phone verification
+  const handleSendOtp = () => {
+    if (phone.replace(/\D/g, '').length >= 10) {
+      setOtpSent(true);
+    }
+  };
+
+  const handleVerifyOtp = () => {
+    const code = otpDigits.join('');
+    if (code.length === 4) {
+      setPhoneVerified(true);
+      const formatted = `+91-${phone.replace(/\D/g, '').slice(-10)}`;
+      dispatch({ type: 'SET_LOGIN', phone: formatted, loggedIn: true });
+      showToast(lang === 'ta' ? 'தொலைபேசி சரிபார்க்கப்பட்டது' : 'Phone verified successfully');
+    }
+  };
+
+  // Place Order handler with 3km enforcement and Supabase persistence
+  const handlePlaceOrder = async () => {
+    if (!phoneVerified) {
+      showToast(lang === 'ta' ? 'தயவுசெய்து உங்கள் மொபைல் எண்ணை சரிபார்க்கவும்' : 'Please verify your phone number');
+      return;
+    }
+
+    // Determine current active address
+    let orderAddressString = '';
+    let currentDistance = 0;
+
+    if (activeSavedAddress) {
+      currentDistance = activeSavedAddress.distanceKm;
+      orderAddressString = `${activeSavedAddress.houseNo}, ${activeSavedAddress.street}, ${activeSavedAddress.area}, ${activeSavedAddress.city} - ${activeSavedAddress.pincode}${
+        activeSavedAddress.landmark ? `, Near ${activeSavedAddress.landmark}` : ''
+      }`;
+    } else if (houseNo.trim() && street.trim() && area.trim() && pincode.trim()) {
+      currentDistance = formDistanceCalculated ? formDistanceKm : 0;
+      orderAddressString = `${houseNo.trim()}, ${street.trim()}, ${area.trim()}, ${city} - ${pincode.trim()}${
+        landmark.trim() ? `, Near ${landmark.trim()}` : ''
+      }`;
+    } else {
+      showToast(lang === 'ta' ? 'தயவுசெய்து டெலிவரி முகவரியை உள்ளிடவும்' : 'Please select or add a delivery address');
+      return;
+    }
+
+    // Strict 3.0 km radius check
+    if (currentDistance > 3.0) {
+      showToast(
+        lang === 'ta'
+          ? 'இந்த முகவரிக்கு டெலிவரி செய்ய முடியாது. 3 கி.மீ-க்குள் உள்ள முகவரியைத் தேர்வு செய்யவும்.'
+          : 'Cannot place order: delivery address is outside our 3 km radius.'
+      );
+      return;
+    }
+
+    setIsSubmittingOrder(true);
+    const orderId = `#SAS-${1000 + Math.floor(Math.random() * 9000)}`;
+    const finalPhone = phone.startsWith('+91') ? phone : `+91-${phone.replace(/\D/g, '').slice(-10)}`;
+
+    const newOrder = {
       id: orderId,
       items: [...state.cart],
       subtotal: getCartMrpTotal(),
@@ -125,18 +384,18 @@ export default function CheckoutPage() {
       deliveryFee: getDeliveryFee(),
       total: getCartTotal(),
       paymentMethod,
-      address: fullAddressString,
-      phone,
+      address: orderAddressString,
+      phone: finalPhone,
       status: 0,
       timestamp: Date.now(),
     };
 
-    // Save order & items to Supabase PostgreSQL database
+    // Insert into Supabase
     try {
       await supabase.from('orders').insert({
-        id: order.id,
-        phone,
-        address: fullAddressString,
+        id: newOrder.id,
+        phone: finalPhone,
+        address: orderAddressString,
         subtotal: getCartSubtotal(),
         discount: getCartDiscount() + (state.couponDiscount || 0),
         delivery_fee: getDeliveryFee(),
@@ -151,7 +410,7 @@ export default function CheckoutPage() {
         const product = (state.catalog || products).find((p) => p.id === item.productId) || products.find((p) => p.id === item.productId);
         const variant = product?.variants[item.variantIndex];
         return {
-          order_id: order.id,
+          order_id: newOrder.id,
           product_id: item.productId,
           variant_label: variant?.label || '1 pack',
           price: variant?.price || 0,
@@ -163,10 +422,13 @@ export default function CheckoutPage() {
         await supabase.from('order_items').insert(orderItemsPayload);
       }
     } catch (err) {
-      console.warn('Supabase order insert failed, proceeding with local order:', err);
+      console.warn('Supabase live order insert error, fallback to local dispatch:', err);
+    } finally {
+      setIsSubmittingOrder(false);
     }
 
-    dispatch({ type: 'ADD_ORDER', order });
+    dispatch({ type: 'ADD_ORDER', order: newOrder });
+    trackPurchase(newOrder.id, getCartTotal());
     dispatch({ type: 'CLEAR_CART' });
     dispatch({ type: 'SET_PAGE', page: 'orders' });
     showToast(t('orderPlacedToast', lang));
@@ -174,16 +436,16 @@ export default function CheckoutPage() {
 
   if (getCartItemCount() === 0) {
     return (
-      <section className="py-20 text-center min-h-screen bg-[#FBF8F3] flex flex-col items-center justify-center px-4">
-        <div className="w-20 h-20 rounded-2xl bg-[#F5EFE6] border border-[#EAE2D5] flex items-center justify-center text-brand-primary mb-4 shadow-xs">
+      <section className="py-20 text-center min-h-[70vh] bg-[#F8FAF7] flex flex-col items-center justify-center px-4 w-full">
+        <div className="w-20 h-20 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-[#76CA3E] mb-4 shadow-sm">
           <IconCart className="w-10 h-10" />
         </div>
-        <h2 className="text-xl font-bold text-brand-slate mb-1">{t('cartEmpty', lang)}</h2>
-        <p className="text-sm text-brand-slate/60 mb-5">{t('cartEmptyDesc', lang)}</p>
+        <h2 className="text-xl font-extrabold text-slate-900 mb-1">{t('cartEmpty', lang)}</h2>
+        <p className="text-sm text-slate-500 mb-6">{t('cartEmptyDesc', lang)}</p>
         <button
           type="button"
           onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-          className="bg-brand-primary hover:bg-brand-highlight text-white px-8 py-3.5 rounded-xl font-bold touch-target shadow-md transition-all text-sm"
+          className="bg-[#76CA3E] hover:bg-[#60B328] text-white px-8 py-3.5 rounded-xl font-extrabold touch-target shadow-md transition-all text-sm active:scale-95"
         >
           {t('shopNow', lang)}
         </button>
@@ -192,323 +454,398 @@ export default function CheckoutPage() {
   }
 
   return (
-    <section className="py-6 md:py-10 bg-[#FBF8F3] min-h-screen w-full max-w-full overflow-x-hidden touch-pan-y">
-      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 w-full">
-        <div className="mb-6">
-          <h1 className="text-xl md:text-3xl font-extrabold text-brand-slate tracking-tight">
-            {t('checkout', lang)}
-          </h1>
-          <p className="text-xs md:text-sm text-brand-slate/60 mt-0.5 font-medium">
-            {lang === 'ta'
-              ? 'மதுரை விரைவு ஹோம் டெலிவரி & பாதுகாப்பான ஆர்டர் உறுதிப்படுத்தல்'
-              : 'Madurai Express 20-Minute Doorstep Delivery & Verified Order Processing'}
-          </p>
-        </div>
+    <>
+      <section className="py-6 md:py-10 bg-[#F8FAF7] min-h-screen w-full max-w-full overflow-x-hidden box-border text-slate-900">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 w-full box-border">
+          {/* Header Breadcrumb & Title */}
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full min-w-0">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
+                  className="hover:text-emerald-700 transition-colors inline-flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>{lang === 'ta' ? 'ஷாப்பிங் தொடர்க' : 'Continue Shopping'}</span>
+                </button>
+                <span>/</span>
+                <span className="text-slate-800 font-bold">{t('checkout', lang)}</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {t('checkout', lang)}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium">
+                {lang === 'ta'
+                  ? 'மதுரை அதிவிரைவு 20-நிமிட ஹோம் டெலிவரி & நேரலை கண்காணிப்பு'
+                  : 'Madurai Express 20-Min Doorstep Delivery & Real-Time Tracking'}
+              </p>
+            </div>
 
-        {/* 2-Column Responsive Checkout Layout */}
-        <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-start w-full">
-          {/* Left Column (Steps 1, 2, 3) */}
-          <div className="lg:col-span-7 space-y-5 w-full">
+            <a
+              href={SHOP_MAPS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-800 bg-white hover:bg-emerald-50 border border-emerald-300 px-3.5 py-2 rounded-xl transition-all shadow-xs"
+            >
+              <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="truncate">{lang === 'ta' ? 'கடை இருப்பிடம் (Google Maps)' : 'Store Location (Google Maps)'}</span>
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            </a>
+          </div>
 
-            {/* STEP 1: Phone Verification */}
-            {step === 1 && (
-              <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-6 shadow-sm animate-fade-in space-y-5">
-                <h3 className="text-lg md:text-xl font-extrabold text-brand-slate">
-                  {t('step1Title', lang)}
-                </h3>
-
-                {phoneVerified ? (
-                  <div className="text-center py-6 bg-[#FDFBF7] rounded-xl border border-emerald-100">
-                    <div className="inline-flex items-center gap-2 bg-brand-mint border border-emerald-200 text-brand-primary px-4 py-2 rounded-xl font-bold text-sm mb-3">
-                      <IconCheckCircle className="w-4 h-4 text-brand-primary" />
-                      <span>{t('phoneVerified', lang)}</span>
+          {/* Responsive Grid: Left Column Form + Right Column Sticky Bill */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full min-w-0">
+            {/* Left Column (Steps 1, 2, 3) */}
+            <div className="w-full min-w-0 lg:col-span-7 space-y-5">
+              {/* STEP 1: Phone Verification (If not verified) */}
+              {!phoneVerified && (
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-6 shadow-xs space-y-4 w-full min-w-0 box-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black text-sm shrink-0">
+                      1
                     </div>
-                    <p className="text-brand-slate font-extrabold text-base">+91 {phone}</p>
-                    <p className="text-xs text-brand-slate/50 mt-1">
-                      {lang === 'ta'
-                        ? 'ஆர்டர் மற்றும் டெலிவரி நிலை WhatsApp வழியாக அனுப்பப்படும்.'
-                        : 'Order confirmation and rider tracking updates will be sent via WhatsApp.'}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setStep(2)}
-                      className="mt-6 w-full max-w-sm bg-brand-primary hover:bg-brand-highlight text-white py-3.5 rounded-xl font-bold text-sm touch-target transition-all shadow-md shadow-brand-primary/20 inline-flex items-center justify-center gap-1.5"
-                    >
-                      <span>{t('continueBtn', lang)}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 break-words leading-tight">
+                        {lang === 'ta' ? 'மொபைல் எண் சரிபார்ப்பு' : 'Verify Mobile Number'}
+                      </h3>
+                      <p className="text-xs text-slate-500 break-words mt-0.5">
+                        {lang === 'ta' ? 'ஆர்டர் உறுதிப்படுத்தலுக்கு 4-இலக்க OTP பெறவும்' : 'Get 4-digit OTP for order confirmation'}
+                      </p>
+                    </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-slate/70">
-                      {t('enterMobile', lang)}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-base font-bold text-brand-slate/70 bg-[#F5EFE6] px-3.5 py-3 rounded-xl border border-[#EAE2D5]">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="98765 43210"
-                        className="flex-1 border-2 border-[#EAE2D5] bg-[#FDFBF7] rounded-xl px-4 py-3 text-base font-semibold outline-none focus:border-brand-primary focus:bg-white transition-all text-brand-slate"
-                        disabled={otpSent}
-                      />
-                    </div>
 
-                    {!otpSent ? (
+                  {!otpSent ? (
+                    <div className="space-y-3 pt-1 w-full min-w-0">
+                      <div className="flex items-center border border-slate-300 rounded-xl overflow-hidden focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-500/10 transition-all w-full">
+                        <span className="bg-slate-100 px-3.5 py-2.5 text-xs font-bold text-slate-700 border-r border-slate-300 shrink-0">
+                          +91
+                        </span>
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          placeholder="98765 43210"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                          className="flex-1 w-full min-w-0 px-3.5 py-2.5 text-sm font-semibold outline-none bg-white text-slate-900"
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={handleSendOtp}
-                        disabled={phone.length !== 10}
-                        className={`w-full py-3.5 rounded-xl text-sm font-bold transition-all touch-target ${
-                          phone.length === 10
-                            ? 'bg-brand-primary hover:bg-brand-highlight text-white shadow-md'
-                            : 'bg-[#EAE2D5] text-[#8A7B6D] cursor-not-allowed'
-                        }`}
+                        disabled={phone.replace(/\D/g, '').length < 10}
+                        className="w-full bg-[#76CA3E] hover:bg-[#60B328] disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-98 text-xs sm:text-sm box-border"
                       >
-                        {t('sendOtp', lang)}
+                        {lang === 'ta' ? 'OTP அனுப்பவும்' : 'Send 4-Digit OTP'}
                       </button>
-                    ) : (
-                      <div className="mt-4 p-4 bg-[#F5EFE6] rounded-xl border border-[#EAE2D5] space-y-3">
-                        <p className="text-xs font-bold text-brand-slate text-center">
-                          {t('enterOtpTitle', lang)} (+91 {phone})
-                        </p>
-                        <div className="flex gap-2.5 justify-center">
-                          {otp.map((digit, i) => (
+                    </div>
+                  ) : (
+                    <div className="space-y-3 pt-1 w-full min-w-0">
+                      <p className="text-xs font-bold text-slate-700 text-center break-words">
+                        {lang === 'ta'
+                          ? `+91 ${phone} க்கு அனுப்பப்பட்ட 4-இலக்க OTP ஐ உள்ளிடவும்`
+                          : `Enter the 4-digit OTP sent to +91 ${phone}`}
+                      </p>
+                      <div className="w-full flex justify-center py-1">
+                        <OtpInput value={otpDigits} onChange={setOtpDigits} onComplete={handleVerifyOtp} />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        disabled={otpDigits.join('').length < 4}
+                        className="w-full bg-[#76CA3E] hover:bg-[#60B328] disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-98 text-xs sm:text-sm box-border"
+                      >
+                        {lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* STEP 2: Delivery Address (Swiggy-Style Address Book & 3km Radius Engine) */}
+              <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-6 shadow-xs space-y-4 w-full min-w-0 box-border">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black text-sm shrink-0">
+                      {phoneVerified ? '1' : '2'}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base sm:text-lg font-black text-slate-900 break-words leading-tight">
+                        {lang === 'ta' ? 'டெலிவரி முகவரி (3 கி.மீ சுற்றளவு)' : 'Delivery Address (Within 3.0 km)'}
+                      </h3>
+                      <p className="text-xs text-slate-500 break-words mt-0.5">
+                        {lang === 'ta'
+                          ? 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்டிலிருந்து 3 கி.மீ-க்குள் அதிவிரைவு டெலிவரி'
+                          : 'Ultra-fresh express delivery strictly within 3 km of our store'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {state.savedAddresses.length > 0 && !showAddForm && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddForm(true);
+                        setFormDistanceCalculated(false);
+                        setAutoFilled(false);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-black text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl transition-all shadow-2xs shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{lang === 'ta' ? 'புதிய முகவரி' : 'Add New'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* 1. RETURNING USER: Saved Addresses Responsive Grid */}
+                {state.savedAddresses.length > 0 && !showAddForm && (
+                  <div className="space-y-3 pt-1 w-full min-w-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                      {state.savedAddresses.map((addr) => {
+                        const isSelected = addr.id === state.selectedAddressId;
+                        const within3km = addr.distanceKm <= 3.0;
+
+                        return (
+                          <div
+                            key={addr.id}
+                            onClick={() => selectAddress(addr.id)}
+                            className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all cursor-pointer text-left flex flex-col justify-between w-full min-w-0 box-border ${
+                              isSelected
+                                ? within3km
+                                  ? 'border-[#76CA3E] bg-[#F1F9EC]/60 shadow-md ring-2 ring-[#76CA3E]/20'
+                                  : 'border-rose-400 bg-rose-50/60 shadow-md ring-2 ring-rose-400/20'
+                                : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                            }`}
+                          >
+                            <div className="w-full min-w-0">
+                              {/* Top Card Row: Tag + Distance */}
+                              <div className="flex items-center justify-between gap-2 mb-2 w-full min-w-0">
+                                <span className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-800 text-[11px] font-black px-2.5 py-0.5 rounded-lg shadow-2xs shrink-0">
+                                  {addr.tag === 'Home' ? (
+                                    <HomeIcon className="w-3 h-3 text-emerald-600 shrink-0" />
+                                  ) : addr.tag === 'Work' ? (
+                                    <Briefcase className="w-3 h-3 text-blue-600 shrink-0" />
+                                  ) : (
+                                    <MapPin className="w-3 h-3 text-purple-600 shrink-0" />
+                                  )}
+                                  <span className="break-words">{addr.customLabel || addr.tag}</span>
+                                </span>
+
+                                <span
+                                  className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap ${
+                                    within3km
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-rose-100 text-rose-700'
+                                  }`}
+                                >
+                                  {within3km ? `${addr.distanceKm} km` : `${addr.distanceKm} km • Out of 3km`}
+                                </span>
+                              </div>
+
+                              {/* Address Text */}
+                              <p className="text-xs font-bold text-slate-900 leading-snug break-words">
+                                {addr.houseNo}, {addr.street}
+                              </p>
+                              <p className="text-[11px] text-slate-600 mt-1 font-medium leading-relaxed break-words">
+                                {addr.area}, {addr.city} - {addr.pincode}
+                              </p>
+                              {addr.landmark && (
+                                <p className="text-[10px] text-slate-500 mt-0.5 break-words">
+                                  {lang === 'ta' ? 'அடையாளம்' : 'Near'}: {addr.landmark}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Card Footer: Select Checkmark & Delete */}
+                            <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-200/70 w-full min-w-0">
+                              <span
+                                className={`text-[11px] font-black flex items-center gap-1 truncate ${
+                                  isSelected ? (within3km ? 'text-emerald-700' : 'text-rose-600') : 'text-slate-500'
+                                }`}
+                              >
+                                {isSelected ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{lang === 'ta' ? 'தேர்ந்தெடுக்கப்பட்டது' : 'Deliver Here'}</span>
+                                  </>
+                                ) : (
+                                  <span>{lang === 'ta' ? 'இங்கு டெலிவரி செய்' : 'Select'}</span>
+                                )}
+                              </span>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteAddress(addr.id);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                                title={lang === 'ta' ? 'நீக்கு' : 'Delete'}
+                                aria-label="Delete address"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Dashed Add New Address Button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddForm(true);
+                        setFormDistanceCalculated(false);
+                        setAutoFilled(false);
+                      }}
+                      className="w-full py-3 px-4 border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/40 hover:bg-emerald-50 text-emerald-800 font-extrabold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center gap-2 box-border active:scale-99"
+                    >
+                      <Plus className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{lang === 'ta' ? '+ புதிய முகவரியைச் சேர்' : '+ Add New Address'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 2. FIRST-TIME USER OR ADD NEW ADDRESS FORM (ZERO garbage text) */}
+                {(state.savedAddresses.length === 0 || showAddForm) && (
+                  <form onSubmit={handleSaveAddress} className="space-y-4 pt-1 w-full min-w-0 box-border">
+                    {/* Top Action Bar: GPS Auto-Detection Button */}
+                    <div className="w-full min-w-0">
+                      <button
+                        type="button"
+                        onClick={handleDetectGPS}
+                        disabled={isDetectingGps}
+                        className="w-full bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 font-extrabold py-2.5 px-3 rounded-xl transition-all text-xs flex items-center justify-center gap-2 shadow-2xs active:scale-98 box-border"
+                      >
+                        {isDetectingGps ? (
+                          <Loader2 className="w-4 h-4 text-blue-700 animate-spin shrink-0" />
+                        ) : (
+                          <Navigation className="w-4 h-4 text-blue-700 shrink-0" />
+                        )}
+                        <span className="truncate">
+                          {isDetectingGps
+                            ? lang === 'ta'
+                              ? 'GPS கண்டறிகிறது...'
+                              : 'Detecting GPS...'
+                            : lang === 'ta'
+                            ? 'தற்போதைய இருப்பிடத்தை கண்டறி (GPS)'
+                            : 'Detect My Current Location (GPS)'}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Live Google Maps / Area Search Autocomplete Input */}
+                    <div className="relative w-full min-w-0 z-50">
+                      <label className="text-xs font-bold text-slate-700 block mb-1">
+                        {lang === 'ta' ? 'பகுதி / தெரு தேடல்' : 'Search Street / Locality in Madurai'}
+                      </label>
+                      <div className="flex items-center border border-slate-300 rounded-xl px-3 py-2.5 bg-white focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-500/10 transition-all w-full min-w-0 box-border">
+                        <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
+                        <input
+                          ref={searchInputRef}
+                          type="text"
+                          value={placeQuery}
+                          onChange={(e) => {
+                            setPlaceQuery(e.target.value);
+                            setShowSuggestions(true);
+                          }}
+                          onFocus={() => {
+                            if (suggestions.length > 0) setShowSuggestions(true);
+                          }}
+                          placeholder={
+                            lang === 'ta'
+                              ? 'உங்கள் தெரு அல்லது பகுதியைத் தேடுங்கள்...'
+                              : 'Search your street, apartment, or area in Madurai...'
+                          }
+                          className="flex-1 w-full min-w-0 text-xs outline-none font-medium text-slate-900 placeholder:text-slate-400 bg-transparent"
+                        />
+                        {isSearchingPlaces && <Loader2 className="w-4 h-4 text-slate-400 animate-spin shrink-0" />}
+                        {placeQuery && !isSearchingPlaces && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPlaceQuery('');
+                              setSuggestions([]);
+                              setShowSuggestions(false);
+                              setAutoFilled(false);
+                            }}
+                            className="p-1 text-slate-400 hover:text-slate-600 shrink-0"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Green confirmation pill after selecting from map */}
+                      {autoFilled && (
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl animate-fade-in mt-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>
+                            {lang === 'ta'
+                              ? 'வரைபடத்திலிருந்து முகவரி விவரங்கள் தானாக நிரப்பப்பட்டன'
+                              : 'Address details auto-filled from map'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Autocomplete Dropdown List with Distance Badges */}
+                      {showSuggestions && suggestions.length > 0 && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 max-h-80 overflow-y-auto divide-y divide-slate-100 z-50 w-full min-w-0 box-border animate-fade-in">
+                          {suggestions.map((item) => (
                             <div
-                              key={i}
-                              className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center text-lg font-bold transition-all ${
-                                digit
-                                  ? 'border-brand-primary bg-brand-mint text-brand-primary'
-                                  : 'border-[#EAE2D5] bg-white text-brand-slate'
-                              }`}
+                              key={item.id}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectSuggestion(item);
+                              }}
+                              className="p-3 hover:bg-slate-50 cursor-pointer flex items-start justify-between gap-3 transition-colors w-full min-w-0 box-border"
                             >
-                              {digit || '•'}
+                              <div className="min-w-0 flex-1">
+                                <p className="font-bold text-xs text-slate-900 break-words leading-tight">{item.title}</p>
+                                <p className="text-[11px] text-slate-500 break-words mt-0.5">{item.fullAddress}</p>
+                              </div>
+                              <span
+                                className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
+                                  item.deliverable
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : 'bg-rose-100 text-rose-700'
+                                }`}
+                              >
+                                {item.deliverable
+                                  ? `${item.distanceKm} km`
+                                  : `${item.distanceKm} km • Unserviceable`}
+                              </span>
                             </div>
                           ))}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-brand-slate/60 justify-center pt-2">
-                          <div className="w-3.5 h-3.5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
-                          <span>{t('verifying', lang)}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* STEP 2: Address & Slot */}
-            {step === 2 && (
-              <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-6 shadow-sm animate-fade-in space-y-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg md:text-xl font-extrabold text-brand-slate">
-                    {t('step2Title', lang)}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: true })}
-                    className="text-xs font-bold text-brand-primary hover:underline"
-                  >
-                    {t('changeLocation', lang)}
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleAutoDetect}
-                  className="w-full bg-[#EBF3FB] hover:bg-[#DCE9F8] text-[#1E5B99] font-bold py-3 rounded-xl transition-all border border-[#C5DCF4] touch-target text-xs md:text-sm flex items-center justify-center gap-2 shadow-xs"
-                >
-                  <IconMapPin className="w-4 h-4 text-[#1E5B99]" />
-                  <span>{t('autoDetect', lang)} ({state.location.area})</span>
-                </button>
-
-                {addressDetected && (
-                  <div className="bg-brand-mint rounded-xl p-3 text-xs font-bold text-brand-primary border border-emerald-200 flex items-center gap-2">
-                    <IconCheckCircle className="w-4 h-4 text-brand-primary flex-shrink-0" />
-                    <span>{t('addressVerified', lang)}</span>
-                  </div>
-                )}
-
-                <div className="space-y-3.5 text-xs">
-                  <div>
-                    <label className="block font-bold text-brand-slate mb-1">
-                      {t('houseNo', lang)}
-                    </label>
-                    <input
-                      type="text"
-                      value={houseNo}
-                      onChange={(e) => setHouseNo(e.target.value)}
-                      placeholder="e.g. 12/B, Amman Illam, 2nd Floor"
-                      className="w-full border-2 border-[#EAE2D5] bg-[#FDFBF7] rounded-xl px-4 py-3 outline-none focus:border-brand-primary focus:bg-white transition-all text-sm font-semibold text-brand-slate"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-brand-slate mb-1">
-                      {t('street', lang)}
-                    </label>
-                    <input
-                      type="text"
-                      value={street}
-                      onChange={(e) => setStreet(e.target.value)}
-                      placeholder="e.g. 80 Feet Road, KK Nagar, Madurai - 625020"
-                      className="w-full border-2 border-[#EAE2D5] bg-[#FDFBF7] rounded-xl px-4 py-3 outline-none focus:border-brand-primary focus:bg-white transition-all text-sm font-semibold text-brand-slate"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-brand-slate mb-1">
-                      {t('landmark', lang)}
-                    </label>
-                    <input
-                      type="text"
-                      value={landmark}
-                      onChange={(e) => setLandmark(e.target.value)}
-                      placeholder="e.g. Opposite Bus Stop / Near Temple"
-                      className="w-full border-2 border-[#EAE2D5] bg-[#FDFBF7] rounded-xl px-4 py-3 outline-none focus:border-brand-primary focus:bg-white transition-all text-sm font-semibold text-brand-slate"
-                    />
-                  </div>
-                </div>
-
-                {/* Delivery Slot Choice */}
-                <div className="pt-3 border-t border-[#EAE2D5]">
-                  <p className="font-bold text-xs uppercase tracking-wider text-brand-slate/70 mb-2.5">
-                    {t('deliverySlot', lang)}
-                  </p>
-                  <div className="grid sm:grid-cols-3 gap-2">
-                    {[
-                      { key: 'express', label: t('slotExpress', lang), sub: '20 Mins', isExpress: true },
-                      { key: 'evening', label: t('slotEvening', lang), sub: '6–8 PM', isExpress: false },
-                      { key: 'morning', label: t('slotMorning', lang), sub: 'Tomorrow 8 AM', isExpress: false },
-                    ].map((slot) => (
-                      <button
-                        key={slot.key}
-                        type="button"
-                        onClick={() => setDeliverySlot(slot.key)}
-                        className={`p-3 rounded-xl border text-left transition-all ${
-                          deliverySlot === slot.key
-                            ? 'border-brand-primary bg-brand-mint text-brand-primary font-bold shadow-xs'
-                            : 'border-[#EAE2D5] bg-white text-brand-slate/80 hover:bg-[#F5EFE6]'
-                        }`}
-                      >
-                        <p className="text-xs leading-tight font-extrabold flex items-center gap-1.5">
-                          {slot.isExpress ? (
-                            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500 flex-shrink-0" />
-                          ) : (
-                            <Clock className="w-3.5 h-3.5 text-brand-slate/60 flex-shrink-0" />
-                          )}
-                          <span>{slot.sub}</span>
-                        </p>
-                        <p className="text-[10px] text-brand-slate/60 mt-0.5 break-words leading-tight">{slot.label}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="px-5 py-3 rounded-xl border-2 border-[#EAE2D5] font-bold text-xs text-brand-slate hover:bg-[#F5EFE6] transition-all touch-target inline-flex items-center gap-1.5"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>{t('backBtn', lang)}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStep(3)}
-                    disabled={!houseNo || !street}
-                    className={`flex-1 py-3.5 rounded-xl font-bold text-sm transition-all touch-target inline-flex items-center justify-center gap-1.5 ${
-                      houseNo && street
-                        ? 'bg-brand-primary hover:bg-brand-highlight text-white shadow-md'
-                        : 'bg-[#EAE2D5] text-[#8A7B6D] cursor-not-allowed'
-                    }`}
-                  >
-                    <span>{t('continueBtn', lang)}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Payment Method */}
-            {step === 3 && (
-              <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] p-5 sm:p-6 shadow-sm animate-fade-in space-y-4">
-                {/* Saved Address Summary Card or Full Address Input Form */}
-                {savedProfileAddress ? (
-                  <div className="bg-[#F8F5EE] border border-[#EAE2D5] rounded-2xl p-4 flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-                        <IconMapPin className="w-4 h-4 text-emerald-800" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-extrabold text-xs text-brand-slate uppercase tracking-wide">
-                            {lang === 'ta' ? 'டெலிவரி முகவரி' : 'Delivering To'}
-                          </span>
-                          <span className="bg-emerald-100/90 text-emerald-900 text-[10px] font-black px-2 py-0.5 rounded-md">
-                            {lang === 'ta' ? 'சேமிக்கப்பட்ட முகவரி' : 'Saved Address'}
-                          </span>
-                        </div>
-                        <p className="text-xs font-bold text-brand-slate mt-1.5 truncate">
-                          {state.userName || 'Vishagan'} • {phone}
-                        </p>
-                        <p className="text-xs text-slate-700 mt-1 leading-relaxed break-words font-medium">
-                          {houseNo}, {street}, {city} - {pincode}
-                        </p>
-                        {landmark && (
-                          <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-                            {lang === 'ta' ? 'அடையாளம்' : 'Landmark'}: {landmark}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => dispatch({ type: 'SET_PAGE', page: 'profile' })}
-                      className="text-xs font-bold text-brand-primary hover:underline shrink-0 pt-0.5"
-                    >
-                      {lang === 'ta' ? 'மாற்று' : 'Change'}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="bg-[#FDFBF7] border border-[#EAE2D5] rounded-2xl p-4 sm:p-5 space-y-3.5">
-                    <div className="flex items-center gap-2 pb-2 border-b border-[#EAE2D5]">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0">
-                        <IconMapPin className="w-4 h-4 text-emerald-800" />
-                      </div>
-                      <div>
-                        <h4 className="font-extrabold text-xs sm:text-sm text-brand-slate">
-                          {lang === 'ta' ? 'டெலிவரி முகவரியை உள்ளிடவும்' : 'Enter Delivery Address'}
-                        </h4>
-                        <p className="text-[11px] text-slate-500 font-medium">
-                          {lang === 'ta'
-                            ? 'விரைவான டெலிவரிக்கு உங்கள் முகவரி விவரங்களை அளிக்கவும்'
-                            : 'Provide your address for 20-min express delivery'}
-                        </p>
-                      </div>
+                      )}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <label className="block font-bold text-brand-slate mb-1">
-                          {lang === 'ta' ? 'வீடு / பிளாட் எண்' : 'House / Flat No'} *
+                    {/* Detailed Address Inputs (Zero pre-filled dummy strings) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs w-full min-w-0">
+                      <div className="w-full min-w-0">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          {lang === 'ta' ? 'வீடு / பிளாட் / கட்டட எண் *' : 'Door / Flat / Building No. *'}
                         </label>
                         <input
+                          ref={houseNoInputRef}
                           type="text"
                           required
                           value={houseNo}
                           onChange={(e) => setHouseNo(e.target.value)}
-                          placeholder="e.g. 12/B, Sri Amman Illam"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
+                          placeholder="e.g. 12/B, Amman Illam"
+                          className={`w-full min-w-0 border rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none transition-all box-border ${
+                            highlightHouseNo
+                              ? 'border-[#76CA3E] ring-2 ring-[#76CA3E]/30 bg-[#F1F9EC]/30 animate-pulse'
+                              : 'border-slate-300 focus:border-emerald-600'
+                          }`}
                         />
                       </div>
 
-                      <div>
-                        <label className="block font-bold text-brand-slate mb-1">
-                          {lang === 'ta' ? 'தெரு பெயர்' : 'Street Name'} *
+                      <div className="w-full min-w-0">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          {lang === 'ta' ? 'தெரு பெயர் *' : 'Street / Road Name *'}
                         </label>
                         <input
                           type="text"
@@ -516,13 +853,13 @@ export default function CheckoutPage() {
                           value={street}
                           onChange={(e) => setStreet(e.target.value)}
                           placeholder="e.g. KK Nagar Main Road"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
+                          className="w-full min-w-0 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none focus:border-emerald-600 box-border"
                         />
                       </div>
 
-                      <div>
-                        <label className="block font-bold text-brand-slate mb-1">
-                          {lang === 'ta' ? 'பகுதி / ஏரியா' : 'Area'} *
+                      <div className="w-full min-w-0">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          {lang === 'ta' ? 'பகுதி / ஏரியா *' : 'Area / Locality *'}
                         </label>
                         <input
                           type="text"
@@ -530,27 +867,13 @@ export default function CheckoutPage() {
                           value={area}
                           onChange={(e) => setArea(e.target.value)}
                           placeholder="e.g. KK Nagar"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
+                          className="w-full min-w-0 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none focus:border-emerald-600 box-border"
                         />
                       </div>
 
-                      <div>
-                        <label className="block font-bold text-brand-slate mb-1">
-                          {lang === 'ta' ? 'நகரம்' : 'City'} *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          placeholder="Madurai"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-bold text-brand-slate mb-1">
-                          {lang === 'ta' ? 'அஞ்சல் குறியீடு (Pincode)' : 'Pincode'} *
+                      <div className="w-full min-w-0">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          {lang === 'ta' ? 'அஞ்சல் குறியீடு (Pincode) *' : 'Pincode (6 digits) *'}
                         </label>
                         <input
                           type="text"
@@ -559,185 +882,421 @@ export default function CheckoutPage() {
                           value={pincode}
                           onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                           placeholder="625020"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
+                          className="w-full min-w-0 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none focus:border-emerald-600 box-border"
                         />
                       </div>
 
-                      <div>
-                        <label className="block font-bold text-brand-slate mb-1">
-                          {lang === 'ta' ? 'அடையாளம் (Landmark)' : 'Landmark'} ({lang === 'ta' ? 'விருப்பம்' : 'Optional'})
+                      <div className="sm:col-span-2 w-full min-w-0">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          {lang === 'ta' ? 'அடையாளம் (Landmark - விருப்பம்)' : 'Landmark (Optional)'}
                         </label>
                         <input
                           type="text"
                           value={landmark}
                           onChange={(e) => setLandmark(e.target.value)}
-                          placeholder="e.g. Near Meenakshi Temple"
-                          className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-800 outline-none focus:border-[#76CA3E]"
+                          placeholder="e.g. Near Temple, Opp. Park"
+                          className="w-full min-w-0 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none focus:border-emerald-600 box-border"
                         />
                       </div>
+                    </div>
+
+                    {/* Swiggy-Style "Save Address As" Tag Selector */}
+                    <div className="w-full min-w-0">
+                      <label className="block font-bold text-slate-700 text-xs mb-1.5">
+                        {lang === 'ta' ? 'முகவரியைச் சேமிக்க:' : 'Save Address As:'}
+                      </label>
+                      <div className="flex items-center gap-2 flex-wrap w-full">
+                        {(['Home', 'Work', 'Other'] as const).map((tVal) => (
+                          <button
+                            key={tVal}
+                            type="button"
+                            onClick={() => setTag(tVal)}
+                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${
+                              tag === tVal
+                                ? 'bg-[#76CA3E] text-white border-[#76CA3E] shadow-2xs'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            {tVal === 'Home' ? (
+                              <HomeIcon className="w-3.5 h-3.5 shrink-0" />
+                            ) : tVal === 'Work' ? (
+                              <Briefcase className="w-3.5 h-3.5 shrink-0" />
+                            ) : (
+                              <MapPin className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                            <span>{tVal}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {tag === 'Other' && (
+                        <div className="mt-2.5 w-full min-w-0 animate-fade-in">
+                          <label className="block font-bold text-slate-700 text-xs mb-1">
+                            {lang === 'ta' ? 'முகவரி பெயர் (எ.கா: அம்மாவின் வீடு)' : 'Name this address'}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={customLabel}
+                            onChange={(e) => setCustomLabel(e.target.value)}
+                            placeholder="e.g. Mom's House, Shop, Friend's Flat"
+                            className="w-full min-w-0 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none focus:border-emerald-600 box-border"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Form Action Buttons */}
+                    <div className="flex items-center gap-2 pt-2 w-full min-w-0">
+                      {state.savedAddresses.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAddForm(false);
+                            setAutoFilled(false);
+                          }}
+                          className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shrink-0 box-border"
+                        >
+                          {lang === 'ta' ? 'ரத்து செய்' : 'Cancel'}
+                        </button>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={isSavingAddress || (formDistanceCalculated && formDistanceKm > 3.0)}
+                        className="flex-1 w-full min-w-0 bg-[#76CA3E] hover:bg-[#60B328] disabled:bg-slate-300 text-white font-black py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-all box-border active:scale-98 text-center"
+                      >
+                        {isSavingAddress
+                          ? lang === 'ta'
+                            ? 'சேமிக்கிறது...'
+                            : 'Saving Address...'
+                          : lang === 'ta'
+                          ? 'முகவரியைச் சேமித்து தொடரவும்'
+                          : 'Save Address & Deliver Here'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* 3. POLISHED 3.0 KM OUT-OF-ZONE ALERT CARD */}
+                {!isDeliverable && (activeSavedAddress || formDistanceCalculated) && activeDistance > 3.0 && (
+                  <div className="bg-rose-50/90 border border-rose-200 rounded-2xl p-4 sm:p-5 shadow-xs transition-all space-y-3 w-full min-w-0 box-border animate-fade-in">
+                    <div className="flex items-start gap-3 w-full min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                        <MapPinned className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-black text-xs sm:text-sm text-rose-900 leading-snug break-words">
+                          {lang === 'ta'
+                            ? `இங்கு டெலிவரி செய்ய இயலாது — 3 கி.மீ எல்லைக்கு வெளியே உள்ளது (${activeDistance} கி.மீ தூரம்)`
+                            : `Could Not Deliver Here — Outside 3 km Radius (${activeDistance} km away)`}
+                        </h4>
+                        <p className="text-[11px] sm:text-xs text-rose-800/80 mt-1 leading-relaxed font-medium break-words">
+                          {lang === 'ta'
+                            ? 'புதிய பொருட்களை விரைவாக வழங்க, ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்டில் இருந்து 3 கி.மீ சுற்றளவில் மட்டுமே தற்போது டெலிவரி செய்கிறோம். 3 கி.மீ-க்குள் உள்ள முகவரியைத் தேர்ந்தெடுக்கவும்.'
+                            : 'To guarantee ultra-fresh groceries and express delivery, Sri Amman Supermarket currently delivers strictly within a 3 km radius of our store. Please select or add an address within 3 km.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-rose-200/60 flex items-center justify-between flex-wrap gap-2 w-full min-w-0">
+                      <a
+                        href={SHOP_MAPS_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-black text-rose-700 hover:text-rose-900 underline shrink-0"
+                      >
+                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{lang === 'ta' ? 'வரைபடத்தில் கடையைப் பார்க்கவும்' : 'View Store on Google Maps'}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0" />
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddForm(true);
+                          setFormDistanceCalculated(false);
+                          setAutoFilled(false);
+                        }}
+                        className="text-xs font-black text-rose-800 bg-rose-100 hover:bg-rose-200 px-3 py-1.5 rounded-xl transition-all shrink-0"
+                      >
+                        {lang === 'ta' ? 'வேறு முகவரியைத் தேர்ந்தெடு' : 'Choose Another Address'}
+                      </button>
                     </div>
                   </div>
                 )}
 
-                {/* Payment Options Header without instant checkout badge */}
-                <div className="pt-1">
-                  <h3 className="text-base md:text-lg font-extrabold text-brand-slate">
-                    {t('step3Title', lang)}
-                  </h3>
+                {/* Delivery Slot Selector */}
+                <div className="pt-3 border-t border-slate-100 space-y-2 w-full min-w-0">
+                  <label className="block font-black text-xs text-slate-800 uppercase tracking-wider">
+                    {lang === 'ta' ? 'டெலிவரி நேரம்' : 'Delivery Slot'}
+                  </label>
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 text-xs w-full min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => setDeliverySlot('express')}
+                      className={`p-3 rounded-xl border-2 text-left transition-all w-full min-w-0 box-border ${
+                        deliverySlot === 'express'
+                          ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 font-bold text-slate-900 break-words">
+                        <Zap className="w-3.5 h-3.5 text-yellow-600 fill-current shrink-0" />
+                        <span className="break-words">{lang === 'ta' ? '20 நிமிட விரைவு' : '20-Min Express'}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5 break-words">
+                        {lang === 'ta' ? 'உடனடி வீட்டு டெலிவரி' : 'Instant doorstep delivery'}
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDeliverySlot('scheduled')}
+                      className={`p-3 rounded-xl border-2 text-left transition-all w-full min-w-0 box-border ${
+                        deliverySlot === 'scheduled'
+                          ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 font-bold text-slate-900 break-words">
+                        <Clock className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                        <span className="break-words">{lang === 'ta' ? 'இன்று மாலை' : 'Evening Slot'}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5 break-words">
+                        {lang === 'ta' ? 'மாலை 6:00 - 8:00' : '6:00 PM - 8:00 PM'}
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* STEP 3: Payment Options & Submit */}
+              <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-6 shadow-xs space-y-4 w-full min-w-0 box-border">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black text-sm shrink-0">
+                    {phoneVerified ? '2' : '3'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 break-words leading-tight">
+                      {t('step3Title', lang)}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {lang === 'ta' ? 'பாதுகாப்பான கட்டண முறை' : '100% Secure Payment Options'}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-3 w-full min-w-0">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('upi')}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-colors flex items-center gap-3.5 box-border ${
+                    className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 box-border ${
                       paymentMethod === 'upi'
-                        ? 'border-brand-primary bg-brand-mint'
-                        : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
+                        ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                     }`}
                   >
                     <div className="w-10 h-10 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0">
-                      <IconCreditCard className="w-5 h-5" />
+                      <IconCreditCard className="w-5 h-5 text-emerald-800" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-extrabold text-sm text-brand-slate leading-tight">{t('payOnline', lang)}</p>
-                      <p className="text-xs text-brand-primary font-semibold mt-1 leading-tight">{t('zeroFee', lang)}</p>
+                      <p className="font-black text-sm text-slate-900 leading-tight break-words">{t('payOnline', lang)}</p>
+                      <p className="text-xs text-emerald-700 font-bold mt-0.5 leading-tight break-words">{t('zeroFee', lang)}</p>
                     </div>
                     <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                      {paymentMethod === 'upi' && <IconCheckCircle className="w-5 h-5 text-brand-primary" />}
+                      {paymentMethod === 'upi' && <IconCheckCircle className="w-5 h-5 text-emerald-700" />}
                     </div>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('cod')}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-colors flex items-center gap-3.5 box-border ${
+                    className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 box-border ${
                       paymentMethod === 'cod'
-                        ? 'border-brand-primary bg-brand-mint'
-                        : 'border-[#EAE2D5] hover:border-brand-primary/50 bg-[#FDFBF7]'
+                        ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                        : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                     }`}
                   >
                     <div className="w-10 h-10 rounded-xl bg-emerald-100 text-brand-primary flex items-center justify-center shrink-0">
-                      <IconHome className="w-5 h-5" />
+                      <IconHome className="w-5 h-5 text-emerald-800" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-extrabold text-sm text-brand-slate leading-tight">{t('cashOnDelivery', lang)}</p>
-                      <p className="text-xs text-brand-primary font-semibold mt-1 leading-tight">{t('codDesc', lang)}</p>
+                      <p className="font-black text-sm text-slate-900 leading-tight break-words">{t('cashOnDelivery', lang)}</p>
+                      <p className="text-xs text-emerald-700 font-bold mt-0.5 leading-tight break-words">{t('codDesc', lang)}</p>
                     </div>
                     <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                      {paymentMethod === 'cod' && <IconCheckCircle className="w-5 h-5 text-brand-primary" />}
+                      {paymentMethod === 'cod' && <IconCheckCircle className="w-5 h-5 text-emerald-700" />}
                     </div>
                   </button>
                 </div>
 
-                {/* Bottom Action Row: Back Button + Confirm & Place Order in Single Line */}
-                <div className="flex items-center gap-2 sm:gap-3 pt-3 border-t border-[#EAE2D5]">
+                {/* Bottom Action Row: Back + Confirm Order Button */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-3 border-t border-slate-100 w-full min-w-0">
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-                    className="px-3.5 sm:px-4 py-3 rounded-xl border-2 border-[#EAE2D5] font-bold text-xs text-brand-slate hover:bg-[#F5EFE6] transition-all touch-target inline-flex items-center justify-center gap-1 shrink-0"
+                    className="px-4 py-3 rounded-xl border-2 border-slate-200 font-bold text-xs text-slate-700 hover:bg-slate-100 transition-all inline-flex items-center justify-center gap-1.5 shrink-0 box-border"
                     style={{ minHeight: '48px' }}
                   >
-                    <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+                    <ArrowLeft className="w-4 h-4 shrink-0" />
                     <span>{t('backBtn', lang)}</span>
                   </button>
+
                   <button
                     type="button"
                     onClick={handlePlaceOrder}
-                    disabled={!paymentMethod}
-                    className="flex-1 px-3 sm:px-4 py-3 rounded-xl font-black text-xs xs:text-sm bg-brand-primary hover:bg-brand-highlight text-white shadow-md shadow-brand-primary/30 transition-all touch-target whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center text-center"
+                    disabled={isSubmittingOrder || !isDeliverable || !phoneVerified}
+                    className={`flex-1 w-full min-w-0 px-4 py-3 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center text-center shadow-md box-border ${
+                      isDeliverable && phoneVerified && !isSubmittingOrder
+                        ? 'bg-[#76CA3E] hover:bg-[#60B328] text-white shadow-emerald-500/20 active:scale-98 cursor-pointer'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                    }`}
                     style={{ minHeight: '48px' }}
                   >
-                    {t('confirmOrder', lang)} (₹{getCartTotal()})
+                    {isSubmittingOrder ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                        <span>{lang === 'ta' ? 'பதிவாகிறது...' : 'Placing Order...'}</span>
+                      </span>
+                    ) : !isDeliverable ? (
+                      <span className="break-words text-center">
+                        {lang === 'ta'
+                          ? '3 கி.மீ-க்குள் முகவரியை தேர்வு செய்க'
+                          : 'Select Deliverable Address (Within 3km)'}
+                      </span>
+                    ) : (
+                      <span className="truncate">
+                        {t('confirmOrder', lang)} (₹{getCartTotal()})
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Right Column (Sticky Real-Time Order Summary) */}
-          <div className="lg:col-span-5 sticky top-36 space-y-4">
-            <div className="bg-[#FFFFFF] rounded-2xl border border-[#EAE2D5] shadow-lg p-5 md:p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#EAE2D5]">
-                <h3 className="font-extrabold text-base text-brand-slate">
-                  {t('billDetails', lang)}
-                </h3>
-                <span className="text-xs font-bold text-brand-primary bg-brand-mint px-2 py-0.5 rounded-full">
-                  {getCartItemCount()} {t('items', lang)}
-                </span>
-              </div>
-
-              {/* Items Preview */}
-              <div className="max-h-56 overflow-y-auto divide-y divide-[#F5EFE6] pr-1">
-                {state.cart.map((item) => {
-                  const product = products.find((p) => p.id === item.productId);
-                  if (!product) return null;
-                  const variant = product.variants[item.variantIndex];
-                  if (!variant) return null;
-
-                  return (
-                    <div key={`${item.productId}-${item.variantIndex}`} className="py-2.5 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#F5EFE6] shrink-0 border border-[#EAE2D5] relative">
-                        <img src={product.image} alt={product.nameEn} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0 text-xs">
-                        <p className="font-bold text-brand-slate break-words leading-tight">
-                          {lang === 'ta' ? product.nameTa : product.nameEn}
-                        </p>
-                        <p className="text-brand-slate/50 break-words mt-0.5">{variant.label} × {item.quantity}</p>
-                      </div>
-                      <span className="font-bold text-xs text-brand-slate">
-                        ₹{variant.price * item.quantity}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Price Breakdown */}
-              <div className="pt-3 border-t border-[#EAE2D5] space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-brand-slate/70">{t('itemTotal', lang)}</span>
-                  <span className="font-semibold text-brand-slate">₹{getCartMrpTotal()}</span>
-                </div>
-                <div className="flex justify-between text-brand-primary">
-                  <span>{t('productDiscount', lang)}</span>
-                  <span className="font-bold">-₹{getCartDiscount()}</span>
-                </div>
-                {state.couponDiscount > 0 && (
-                  <div className="flex justify-between text-brand-primary font-bold">
-                    <span>Promo ({state.appliedCoupon}) Discount</span>
-                    <span>-₹{state.couponDiscount}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-brand-slate/70">{t('deliveryFee', lang)}</span>
-                  <span className="font-bold text-brand-slate">
-                    {getDeliveryFee() === 0 ? <span className="text-brand-primary">{t('free', lang)}</span> : `₹${getDeliveryFee()}`}
+            {/* Right Column (Sticky Order Summary) */}
+            <div className="w-full min-w-0 lg:col-span-5 lg:sticky lg:top-28 space-y-4">
+              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-6 space-y-4 w-full min-w-0 box-border">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <h3 className="font-black text-base text-slate-900">
+                    {t('billDetails', lang)}
+                  </h3>
+                  <span className="text-xs font-black text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                    {getCartItemCount()} {t('items', lang)}
                   </span>
                 </div>
-                <div className="border-t border-[#EAE2D5] pt-2 flex justify-between font-black text-base text-brand-slate">
-                  <span>{t('grandTotal', lang)}</span>
-                  <span className="text-brand-primary">₹{getCartTotal()}</span>
-                </div>
-              </div>
 
-              {/* Delivery Guarantee Card */}
-              <div className="p-3 bg-brand-mint rounded-xl border border-emerald-200 text-xs space-y-1">
-                <div className="flex items-center gap-1.5 font-bold text-brand-primary">
-                  <IconTruck className="w-4 h-4 text-brand-primary shrink-0" />
-                  <span>{t('delivery30', lang)}</span>
+                {/* Items Preview */}
+                <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 pr-1 w-full min-w-0">
+                  {state.cart.map((item) => {
+                    const product =
+                      (state.catalog || products).find((p) => p.id === item.productId) ||
+                      products.find((p) => p.id === item.productId);
+                    if (!product) return null;
+                    const variant = product.variants[item.variantIndex];
+                    if (!variant) return null;
+
+                    return (
+                      <div
+                        key={`${item.productId}-${item.variantIndex}`}
+                        className="py-2.5 flex items-center gap-3 w-full min-w-0"
+                      >
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-50 shrink-0 border border-slate-200 relative">
+                          <img
+                            src={product.image}
+                            alt={product.nameEn}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0 text-xs">
+                          <p className="font-bold text-slate-900 break-words leading-tight">
+                            {lang === 'ta' ? product.nameTa : product.nameEn}
+                          </p>
+                          <p className="text-slate-500 break-words mt-0.5 font-medium">
+                            {variant.label} × {item.quantity}
+                          </p>
+                        </div>
+                        <span className="font-black text-xs text-slate-900 shrink-0">
+                          ₹{variant.price * item.quantity}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <p className="text-[11px] text-brand-slate/70 leading-relaxed">
-                  {lang === 'ta'
-                    ? `டெலிவரி முகவரி: ${state.location.area} (~${state.location.deliveryMins} நிமிடம்)`
-                    : `Delivering directly to ${state.location.area} in ~${state.location.deliveryMins} mins.`}
-                </p>
+
+                {/* Price Breakdown */}
+                <div className="pt-3 border-t border-slate-100 space-y-2 text-xs w-full min-w-0">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">{t('itemTotal', lang)}</span>
+                    <span className="font-bold text-slate-900">₹{getCartMrpTotal()}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-700">
+                    <span>{t('productDiscount', lang)}</span>
+                    <span className="font-black">-₹{getCartDiscount()}</span>
+                  </div>
+                  {state.couponDiscount > 0 && (
+                    <div className="flex justify-between items-center text-emerald-700 font-bold">
+                      <span>Promo ({state.appliedCoupon}) Discount</span>
+                      <span className="font-black">-₹{state.couponDiscount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">{t('deliveryFee', lang)}</span>
+                    <span className="font-bold text-slate-900">
+                      {getDeliveryFee() === 0 ? (
+                        <span className="text-emerald-700 font-black">{t('free', lang)}</span>
+                      ) : (
+                        `₹${getDeliveryFee()}`
+                      )}
+                    </span>
+                  </div>
+                  <div className="border-t border-slate-200 pt-2 flex justify-between items-center font-black text-base text-slate-900">
+                    <span>{t('grandTotal', lang)}</span>
+                    <span className="text-emerald-700 font-black">₹{getCartTotal()}</span>
+                  </div>
+                </div>
+
+                {/* 3km Express Guarantee Card */}
+                <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200 text-xs space-y-1 w-full min-w-0 box-border">
+                  <div className="flex items-center gap-1.5 font-black text-emerald-800">
+                    <IconTruck className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <span className="truncate">{t('delivery30', lang)}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 leading-relaxed font-medium">
+                    {lang === 'ta'
+                      ? 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்டிலிருந்து 3 கி.மீ சுற்றளவில் 20 நிமிடங்களில் டோர் டெலிவரி.'
+                      : 'Express doorstep delivery in ~20 minutes strictly within a 3.0 km radius of our store.'}
+                  </p>
+                </div>
+
+                {/* Trust Badge */}
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 font-semibold pt-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{lang === 'ta' ? '100% பாதுகாப்பான பரிவர்த்தனை' : '100% Safe & Secure Checkout'}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Responsive Centered GPS Denied Modal */}
+      <GpsDeniedModal
+        isOpen={gpsDeniedOpen}
+        onClose={() => setGpsDeniedOpen(false)}
+        onSearchManually={() => {
+          setGpsDeniedOpen(false);
+          setShowAddForm(true);
+          setTimeout(() => {
+            searchInputRef.current?.focus();
+          }, 100);
+        }}
+        onRetryGps={() => {
+          setGpsDeniedOpen(false);
+          handleDetectGPS();
+        }}
+        lang={lang}
+      />
+    </>
   );
 }

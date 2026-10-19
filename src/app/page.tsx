@@ -7,7 +7,7 @@ import CategoryGrid from '@/components/CategoryGrid';
 import PromoBanners from '@/components/PromoBanners';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import ProductsPage from '@/components/ProductsPage';
-import MonthlyListPage from '@/components/MonthlyListPage';
+import OrderAgainPage from '@/components/OrderAgainPage';
 import CheckoutPage from '@/components/CheckoutPage';
 import OrdersPage from '@/components/OrdersPage';
 import ProductDetailPage from '@/components/ProductDetailPage';
@@ -39,7 +39,7 @@ export default function Home() {
       case 'products':
         return <ProductsPage />;
       case 'monthly-list':
-        return <MonthlyListPage />;
+        return <OrderAgainPage />;
       case 'checkout':
         return <CheckoutPage />;
       case 'orders':
@@ -63,14 +63,6 @@ export default function Home() {
         );
     }
   };
-
-  if (state.currentPage === 'profile') {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-900 w-full">
-        <ProfilePage />
-      </div>
-    );
-  }
 
   return <AppShell>{renderPage()}</AppShell>;
 }

@@ -209,10 +209,10 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <h3 className="text-base xs:text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1.5 line-clamp-2 drop-shadow-xs">
+              <h3 className="text-base xs:text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1.5 break-words drop-shadow-xs">
                 {lang === 'ta' ? currentSlide.titleTa : currentSlide.titleEn}
               </h3>
-              <p className="text-xs xs:text-[13px] sm:text-sm md:text-base text-emerald-100 font-medium leading-relaxed line-clamp-2 drop-shadow-xs">
+              <p className="text-xs xs:text-[13px] sm:text-sm md:text-base text-emerald-100 font-medium leading-relaxed break-words drop-shadow-xs">
                 {lang === 'ta' ? currentSlide.subTa : currentSlide.subEn}
               </p>
             </div>
@@ -249,7 +249,7 @@ export default function HeroSection() {
                 {/* Card Top: Badge & Full Title visible on multiple lines */}
                 <div className="min-w-0">
                   <div className="flex items-center justify-between gap-1.5 mb-1.5">
-                    <span className="text-[10px] sm:text-[11px] font-black text-emerald-900 bg-emerald-100/90 px-2 sm:px-2.5 py-0.5 rounded-full inline-block truncate max-w-[70%]">
+                    <span className="text-[10px] sm:text-[11px] font-black text-emerald-900 bg-emerald-100/90 px-2 sm:px-2.5 py-0.5 rounded-full inline-block">
                       {lang === 'ta' ? card.badgeTa : card.badgeEn}
                     </span>
                     <span className="text-[10px] sm:text-[11px] font-bold text-[#76CA3E] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0 whitespace-nowrap">

@@ -19,31 +19,34 @@ export default function MobileBottomNav() {
   const lang = state.lang;
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const cartCount = getCartItemCount();
-  const cartSubtotal = getCartSubtotal();
-  const cartSavings = getCartDiscount();
+  const cartCount = mounted ? getCartItemCount() : 0;
+  const cartSubtotal = mounted ? getCartSubtotal() : 0;
+  const cartSavings = mounted ? getCartDiscount() : 0;
   const freeDeliveryDiff = Math.max(0, 499 - cartSubtotal);
   const freeDeliveryProgress = Math.min(100, Math.round((cartSubtotal / 499) * 100));
 
   // Get last 3 products added to cart for thumbnail stack
-  const recentCartProducts = state.cart
-    .slice(-3)
-    .reverse()
-    .map((item) => products.find((p) => p.id === item.productId))
-    .filter(Boolean);
+  const recentCartProducts = mounted
+    ? state.cart
+        .slice(-3)
+        .reverse()
+        .map((item) => products.find((p) => p.id === item.productId))
+        .filter(Boolean)
+    : [];
 
   const navItems = [
     { key: 'home', Icon: Home, label: t('home', lang) },
     { key: 'products', Icon: LayoutGrid, label: t('categories', lang) },
-    { key: 'monthly-list', Icon: RotateCcw, label: lang === 'ta' ? 'மாத லிஸ்ட்' : 'Order Again' },
+    { key: 'monthly-list', Icon: RotateCcw, label: lang === 'ta' ? 'மீண்டும் ஆர்டர்' : 'Order Again' },
     { key: 'orders', Icon: Receipt, label: t('trackOrder', lang) },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
       <div className="max-w-md md:max-w-xl mx-auto pointer-events-auto">
         {/* Layer 1: Dark Free-Delivery Nudge Strip (only shown while unlocking; disappears once free delivery is reached) */}
         {cartCount > 0 && cartSubtotal < 499 && (
@@ -51,7 +54,7 @@ export default function MobileBottomNav() {
             <div className="flex items-center justify-between font-bold text-[11px] sm:text-xs">
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 <Truck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="leading-tight truncate">
+                <span className="leading-tight break-words">
                   {lang === 'ta'
                     ? `இலவச டெலிவரிக்கு மேலும் ₹${freeDeliveryDiff} சேருங்கள்`
                     : `Shop for ₹${freeDeliveryDiff} more for FREE delivery!`}
@@ -120,44 +123,46 @@ export default function MobileBottomNav() {
         )}
       </div>
 
-      {/* Layer 3: Frosted Glass 4-Tab Bottom Navigation Bar (Always visible on mobile) */}
-      <nav className="md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 h-16 px-4 flex items-center justify-around pointer-events-auto shadow-lg pb-safe">
-        {navItems.map((item) => {
-          const isActive = state.currentPage === item.key && !state.cartOpen;
-          const NavIcon = item.Icon;
+      {/* Layer 3: Persistent 4-Tab Bottom Navigation Bar (Home, Categories, Order Again, Track Order) */}
+      <div className="w-full pointer-events-auto bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <nav className="max-w-md md:max-w-xl mx-auto h-16 px-3 sm:px-6 flex items-center justify-around pb-safe">
+          {navItems.map((item) => {
+            const isActive = state.currentPage === item.key && !state.cartOpen;
+            const NavIcon = item.Icon;
 
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => {
-                dispatch({ type: 'SET_CART_OPEN', open: false });
-                dispatch({ type: 'SET_PAGE', page: item.key });
-                if (item.key === 'products') {
-                  dispatch({ type: 'SET_CATEGORY', category: 'all' });
-                }
-              }}
-              className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition-all relative ${
-                isActive ? 'text-[#143B0D] font-extrabold' : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <div
-                className={`p-1.5 rounded-xl transition-colors ${
-                  isActive ? 'bg-[#F1F9EC] text-[#76CA3E]' : ''
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => {
+                  dispatch({ type: 'SET_CART_OPEN', open: false });
+                  dispatch({ type: 'SET_PAGE', page: item.key });
+                  if (item.key === 'products') {
+                    dispatch({ type: 'SET_CATEGORY', category: 'all' });
+                  }
+                }}
+                className={`flex flex-col items-center justify-center flex-1 py-1 rounded-xl transition-all relative select-none ${
+                  isActive ? 'text-[#143B0D] font-extrabold' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <NavIcon className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] sm:text-[11px] font-semibold leading-none mt-0.5">
-                {item.label}
-              </span>
-              {isActive && (
-                <div className="w-1.5 h-1.5 rounded-full bg-[#76CA3E] mt-1 shadow-2xs" />
-              )}
-            </button>
-          );
-        })}
-      </nav>
+                <div
+                  className={`p-1.5 rounded-xl transition-colors ${
+                    isActive ? 'bg-[#F1F9EC] text-[#76CA3E]' : ''
+                  }`}
+                >
+                  <NavIcon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] sm:text-[11px] font-semibold leading-none mt-0.5 whitespace-nowrap">
+                  {item.label}
+                </span>
+                {isActive && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#76CA3E] mt-1 shadow-2xs" />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 }

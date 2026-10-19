@@ -346,7 +346,7 @@ export default function MonthlyListPage() {
           <div className="lg:col-span-4 lg:sticky lg:top-36 space-y-4 min-w-0">
             <div className="bg-[#FFFFFF] rounded-2xl border-2 border-brand-primary/30 shadow-xl p-4 sm:p-5 md:p-6 space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#EAE2D5] gap-2">
-                <h3 className="font-extrabold text-sm sm:text-base text-brand-slate truncate">
+                <h3 className="font-extrabold text-sm sm:text-base text-brand-slate break-words flex-1">
                   {lang === 'ta' ? 'மாதாந்திர பில் விவரம்' : 'Monthly Provision Summary'}
                 </h3>
                 <span className="text-[11px] sm:text-xs font-bold text-brand-primary bg-brand-mint px-2 py-0.5 rounded-full border border-brand-primary/10 shrink-0">
@@ -395,7 +395,7 @@ export default function MonthlyListPage() {
                 style={{ minHeight: '48px' }}
               >
                 <IconZap className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300 shrink-0" />
-                <span className="truncate">{t('addEntireList', lang)}</span>
+                <span className="break-words">{t('addEntireList', lang)}</span>
               </button>
 
               <p className="text-[10px] sm:text-[11px] text-center text-brand-slate/50 leading-relaxed">
@@ -423,8 +423,8 @@ export default function MonthlyListPage() {
 
       {/* Interactive Customize Monthly List Modal */}
       {customizeOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in box-border">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 box-border">
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-[#F8FAF7]">
               <div>

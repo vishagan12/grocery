@@ -162,7 +162,7 @@ export default function ProductsPage() {
                     }`}
                   >
                     <img src={cat.image} alt={cat.nameEn} className="w-4 h-4 rounded-full object-cover shrink-0" />
-                    <span className="truncate max-w-[140px]">{lang === 'ta' ? cat.nameTa : cat.nameEn}</span>
+                    <span className="whitespace-nowrap">{lang === 'ta' ? cat.nameTa : cat.nameEn}</span>
                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ${
                       isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                     }`}>

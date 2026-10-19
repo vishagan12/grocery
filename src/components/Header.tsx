@@ -24,7 +24,9 @@ import {
   Plus,
   MapPin,
   Heart,
+  RotateCcw,
 } from 'lucide-react';
+import OtpInput from '@/components/OtpInput';
 
 export default function Header() {
   const { state, dispatch, showToast } = useStore();
@@ -130,7 +132,7 @@ export default function Header() {
                 <MapPin className="w-3.5 h-3.5 text-[#143B0D] shrink-0" />
                 <div className="flex flex-col leading-none min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="font-extrabold text-[#143B0D] text-[11px] sm:text-xs uppercase tracking-wide truncate max-w-[110px] xs:max-w-[150px] sm:max-w-[200px]">
+                    <span className="font-extrabold text-[#143B0D] text-[11px] sm:text-xs uppercase tracking-wide break-words max-w-[150px] xs:max-w-[220px] sm:max-w-[320px]">
                       {state.location.area || 'Madurai'}
                     </span>
                     <ChevronDown className="w-2.5 h-2.5 text-[#143B0D]/80 group-hover:translate-y-0.5 transition-transform shrink-0" />
@@ -226,19 +228,19 @@ export default function Header() {
                   </button>
                 )}
 
-                {/* Right: Subtle vertical divider + Quick 1-Click Monthly List Badge */}
+                {/* Right: Subtle vertical divider + Quick 1-Click Order Again Badge */}
                 <div className="h-5 sm:h-6 w-px bg-slate-200 mx-1 sm:mx-1.5 shrink-0" />
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
                   className="flex items-center gap-1 sm:gap-1.5 bg-[#F1F9EC] hover:bg-[#E2F3D9] text-[#143B0D] px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-black transition-all shrink-0 border border-[#76CA3E]/30"
                 >
-                  <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-600 fill-current shrink-0" />
+                  <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#3D9415] shrink-0" />
                   <span className="whitespace-nowrap hidden xs:inline">
-                    {lang === 'ta' ? 'மாத மளிகை' : 'Monthly List'}
+                    {lang === 'ta' ? 'மீண்டும் ஆர்டர்' : 'Order Again'}
                   </span>
                   <span className="whitespace-nowrap xs:hidden">
-                    {lang === 'ta' ? 'மாதம்' : 'List'}
+                    {lang === 'ta' ? 'மீண்டும்' : 'Reorder'}
                   </span>
                 </button>
               </div>
@@ -366,7 +368,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   const lang = state.lang;
   const [phone, setPhone] = useState('');
   const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
-  const [otp, setOtp] = useState('');
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '']);
   const [name, setName] = useState('');
   const [dob, setDob] = useState('');
 
@@ -377,8 +379,8 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   };
 
   const handleVerifyOtp = () => {
-    // Accepts any OTP entered by user
-    if (otp.length > 0) {
+    const code = otpDigits.join('');
+    if (code.length === 4) {
       setStep('name');
     }
   };
@@ -418,8 +420,8 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in box-border">
+      <div className="bg-white rounded-3xl max-w-sm w-full p-5 sm:p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto box-border">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-[#F1F9EC] flex items-center justify-center text-[#76CA3E]">
@@ -489,25 +491,22 @@ function LoginModal({ onClose }: { onClose: () => void }) {
         )}
 
         {step === 'otp' && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                {lang === 'ta' ? 'OTP குறியீடு (எந்த எண்ணும் ஏற்கப்படும்)' : 'Enter OTP (Any number accepted)'}
+              <label className="text-xs font-bold text-slate-700 block mb-2 text-center">
+                {lang === 'ta' ? '4-இலக்க OTP குறியீட்டை உள்ளிடவும்' : 'Enter 4-Digit Verification OTP'}
               </label>
-              <input
-                type="text"
-                maxLength={6}
-                placeholder="4829"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full text-center tracking-widest text-lg font-bold border border-slate-200 rounded-xl py-2.5 outline-none focus:border-[#76CA3E]"
+              <OtpInput
+                value={otpDigits}
+                onChange={setOtpDigits}
+                onComplete={handleVerifyOtp}
               />
             </div>
 
             <button
-              disabled={otp.length === 0}
+              disabled={otpDigits.join('').length < 4}
               onClick={handleVerifyOtp}
-              className="w-full bg-[#76CA3E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98"
+              className="w-full bg-[#76CA3E] disabled:bg-slate-300 text-white font-extrabold py-3 rounded-xl shadow-sm active:scale-98 transition-all"
             >
               {lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}
             </button>

@@ -104,7 +104,7 @@ export default function CartDrawer() {
             <div className="flex items-center justify-between gap-2 text-xs font-black text-slate-800 mb-2">
               <div className="flex items-center gap-1.5 min-w-0">
                 <IconTruck className="w-4 h-4 text-[#143B0D] shrink-0" />
-                <span className="truncate text-xs font-bold text-slate-900">
+                <span className="text-xs font-bold text-slate-900 break-words leading-tight flex-1">
                   {remaining > 0
                     ? t('addMoreForFree', lang, { amount: remaining })
                     : t('freeDeliveryUnlocked', lang)}
@@ -262,7 +262,7 @@ export default function CartDrawer() {
                           <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-cover" />
                         </div>
                         <div className="min-w-0 mb-2">
-                          <p className="font-bold text-xs text-slate-900 truncate leading-snug">
+                          <p className="font-bold text-xs text-slate-900 break-words leading-snug">
                             {lang === 'ta' ? prod.nameTa : prod.nameEn}
                           </p>
                           <p className="text-[10px] text-slate-500 font-semibold">{variant.label}</p>

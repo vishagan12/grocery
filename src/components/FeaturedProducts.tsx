@@ -20,16 +20,16 @@ export default function FeaturedProducts() {
         {/* Section Heading - Clean single-line row on all screen sizes */}
         <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b border-slate-200/80 gap-2">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <h3 className="font-black text-[#0F172A] tracking-tight text-sm sm:text-xl whitespace-nowrap truncate">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h3 className="font-black text-[#0F172A] tracking-tight text-sm sm:text-xl break-words">
                 {t('dealOfDay', lang)}
               </h3>
-              <span className="hidden xs:inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black bg-[#76CA3E] text-white px-2 py-0.5 rounded-full shadow-2xs whitespace-nowrap shrink-0">
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black bg-[#76CA3E] text-white px-2 py-0.5 rounded-full shadow-2xs whitespace-nowrap shrink-0">
                 <Flame className="w-3 h-3 fill-current shrink-0" />
                 <span>{lang === 'ta' ? 'சிறப்பு சலுகை' : 'HOT DEALS'}</span>
               </span>
             </div>
-            <p className="text-slate-600 font-medium text-[11px] sm:text-sm mt-0.5 truncate hidden sm:block">
+            <p className="text-slate-600 font-medium text-[11px] sm:text-sm mt-0.5 break-words hidden sm:block">
               {lang === 'ta'
                 ? 'நேரடி கடை கவுண்டர் விலை • 20 நிமிட விரைவு டெலிவரி'
                 : 'Direct store counter price • Delivered in 20 minutes'}
