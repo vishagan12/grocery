@@ -373,16 +373,86 @@ export default function CheckoutPage() {
     }
 
     setIsSubmittingOrder(true);
-    const orderId = `#SAS-${1000 + Math.floor(Math.random() * 9000)}`;
+    const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `sas-idem-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const finalPhone = phone.startsWith('+91') ? phone : `+91-${phone.replace(/\D/g, '').slice(-10)}`;
+    const rawPhone = finalPhone.replace(/\D/g, '').slice(-10);
 
-    const newOrder = {
-      id: orderId,
+    const targetLat = activeSavedAddress ? activeSavedAddress.lat : formLat;
+    const targetLng = activeSavedAddress ? activeSavedAddress.lng : formLng;
+
+    const orderItems = state.cart.map((item) => {
+      const product =
+        (state.catalog || products).find((p) => p.id === item.productId) ||
+        products.find((p) => p.id === item.productId);
+      const variant = product?.variants[item.variantIndex];
+      return {
+        productId: item.productId,
+        variantLabel: variant?.label || '1 pack',
+        quantity: item.quantity,
+      };
+    });
+
+    let authoritativeOrderId = `#SAS-${1000 + Math.floor(Math.random() * 9000)}`;
+    let finalTotal = getCartTotal();
+    let finalSubtotal = getCartMrpTotal();
+    let finalDiscount = getCartDiscount() + state.couponDiscount;
+    let finalDeliveryFee = getDeliveryFee();
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idempotencyKey,
+          phone: rawPhone,
+          customerName: state.userName || 'Valued Customer',
+          address: orderAddressString,
+          lat: targetLat,
+          lng: targetLng,
+          paymentMethod,
+          deliverySlot: deliverySlot || 'express',
+          couponCode: state.appliedCoupon,
+          items: orderItems,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.orderId) {
+          authoritativeOrderId = data.orderId;
+          finalTotal = data.total;
+          finalSubtotal = data.subtotal;
+          finalDiscount = data.discount;
+          finalDeliveryFee = data.deliveryFee;
+        }
+      } else {
+        const errJson = await res.json().catch(() => null);
+        if (res.status === 400 && errJson?.error?.includes('3 km')) {
+          showToast(
+            lang === 'ta'
+              ? 'இந்த முகவரிக்கு டெலிவரி செய்ய முடியாது. 3 கி.மீ-க்குள் உள்ள முகவரியைத் தேர்வு செய்யவும்.'
+              : 'Delivery address is outside our 3 km radius.'
+          );
+          setIsSubmittingOrder(false);
+          return;
+        }
+        console.warn('API /api/orders returned error, falling back locally:', errJson);
+      }
+    } catch (err) {
+      console.warn('Server order API network error, falling back locally:', err);
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+
+    const placedOrder = {
+      id: authoritativeOrderId,
       items: [...state.cart],
-      subtotal: getCartMrpTotal(),
-      discount: getCartDiscount() + state.couponDiscount,
-      deliveryFee: getDeliveryFee(),
-      total: getCartTotal(),
+      subtotal: finalSubtotal,
+      discount: finalDiscount,
+      deliveryFee: finalDeliveryFee,
+      total: finalTotal,
       paymentMethod,
       address: orderAddressString,
       phone: finalPhone,
@@ -390,45 +460,8 @@ export default function CheckoutPage() {
       timestamp: Date.now(),
     };
 
-    // Insert into Supabase
-    try {
-      await supabase.from('orders').insert({
-        id: newOrder.id,
-        phone: finalPhone,
-        address: orderAddressString,
-        subtotal: getCartSubtotal(),
-        discount: getCartDiscount() + (state.couponDiscount || 0),
-        delivery_fee: getDeliveryFee(),
-        total: getCartTotal(),
-        payment_method: paymentMethod,
-        payment_status: paymentMethod === 'upi' ? 'paid' : 'pending',
-        status: 0,
-        delivery_slot: deliverySlot || 'express',
-      });
-
-      const orderItemsPayload = state.cart.map((item) => {
-        const product = (state.catalog || products).find((p) => p.id === item.productId) || products.find((p) => p.id === item.productId);
-        const variant = product?.variants[item.variantIndex];
-        return {
-          order_id: newOrder.id,
-          product_id: item.productId,
-          variant_label: variant?.label || '1 pack',
-          price: variant?.price || 0,
-          quantity: item.quantity,
-        };
-      });
-
-      if (orderItemsPayload.length > 0) {
-        await supabase.from('order_items').insert(orderItemsPayload);
-      }
-    } catch (err) {
-      console.warn('Supabase live order insert error, fallback to local dispatch:', err);
-    } finally {
-      setIsSubmittingOrder(false);
-    }
-
-    dispatch({ type: 'ADD_ORDER', order: newOrder });
-    trackPurchase(newOrder.id, getCartTotal());
+    dispatch({ type: 'ADD_ORDER', order: placedOrder });
+    trackPurchase(placedOrder.id, finalTotal);
     dispatch({ type: 'CLEAR_CART' });
     dispatch({ type: 'SET_PAGE', page: 'orders' });
     showToast(t('orderPlacedToast', lang));

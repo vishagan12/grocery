@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateDistanceKm, isWithinDeliveryRadius, DEFAULT_SHOP_COORDS } from '@/lib/geofence';
+import { fetchWithTimeout, validateSafeExternalUrl } from '@/lib/resilience';
 
 export interface PlaceSuggestion {
   id: string;
@@ -253,41 +254,91 @@ export async function GET(req: NextRequest) {
     // Engine A: Google Geocoding API if key present
     if (googleApiKey) {
       try {
-        const gRes = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLat},${userLng}&key=${googleApiKey}`
-        );
-        const gData = await gRes.json();
-        if (gData.status === 'OK' && Array.isArray(gData.results) && gData.results.length > 0) {
-          const first = gData.results[0];
-          const components = first.address_components || [];
+        const gUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLat},${userLng}&key=${googleApiKey}`;
+        if (validateSafeExternalUrl(gUrl)) {
+          const gRes = await fetchWithTimeout(gUrl, {}, 3500);
+          const gData = await gRes.json();
+          if (gData.status === 'OK' && Array.isArray(gData.results) && gData.results.length > 0) {
+            const first = gData.results[0];
+            const components = first.address_components || [];
 
-          let houseNo = '';
-          let street = '';
-          let area = '';
-          let landmark = '';
-          let pincode = '';
+            let houseNo = '';
+            let street = '';
+            let area = '';
+            let landmark = '';
+            let pincode = '';
 
-          for (const comp of components) {
-            const types = comp.types || [];
-            if (types.includes('street_number') || types.includes('subpremise') || types.includes('premise')) {
-              houseNo = comp.long_name;
-            } else if (types.includes('route')) {
-              street = comp.long_name;
-            } else if (types.includes('sublocality') || types.includes('sublocality_level_1') || types.includes('neighborhood')) {
-              if (!area) area = comp.long_name;
-            } else if (types.includes('point_of_interest') || types.includes('establishment')) {
-              landmark = comp.long_name;
-            } else if (types.includes('postal_code')) {
-              pincode = comp.long_name;
+            for (const comp of components) {
+              const types = comp.types || [];
+              if (types.includes('street_number') || types.includes('subpremise') || types.includes('premise')) {
+                houseNo = comp.long_name;
+              } else if (types.includes('route')) {
+                street = comp.long_name;
+              } else if (types.includes('sublocality') || types.includes('sublocality_level_1') || types.includes('neighborhood')) {
+                if (!area) area = comp.long_name;
+              } else if (types.includes('point_of_interest') || types.includes('establishment')) {
+                landmark = comp.long_name;
+              } else if (types.includes('postal_code')) {
+                pincode = comp.long_name;
+              }
             }
+
+            const parsed = parseAddressParts(
+              first.formatted_address || '',
+              '',
+              {
+                id: `g-rev-${first.place_id || 'gps'}`,
+                title: houseNo ? `${houseNo}, ${street || area}` : street || area || 'Current Location',
+                houseNo,
+                street,
+                area,
+                landmark,
+                pincode,
+                lat: userLat,
+                lng: userLng,
+              },
+              shopLat,
+              shopLng
+            );
+
+            return NextResponse.json({ suggestions: [parsed] });
           }
+        }
+      } catch (err) {
+        console.warn('Google reverse geocode failed, falling back to OSM:', err);
+      }
+    }
+
+    // Engine B: OpenStreetMap Nominatim Reverse
+    try {
+      const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&addressdetails=1`;
+      if (validateSafeExternalUrl(nomUrl)) {
+        const nomRes = await fetchWithTimeout(
+          nomUrl,
+          {
+            headers: {
+              'User-Agent': 'SriAmmanSupermarketMadurai/2.0 (contact@sriammansupermarket.in)',
+              'Accept-Language': 'en',
+            },
+          },
+          3500
+        );
+        const data = await nomRes.json();
+
+        if (data && data.address) {
+          const addr = data.address;
+          const houseNo = addr.house_number || addr.building || '';
+          const street = addr.road || addr.street || addr.pedestrian || addr.neighbourhood || '';
+          const area = addr.suburb || addr.neighbourhood || addr.residential || addr.city_district || '';
+          const landmark = addr.amenity || addr.shop || '';
+          const pincode = addr.postcode || '';
 
           const parsed = parseAddressParts(
-            first.formatted_address || '',
+            data.display_name || '',
             '',
             {
-              id: `g-rev-${first.place_id || 'gps'}`,
-              title: houseNo ? `${houseNo}, ${street || area}` : street || area || 'Current Location',
+              id: `osm-rev-${data.place_id || 'gps'}`,
+              title: houseNo ? `${houseNo}, ${street || area}` : street || area || data.name || 'Current Location',
               houseNo,
               street,
               area,
@@ -302,49 +353,6 @@ export async function GET(req: NextRequest) {
 
           return NextResponse.json({ suggestions: [parsed] });
         }
-      } catch (err) {
-        console.warn('Google reverse geocode failed, falling back to OSM:', err);
-      }
-    }
-
-    // Engine B: OpenStreetMap Nominatim Reverse
-    try {
-      const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}&addressdetails=1`;
-      const nomRes = await fetch(nomUrl, {
-        headers: {
-          'User-Agent': 'SriAmmanSupermarketMadurai/2.0 (contact@sriammansupermarket.in)',
-          'Accept-Language': 'en',
-        },
-      });
-      const data = await nomRes.json();
-
-      if (data && data.address) {
-        const addr = data.address;
-        const houseNo = addr.house_number || addr.building || '';
-        const street = addr.road || addr.street || addr.pedestrian || addr.neighbourhood || '';
-        const area = addr.suburb || addr.neighbourhood || addr.residential || addr.city_district || '';
-        const landmark = addr.amenity || addr.shop || '';
-        const pincode = addr.postcode || '';
-
-        const parsed = parseAddressParts(
-          data.display_name || '',
-          '',
-          {
-            id: `osm-rev-${data.place_id || 'gps'}`,
-            title: houseNo ? `${houseNo}, ${street || area}` : street || area || data.name || 'Current Location',
-            houseNo,
-            street,
-            area,
-            landmark,
-            pincode,
-            lat: userLat,
-            lng: userLng,
-          },
-          shopLat,
-          shopLng
-        );
-
-        return NextResponse.json({ suggestions: [parsed] });
       }
     } catch (err) {
       console.warn('OSM reverse geocode error:', err);
@@ -430,7 +438,10 @@ export async function GET(req: NextRequest) {
         const gUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
           cleanQuery + ', Madurai, Tamil Nadu'
         )}&key=${googleApiKey}`;
-        const res = await fetch(gUrl);
+        if (!validateSafeExternalUrl(gUrl)) {
+          return [];
+        }
+        const res = await fetchWithTimeout(gUrl, {}, 3500);
         const data = await res.json();
         if (data.status === 'OK' && Array.isArray(data.results)) {
           return data.results.slice(0, 4).map((item: any) => {
@@ -492,11 +503,18 @@ export async function GET(req: NextRequest) {
       const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(
         cleanQuery + ' Madurai'
       )}&lat=${shopLat}&lon=${shopLng}&limit=8`;
-      const res = await fetch(photonUrl, {
-        headers: {
-          'User-Agent': 'SriAmmanSupermarketMadurai/2.0 (contact@sriammansupermarket.in)',
+      if (!validateSafeExternalUrl(photonUrl)) {
+        return [];
+      }
+      const res = await fetchWithTimeout(
+        photonUrl,
+        {
+          headers: {
+            'User-Agent': 'SriAmmanSupermarketMadurai/2.0 (contact@sriammansupermarket.in)',
+          },
         },
-      });
+        3500
+      );
       const data = await res.json();
       if (data && Array.isArray(data.features)) {
         return data.features.map((feat: any, idx: number) => {
@@ -543,12 +561,19 @@ export async function GET(req: NextRequest) {
       const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
         cleanQuery + ', Madurai'
       )}&addressdetails=1&limit=6`;
-      const res = await fetch(nomUrl, {
-        headers: {
-          'User-Agent': 'SriAmmanSupermarketMadurai/2.0 (contact@sriammansupermarket.in)',
-          'Accept-Language': 'en',
+      if (!validateSafeExternalUrl(nomUrl)) {
+        return [];
+      }
+      const res = await fetchWithTimeout(
+        nomUrl,
+        {
+          headers: {
+            'User-Agent': 'SriAmmanSupermarketMadurai/2.0 (contact@sriammansupermarket.in)',
+            'Accept-Language': 'en',
+          },
         },
-      });
+        3500
+      );
       const data = await res.json();
       if (Array.isArray(data)) {
         return data.map((item: any) => {

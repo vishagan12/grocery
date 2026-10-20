@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { DEFAULT_SHOP_COORDS, SHOP_MAPS_URL } from '@/lib/geofence';
+import { fetchWithTimeout, validateSafeExternalUrl } from '@/lib/resilience';
 
 interface ShopCoords {
   lat: number;
@@ -26,15 +27,19 @@ export async function GET() {
     return NextResponse.json(cachedCoords);
   }
 
-  try {
-    const res = await fetch(SHOP_MAPS_URL, {
-      method: 'GET',
-      redirect: 'follow',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-      next: { revalidate: 86400 }, // Cache for 24 hours
-    });
+  if (validateSafeExternalUrl(SHOP_MAPS_URL)) {
+    try {
+      const res = await fetchWithTimeout(
+        SHOP_MAPS_URL,
+        {
+          method: 'GET',
+          redirect: 'follow',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+        },
+        3500
+      );
 
     const finalUrl = res.url || '';
     const text = await res.text();
@@ -63,6 +68,7 @@ export async function GET() {
   } catch (err) {
     console.warn('Failed to dynamically resolve shop coordinates, using default shop coordinates:', err);
   }
+}
 
   cachedCoords = {
     ...DEFAULT_SHOP_COORDS,

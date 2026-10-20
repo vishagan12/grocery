@@ -77,6 +77,7 @@ type StoreState = {
   savedAddresses: SavedAddress[];
   selectedAddressId: string | null;
   shopCoords: { lat: number; lng: number; shopUrl: string };
+  sessionExpiresAt?: number | null;
 };
 
 type StoreAction =
@@ -146,6 +147,7 @@ const initialState: StoreState = {
   savedAddresses: [],
   selectedAddressId: null,
   shopCoords: { ...DEFAULT_SHOP_COORDS, shopUrl: SHOP_MAPS_URL },
+  sessionExpiresAt: null,
 };
 
 function reducer(state: StoreState, action: StoreAction): StoreState {
@@ -241,6 +243,7 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
         userName: action.name || state.userName || 'Vishagan',
         userDob: action.dob || state.userDob || '12 Dec 2006',
         isLoggedIn: action.loggedIn,
+        sessionExpiresAt: action.loggedIn ? Date.now() + 7 * 24 * 60 * 60 * 1000 : null,
       };
 
     case 'LOGOUT':
@@ -251,6 +254,7 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
         userName: '',
         savedAddresses: [],
         selectedAddressId: null,
+        sessionExpiresAt: null,
       };
 
     case 'SHOW_TOAST':
@@ -429,6 +433,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const parsedLoc = parsed.location;
         const isLegacyLoc = parsedLoc && parsedLoc.area === 'K.K. Nagar' && parsedLoc.distanceKm === 1.8;
 
+        // Check session expiration (7 days TTL)
+        const sessionExpiresAt = parsed.sessionExpiresAt;
+        const isSessionValid =
+          Boolean(parsed.isLoggedIn) &&
+          typeof sessionExpiresAt === 'number' &&
+          Date.now() < sessionExpiresAt;
+
         dispatch({
           type: 'LOAD_STATE',
           state: {
@@ -436,11 +447,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             wishlist: initialWishlist,
             orders: parsed.orders || [],
             lang: parsed.lang || 'en',
-            isLoggedIn: false,
-            loginPhone: parsed.loginPhone || '',
-            userName: parsed.userName || 'Vishagan',
-            userDob: parsed.userDob || '12 Dec 2006',
+            isLoggedIn: isSessionValid,
+            loginPhone: isSessionValid ? parsed.loginPhone || '' : '',
+            userName: isSessionValid ? parsed.userName || 'Vishagan' : 'Vishagan',
+            userDob: isSessionValid ? parsed.userDob || '12 Dec 2006' : '12 Dec 2006',
             location: isLegacyLoc ? defaultLocation : parsed.location || defaultLocation,
+            sessionExpiresAt: isSessionValid ? sessionExpiresAt : null,
           },
         });
       }
@@ -536,12 +548,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           userName: state.userName,
           userDob: state.userDob,
           location: state.location,
+          sessionExpiresAt: state.sessionExpiresAt,
         })
       );
     } catch (e) {
       // ignore
     }
-  }, [state.cart, state.wishlist, state.orders, state.lang, state.isLoggedIn, state.loginPhone, state.userName, state.userDob, state.location, mounted]);
+  }, [state.cart, state.wishlist, state.orders, state.lang, state.isLoggedIn, state.loginPhone, state.userName, state.userDob, state.location, state.sessionExpiresAt, mounted]);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
