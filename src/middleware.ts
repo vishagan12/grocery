@@ -51,6 +51,8 @@ export function middleware(req: NextRequest) {
       maxRequestsPerMinute = 10;
     } else if (pathname.startsWith('/api/webhooks/')) {
       maxRequestsPerMinute = 60;
+    } else if (pathname.startsWith('/api/admin') || pathname.startsWith('/api/rider')) {
+      maxRequestsPerMinute = 120; // High frequency for real-time POS, barcode scans and rider updates
     } else if (pathname.startsWith('/api/places') || pathname.startsWith('/api/resolve-shop')) {
       maxRequestsPerMinute = 45;
     }

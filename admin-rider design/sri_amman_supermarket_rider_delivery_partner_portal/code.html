@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface": "#faf8ff", "on-surface-variant": "#3e4943", "on-tertiary": "#ffffff", "on-tertiary-fixed-variant": "#003ea8", "surface-variant": "#dae2fd", "on-secondary-fixed-variant": "#6e3900", "primary-fixed-dim": "#7bd8b1", "on-primary-fixed-variant": "#00513a", "on-error": "#ffffff", "tertiary-container": "#1e5fe7", "outline-variant": "#bdc9c1", "on-background": "#131b2e", "secondary-fixed-dim": "#ffb77d", "secondary": "#904d00", "surface-container-highest": "#dae2fd", "secondary-fixed": "#ffdcc3", "secondary-container": "#fe932c", "surface-container-low": "#f2f3ff", "on-primary-container": "#9ffdd3", "surface-container-high": "#e2e7ff", "outline": "#6e7a73", "error": "#ba1a1a", "on-tertiary-container": "#e6e9ff", "surface-container-lowest": "#ffffff", "inverse-on-surface": "#eef0ff", "tertiary-fixed": "#dbe1ff", "on-tertiary-fixed": "#00174b", "surface-tint": "#006c4e", "error-container": "#ffdad6", "surface-container": "#eaedff", "surface-bright": "#faf8ff", "primary-fixed": "#97f5cc", "on-primary-fixed": "#002115", "inverse-surface": "#283044", "surface-dim": "#d2d9f4", "on-secondary-fixed": "#2f1500", "tertiary": "#0047bf", "on-secondary": "#ffffff", "on-secondary-container": "#663500", "on-surface": "#131b2e", "primary": "#005d42", "inverse-primary": "#7bd8b1", "tertiary-fixed-dim": "#b4c5ff", "background": "#faf8ff", "primary-container": "#047857", "on-primary": "#ffffff", "on-error-container": "#93000a" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xs": "0.25rem", "margin": "1rem", "space-md": "0.75rem", "space-sm": "0.375rem", "gutter-desktop": "1rem", "gutter": "0.75rem", "margin-desktop": "1.5rem", "space-xl": "1.5rem", "space-lg": "1rem" }, "fontFamily": { "headline-sm": ["Plus Jakarta Sans"], "body-sm": ["Inter"], "title-md": ["Inter"], "label-code": ["Inter"], "tamil-subtitle": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "label-numeric": ["Inter"], "body-md": ["Inter"] }, "fontSize": { "headline-sm": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "title-md": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-code": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "600" }], "tamil-subtitle": ["11px", { "lineHeight": "14px", "letterSpacing": "0em", "fontWeight": "500" }], "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-xl": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "label-numeric": ["14px", { "lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-primary-container text-on-primary pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs"><button aria-label="Go back" class="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-on-primary hover:bg-primary rounded-lg transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[20px]">arrow_back</span></button><div class="flex flex-col justify-center min-w-0"><h1 class="font-headline-sm text-headline-sm text-on-primary truncate leading-tight">Active Delivery Run</h1><span class="font-tamil-subtitle text-tamil-subtitle text-primary-fixed-dim leading-none">ஸ்ரீ அம்மன் டெலிவரி</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Toggle Language" class="h-7 px-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-primary text-on-primary font-label-code text-label-code hover:bg-on-primary-fixed-variant transition-colors"><span class="font-bold">EN</span><span class="opacity-40 mx-0.5">/</span><span>தமிழ்</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full px-margin pt-16 pb-safe bg-surface flex-1"><div class="flex flex-col w-full pb-36 font-body-md text-on-surface">
+<!-- RIDER SHIFT STATUS BAR (High-contrast outdoor ambient bar) -->
+<div class="w-full bg-surface-container-highest px-gutter py-space-sm rounded-xl mb-space-md flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-headline-sm text-[13px] text-on-surface">Rider: Murugan K. (TVs XL - TN59 BV 8841)</span>
+</div>
+<div class="flex items-center gap-1 bg-surface px-2 py-0.5 rounded-full">
+<span class="font-tamil-subtitle text-tamil-subtitle text-primary font-bold">ஷிப்ட் ஆன்லைன்</span>
+</div>
+</div>
+<!-- SECTION 1: QUICK-LOOKUP 4-DIGIT PIN PAD / ORDER ID SEARCH -->
+<section class="w-full bg-surface-container-lowest rounded-xl shadow-md p-gutter mb-space-md flex flex-col gap-space-md">
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] uppercase tracking-wider text-primary">Order Verification Slip</span>
+<h2 class="font-title-md text-title-md text-on-surface">ENTER 4-DIGIT ORDER ID FROM BAG SLIP</h2>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">பில் எண்ணை உள்ளிடவும் (4 இலக்கம்)</span>
+</div>
+<!-- 4 Box Monospace Numeric Visual Display -->
+<div class="flex items-center justify-center gap-space-sm my-1">
+<div class="w-14 h-16 rounded-xl bg-surface-container-low flex flex-col items-center justify-center shadow-inner">
+<span class="font-headline-xl text-headline-xl text-on-surface font-mono font-bold leading-none">4</span>
+<span class="text-[9px] text-outline font-label-code mt-0.5">DIGIT 1</span>
+</div>
+<div class="w-14 h-16 rounded-xl bg-surface-container-low flex flex-col items-center justify-center shadow-inner">
+<span class="font-headline-xl text-headline-xl text-on-surface font-mono font-bold leading-none">8</span>
+<span class="text-[9px] text-outline font-label-code mt-0.5">DIGIT 2</span>
+</div>
+<div class="w-14 h-16 rounded-xl bg-surface-container-low flex flex-col items-center justify-center shadow-inner">
+<span class="font-headline-xl text-headline-xl text-on-surface font-mono font-bold leading-none">2</span>
+<span class="text-[9px] text-outline font-label-code mt-0.5">DIGIT 3</span>
+</div>
+<div class="w-14 h-16 rounded-xl bg-surface-container-high flex flex-col items-center justify-center shadow-md">
+<span class="font-headline-xl text-headline-xl text-primary font-mono font-bold leading-none">1</span>
+<span class="text-[9px] text-primary font-label-code mt-0.5">DIGIT 4</span>
+</div>
+</div>
+<!-- Action Row (Camera & Big Emerald Load Button) -->
+<div class="flex items-center gap-space-sm mt-1">
+<button aria-label="Scan bag barcode or QR slip" class="h-[52px] w-[56px] min-h-[44px] min-w-[44px] rounded-xl bg-surface-container-high flex items-center justify-center active:bg-surface-variant transition-colors shrink-0" type="button">
+<svg class="w-6 h-6 text-on-surface" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+<path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+<path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+<path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+<rect height="10" rx="1" width="10" x="7" y="7"></rect>
+</svg>
+</button>
+<button class="flex-1 h-[52px] min-h-[44px] px-space-md rounded-xl bg-primary text-on-primary flex items-center justify-center gap-space-xs font-title-md text-title-md active:bg-on-primary-fixed-variant transition-transform active:scale-[0.98] shadow-sm" type="button">
+<svg class="w-5 h-5 text-on-primary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<path d="m21 21-4.3-4.3"></path>
+</svg>
+<span>Load Delivery Details</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-primary-fixed-dim">/ விவரங்கள்</span>
+</button>
+</div>
+<!-- Quick Recent Orders -->
+<div class="pt-space-xs flex items-center justify-between">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-code text-label-code text-outline uppercase">Recent:</span>
+<button class="bg-surface-container px-2 py-1 rounded-lg font-mono text-[11px] font-bold text-on-surface hover:bg-surface-variant" type="button">#SAS-4819 (சிம்மக்கல்)</button>
+<button class="bg-surface-container px-2 py-1 rounded-lg font-mono text-[11px] font-bold text-on-surface hover:bg-surface-variant" type="button">#SAS-4815 (கேகே நகர்)</button>
+</div>
+</div>
+</section>
+<!-- SECTION 2: ACTIVE DELIVERY MISSION CARD (#SAS-4821) -->
+<section class="w-full bg-surface-container-lowest rounded-xl shadow-md overflow-hidden mb-space-md">
+<!-- Status Ribbon (High-visibility top banner) -->
+<div class="bg-primary-container text-on-primary p-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-code text-label-code bg-surface text-primary font-mono font-bold px-2 py-0.5 rounded">ORDER #SAS-4821</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-primary-fixed-dim">தயாராக உள்ளது</span>
+</div>
+<span class="bg-primary px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider text-primary-fixed">PACKED &amp; READY</span>
+</div>
+<div class="flex items-center gap-space-xs mt-1">
+<svg class="w-4 h-4 text-primary-fixed" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+<span class="font-headline-sm text-[14px] text-on-primary font-bold">1.8 km from shop • ~6 mins by bike</span>
+<span class="bg-on-primary-fixed-variant text-on-primary text-[11px] font-semibold px-2 py-0.5 rounded-full">அண்ணா நகர்</span>
+</div>
+</div>
+<!-- Customer Details Content -->
+<div class="p-gutter flex flex-col gap-space-md">
+<!-- Customer name with phone verification -->
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-code text-label-code uppercase text-outline">Customer / வாடிக்கையாளர்</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface leading-tight">Lakshmi Narayanan</h3>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant font-medium">லட்சுமி நாராயணன்</span>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-high px-2 py-1 rounded-full">
+<svg class="w-4 h-4 text-primary-container" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+<path d="m9 12 2 2 4-4"></path>
+</svg>
+<span class="font-label-code text-[10px] text-primary font-bold">VERIFIED</span>
+</div>
+</div>
+<!-- Address Box with highlighted Door No -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface">
+<svg class="w-5 h-5 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<div class="flex items-baseline gap-1.5 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface bg-secondary-fixed text-on-secondary-fixed px-1.5 py-0.5 rounded font-mono font-bold">Door No. 12B</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">4th Cross Street, Anna Nagar</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface pl-7 leading-relaxed">
+          Near Ambiga College, Madurai - 625020.
+        </p>
+<!-- Prominent Landmark Highlight Callout -->
+<div class="mt-1 bg-surface-container-highest p-space-sm rounded-lg flex items-center gap-space-xs">
+<svg class="w-5 h-5 text-secondary-container shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+<circle cx="12" cy="10" r="3"></circle>
+</svg>
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] text-on-secondary-container font-bold">Landmark: Opposite Pillayar Kovil arch</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-secondary-container">அடையாளம்: பிள்ளையார் கோவில் வளைவு எதிரில்</span>
+</div>
+</div>
+</div>
+<!-- Two Giant One-Thumb Action Buttons (Ergonomic 56px Targets) -->
+<div class="flex flex-col gap-space-sm mt-1">
+<!-- BUTTON 1: Navigation Full Width (Blue #2563eb vibe) -->
+<a class="h-[56px] min-h-[44px] w-full rounded-xl bg-tertiary text-on-tertiary flex items-center justify-between px-space-md shadow-md active:bg-on-tertiary-fixed-variant transition-transform active:scale-[0.99]" href="https://maps.google.com" rel="noopener noreferrer" target="_blank">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest/20 flex items-center justify-center">
+<svg class="w-6 h-6 text-on-tertiary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewbox="0 0 24 24">
+<polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+</svg>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-headline-sm text-[15px] font-bold leading-tight">Open Google Maps Bike Route</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-tertiary-fixed font-medium">மேப்பில் வழியைப் பார்க்க (1.8 km)</span>
+</div>
+</div>
+<svg class="w-6 h-6 text-on-tertiary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="m9 18 6-6-6-6"></path>
+</svg>
+</a>
+<!-- BUTTON 2: Split Communication Bar (52px tall) -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Call Customer -->
+<a class="h-[52px] min-h-[44px] rounded-xl bg-inverse-surface text-inverse-on-surface flex items-center justify-center gap-2 px-2 shadow-sm active:bg-on-background transition-colors" href="tel:+919842100000">
+<svg class="w-5 h-5 text-inverse-on-surface shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+</svg>
+<div class="flex flex-col text-left leading-none">
+<span class="font-title-md text-[13px] font-bold">Call Customer</span>
+<span class="text-[10px] text-surface-dim font-mono mt-0.5">98421 XXXXX</span>
+</div>
+</a>
+<!-- WhatsApp Pin / Location -->
+<a class="h-[52px] min-h-[44px] rounded-xl bg-primary-container text-on-primary flex items-center justify-center gap-2 px-2 shadow-sm active:bg-primary transition-colors" href="https://wa.me/919842100000">
+<svg class="w-5 h-5 text-on-primary shrink-0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+</svg>
+<div class="flex flex-col text-left leading-none">
+<span class="font-title-md text-[13px] font-bold">WhatsApp Pin</span>
+<span class="font-tamil-subtitle text-[10px] text-primary-fixed mt-0.5">லொகேஷன் கேட்க</span>
+</div>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: HIGH-VISIBILITY PAYMENT COLLECTION BANNER (Zero-Mistake Rider Guarantee) -->
+<section class="w-full flex flex-col gap-space-sm mb-space-md">
+<!-- Cash On Delivery Primary High-Alert Card -->
+<div class="w-full bg-secondary-fixed rounded-xl p-gutter shadow-md flex flex-col gap-space-sm">
+<!-- Warning Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-on-secondary-fixed">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<line x1="12" x2="12" y1="2" y2="22"></line>
+<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-bold uppercase tracking-wider text-on-secondary-fixed">CASH / UPI ON DELIVERY</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-secondary-fixed-variant">வாடிக்கையாளரிடம் ரொக்கம் வசூலிக்கவும்</span>
+</div>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-label-code text-[10px] font-bold uppercase tracking-wider">MANDATORY</span>
+</div>
+<!-- Giant Amount Display -->
+<div class="flex items-baseline justify-between bg-surface-container-lowest p-space-md rounded-xl shadow-inner my-1">
+<div class="flex flex-col">
+<span class="font-label-code text-label-code uppercase text-outline">Total Bill Cash to Hand</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">மொத்த வசூல் தொகை</span>
+</div>
+<div class="flex items-baseline">
+<span class="font-headline-xl text-3xl font-mono font-bold text-secondary">₹645.00</span>
+</div>
+</div>
+<!-- Rider Settlement Quick Toggle Buttons -->
+<div class="grid grid-cols-2 gap-space-xs mt-1">
+<button class="h-12 min-h-[44px] rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-[13px] font-bold flex items-center justify-center gap-1.5 active:bg-surface-variant transition-all shadow-sm" id="cashCollectedBtn" onclick="togglePaymentChoice(this)" type="button">
+<svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+<span>Collected Cash</span>
+</button>
+<button class="h-12 min-h-[44px] rounded-lg bg-surface-container-high text-on-surface font-title-md text-[13px] font-bold flex items-center justify-center gap-1.5 active:bg-surface-variant transition-all" id="showQrBtn" onclick="openQrModal()" type="button">
+<svg class="w-4 h-4 text-tertiary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewbox="0 0 24 24">
+<rect height="18" rx="2" width="18" x="3" y="3"></rect>
+<path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01M12 12h.01"></path>
+</svg>
+<span>Show Store UPI QR</span>
+</button>
+</div>
+</div>
+<!-- Secondary Reference Pill (Comparison state when paid) -->
+<div class="w-full bg-surface-container-low px-space-md py-space-sm rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-outline-variant"></div>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Alternative status comparison:</span>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed text-[11px] font-semibold px-2.5 py-0.5 rounded-full font-tamil-subtitle">
+        PAID ONLINE • ₹0 (முன்பணம்)
+      </span>
+</div>
+</section>
+<!-- SECTION 4: BAG VERIFICATION ACCORDION -->
+<section class="w-full bg-surface-container-lowest rounded-xl shadow-md p-gutter mb-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<div class="flex flex-col">
+<h4 class="font-title-md text-title-md text-on-surface leading-tight">Verify 1 Bag • 3 Items Inside</h4>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">பொருட்கள் சரிபார்ப்பு (3 உருப்படிகள்)</span>
+</div>
+</div>
+<span class="font-mono text-xs font-bold text-primary bg-primary-fixed-dim/20 px-2 py-0.5 rounded">3 / 3 OK</span>
+</div>
+<!-- Checked Items Checklist -->
+<div class="flex flex-col gap-space-xs mt-1">
+<!-- Item 1 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-6 h-6 rounded bg-primary-container text-on-primary flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] font-bold text-on-surface">Ponni Boiled Rice 5kg</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">சாப்பாட்டு அரிசி</span>
+</div>
+</div>
+<span class="font-mono text-xs font-bold text-on-surface bg-surface-container-highest px-2 py-1 rounded">x 1</span>
+</div>
+<!-- Item 2 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-6 h-6 rounded bg-primary-container text-on-primary flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] font-bold text-on-surface">Gold Winner Sunflower Oil 1L</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">சூரியகாந்தி எண்ணெய்</span>
+</div>
+</div>
+<span class="font-mono text-xs font-bold text-on-surface bg-surface-container-highest px-2 py-1 rounded">x 1</span>
+</div>
+<!-- Item 3 -->
+<div class="p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-6 h-6 rounded bg-primary-container text-on-primary flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] font-bold text-on-surface">Aavin Full Cream Milk 500ml</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">ஆவின் ஆரஞ்சு பால் பாக்கெட்</span>
+</div>
+</div>
+<span class="font-mono text-xs font-bold text-on-surface bg-surface-container-highest px-2 py-1 rounded">x 1</span>
+</div>
+</div>
+<!-- Security Bag Verification Seal -->
+<div class="mt-space-xs p-space-sm bg-surface-container rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<svg class="w-4 h-4 text-outline" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect>
+<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+</svg>
+<span class="font-label-code text-[11px] text-on-surface font-mono font-semibold">Bag Seal ID: #AMN-9421</span>
+</div>
+<span class="font-label-code text-[10px] text-on-surface-variant">Staff: #04 (Packing Bay)</span>
+</div>
+</section>
+<!-- STORE QR MODAL OVERLAY (Initially Hidden, Triggered by Show QR) -->
+<div class="hidden fixed inset-0 z-50 bg-inverse-surface/80 flex items-center justify-center p-gutter" id="qrModal">
+<div class="w-full max-w-sm bg-surface-container-lowest rounded-2xl p-margin flex flex-col items-center gap-space-md shadow-2xl">
+<div class="w-full flex justify-between items-center">
+<div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface">Sri Amman UPI QR</h5>
+<p class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">ஸ்கேன் செய்து பணம் செலுத்தவும்</p>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface" onclick="closeQrModal()">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+</button>
+</div>
+<!-- QR Display SVG simulation -->
+<div class="p-4 bg-surface rounded-xl shadow-inner flex flex-col items-center justify-center">
+<svg class="w-48 h-48 text-on-surface" fill="currentColor" viewbox="0 0 24 24">
+<path d="M2 2h8v8H2zm2 2v4h4V4zm-2 10h8v8H2zm2 2v4h4v-4zm10-14h8v8h-8zm2 2v4h4V4zm1 7h2v2h-2zm-3 2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm-4 0h2v2h-2zm0-4h2v2h-2z"></path>
+</svg>
+<span class="font-mono text-sm font-bold text-secondary mt-2">Amount: ₹645.00</span>
+<span class="font-label-code text-[11px] text-outline">UPI ID: sriamman.madurai@icici</span>
+</div>
+<button class="w-full h-12 rounded-xl bg-primary text-on-primary font-title-md font-bold" onclick="closeQrModal()" type="button">
+        Customer Paid Successfully
+      </button>
+</div>
+</div>
+<!-- SECTION 5: STICKY BOTTOM THUMB ACTION BAR (Designed for 1-hand glove thumb reach) -->
+<nav aria-label="Order action flow" class="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md px-gutter pt-space-xs pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
+<div class="max-w-[390px] mx-auto flex flex-col gap-space-xs mb-1">
+<!-- STAGE 1: Confirm Pickup Button (Active first, turns green when done) -->
+<button class="w-full h-[54px] min-h-[44px] rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-between px-space-md shadow-sm active:scale-[0.98] transition-all" id="pickupBtn" onclick="handlePickupAction()" type="button">
+<div class="flex items-center gap-space-xs text-left">
+<div class="w-8 h-8 rounded-full bg-on-secondary-container/20 flex items-center justify-center">
+<svg class="w-5 h-5 text-on-secondary-container" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M5 12h14"></path>
+<path d="m12 5 7 7-7 7"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] font-bold leading-tight">1. Confirm Bag Pickup &amp; Start Ride</span>
+<span class="font-tamil-subtitle text-[11px] text-on-secondary-container/90">அலுவலகத்திலிருந்து கிளம்பு</span>
+</div>
+</div>
+<span class="bg-on-secondary-container text-secondary-fixed text-[10px] font-mono font-bold px-2 py-0.5 rounded" id="pickupBadge">READY</span>
+</button>
+<!-- STAGE 2: Mark Order Delivered Button (Massive Primary Target) -->
+<button class="w-full h-[58px] min-h-[44px] rounded-xl bg-primary text-on-primary flex items-center justify-between px-space-md shadow-lg active:bg-on-primary-fixed-variant active:scale-[0.98] transition-all" id="deliveredBtn" onclick="handleDeliverAction()" type="button">
+<div class="flex items-center gap-space-xs text-left">
+<div class="w-9 h-9 rounded-full bg-surface-container-lowest/20 flex items-center justify-center">
+<svg class="w-6 h-6 text-on-primary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.8" viewbox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[15px] font-bold leading-tight">2. Mark Order Delivered</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-primary-fixed-dim">டெலிவரி முடிந்தது (OTP சரிபார்)</span>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-on-primary-fixed-variant px-2.5 py-1 rounded-lg">
+<span class="font-label-code text-label-code text-on-primary font-bold">OTP 48</span>
+<svg class="w-4 h-4 text-primary-fixed" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+</div>
+</button>
+</div>
+</nav>
+</div>
+<script>
+  function togglePaymentChoice(btn) {
+    if (btn.classList.contains('bg-primary-container')) {
+      btn.classList.remove('bg-primary-container', 'text-on-primary');
+      btn.classList.add('bg-surface-container-lowest', 'text-on-surface');
+      btn.querySelector('span').innerText = 'Collected Cash';
+    } else {
+      btn.classList.remove('bg-surface-container-lowest', 'text-on-surface');
+      btn.classList.add('bg-primary-container', 'text-on-primary');
+      btn.querySelector('span').innerText = '✓ ₹645 Cash In Bag';
+    }
+  }
+
+  function openQrModal() {
+    document.getElementById('qrModal').classList.remove('hidden');
+  }
+
+  function closeQrModal() {
+    document.getElementById('qrModal').classList.add('hidden');
+  }
+
+  function handlePickupAction() {
+    const pickupBtn = document.getElementById('pickupBtn');
+    const badge = document.getElementById('pickupBadge');
+    pickupBtn.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+    pickupBtn.classList.add('bg-surface-container-highest', 'text-on-surface');
+    badge.innerText = 'ON BIKE (பயணத்தில்)';
+    badge.classList.remove('bg-on-secondary-container', 'text-secondary-fixed');
+    badge.classList.add('bg-primary', 'text-on-primary');
+  }
+
+  function handleDeliverAction() {
+    const otp = prompt("Enter 4-digit Customer Delivery OTP / வாடிக்கையாளர் OTP:", "4821");
+    if (otp !== null) {
+      alert("Order #SAS-4821 Delivered Successfully! ₹645 logged in shift cashbook.");
+    }
+  }
+</script></main></body></html>

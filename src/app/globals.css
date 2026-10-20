@@ -265,6 +265,33 @@ button, a, input, select {
     display: none !important;
   }
 
+  /* Thermal 80mm POS Slip layout */
+  #thermal-print-slip {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    margin: 0 auto !important;
+    top: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    width: 78mm !important;
+    max-width: 78mm !important;
+    padding: 2mm 3mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: monospace, Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  #thermal-print-slip * {
+    visibility: visible !important;
+    color: #000000 !important;
+  }
+
   /* Crisp monochrome printing */
   #printable-receipt p,
   #printable-receipt span,
@@ -277,3 +304,4 @@ button, a, input, select {
     border-color: #555555 !important;
   }
 }
+

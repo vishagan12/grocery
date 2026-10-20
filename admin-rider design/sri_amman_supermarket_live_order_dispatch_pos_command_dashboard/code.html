@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "tertiary-fixed": "#dbe1ff",
+          "secondary-fixed-dim": "#ffb77d",
+          "primary-container": "#047857",
+          "on-surface": "#131b2e",
+          "tertiary": "#0047bf",
+          "surface": "#faf8ff",
+          "surface-container-high": "#e2e7ff",
+          "inverse-on-surface": "#eef0ff",
+          "primary": "#005d42",
+          "surface-dim": "#d2d9f4",
+          "surface-variant": "#dae2fd",
+          "on-primary": "#ffffff",
+          "surface-bright": "#faf8ff",
+          "on-tertiary": "#ffffff",
+          "primary-fixed-dim": "#7bd8b1",
+          "surface-tint": "#006c4e",
+          "on-primary-fixed": "#002115",
+          "surface-container": "#eaedff",
+          "secondary": "#904d00",
+          "tertiary-container": "#1e5fe7",
+          "on-secondary-fixed-variant": "#6e3900",
+          "surface-container-highest": "#dae2fd",
+          "tertiary-fixed-dim": "#b4c5ff",
+          "on-primary-fixed-variant": "#00513a",
+          "background": "#faf8ff",
+          "secondary-container": "#fe932c",
+          "on-secondary-container": "#663500",
+          "on-error": "#ffffff",
+          "error": "#ba1a1a",
+          "surface-container-low": "#f2f3ff",
+          "on-tertiary-container": "#e6e9ff",
+          "outline-variant": "#bdc9c1",
+          "on-surface-variant": "#3e4943",
+          "on-error-container": "#93000a",
+          "primary-fixed": "#97f5cc",
+          "on-tertiary-fixed": "#00174b",
+          "on-background": "#131b2e",
+          "on-secondary": "#ffffff",
+          "inverse-surface": "#283044",
+          "error-container": "#ffdad6",
+          "secondary-fixed": "#ffdcc3",
+          "on-secondary-fixed": "#2f1500",
+          "on-tertiary-fixed-variant": "#003ea8",
+          "surface-container-lowest": "#ffffff",
+          "inverse-primary": "#7bd8b1",
+          "on-primary-container": "#9ffdd3",
+          "outline": "#6e7a73"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-xl": "1.5rem",
+          "gutter": "0.75rem",
+          "space-lg": "1rem",
+          "space-xs": "0.25rem",
+          "margin": "1rem",
+          "space-sm": "0.375rem",
+          "gutter-desktop": "1rem",
+          "margin-desktop": "1.5rem",
+          "space-md": "0.75rem"
+        },
+        "fontFamily": {
+          "label-numeric": ["Inter"],
+          "headline-lg": ["Plus Jakarta Sans"],
+          "body-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-xl": ["Plus Jakarta Sans"],
+          "headline-sm": ["Plus Jakarta Sans"],
+          "label-code": ["Inter"],
+          "title-md": ["Inter"],
+          "tamil-subtitle": ["Plus Jakarta Sans"]
+        },
+        "fontSize": {
+          "label-numeric": ["14px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "headline-lg": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "body-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-xl": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "700"}],
+          "headline-sm": ["16px", {"lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "label-code": ["11px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+          "title-md": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "tamil-subtitle": ["11px", {"lineHeight": "14px", "letterSpacing": "0em", "fontWeight": "500"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-primary text-on-primary z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="p-space-md bg-on-primary-fixed-variant"><div class="flex items-center gap-space-xs mb-1"><span class="material-symbols-outlined text-primary-fixed text-[20px]">storefront</span><span class="font-headline-sm text-headline-sm text-on-primary tracking-tight leading-tight">Sri Amman</span></div><div class="font-tamil-subtitle text-tamil-subtitle text-primary-fixed-dim leading-none">ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்</div><div class="mt-space-xs inline-flex items-center gap-1 font-label-code text-[10px] text-primary-fixed-dim uppercase tracking-wider bg-primary/40 px-space-xs py-0.5 rounded"><span class="w-1.5 h-1.5 rounded-full bg-primary-fixed animate-pulse"></span>Counter POS & Dispatch • Madurai</div></div><div class="m-space-sm p-space-sm rounded bg-primary-container text-on-primary text-body-sm shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center justify-between pb-space-xs"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_6px_rgba(151,245,204,0.9)]"></span><span class="font-title-md text-[11px] font-semibold tracking-wide text-on-primary">80mm Thermal Printer</span></div><span class="font-label-code text-[9px] bg-primary text-primary-fixed px-1 py-0.2 rounded font-bold uppercase">Kiosk ON</span></div><div class="flex items-center justify-between pt-space-xs text-primary-fixed-dim font-body-sm text-[11px]"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">volume_up</span>Sound Alerts</span><div class="w-7 h-4 bg-primary-fixed rounded-full flex items-center justify-end px-0.5 cursor-pointer"><div class="w-3 h-3 rounded-full bg-primary"></div></div></div></div><nav class="flex flex-col gap-1 px-space-sm mt-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a aria-current="page" class="flex items-center justify-between px-space-sm py-2 rounded transition-colors bg-primary-container text-on-primary font-bold shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-path="live-dispatch-queue" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">local_shipping</span><span>Live Dispatch Queue</span></div><span class="px-1.5 py-0.5 rounded font-label-code text-[10px] bg-secondary-container text-on-secondary-container font-bold">4 Active</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded text-primary-fixed-dim hover:bg-primary-container hover:text-on-primary transition-colors text-body-md" data-path="inventory-and-stock" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">inventory_2</span><span>Inventory & Stock</span></div><span class="px-1.5 py-0.5 rounded font-label-code text-[10px] bg-error-container text-on-error-container font-bold">3 Low</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded text-primary-fixed-dim hover:bg-primary-container hover:text-on-primary transition-colors text-body-md" data-path="gayoo-erp-pos-bridge" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">hub</span><span>Gayoo ERP / POS Bridge</span></div><span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">check_circle</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded text-primary-fixed-dim hover:bg-primary-container hover:text-on-primary transition-colors text-body-md" data-path="daily-cash-and-upi-settlement" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">payments</span><span>Cash & UPI Settlement</span></div><span class="material-symbols-outlined text-[14px] text-primary-fixed-dim">arrow_forward</span></a></nav></div><div class="p-space-sm"><div class="p-space-sm rounded bg-on-primary-fixed-variant shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex items-center justify-between"><div class="flex flex-col"><span class="font-title-md text-[11px] text-on-primary font-semibold">Online Orders</span><span class="font-label-code text-[10px] text-primary-fixed font-bold">ACCEPTING LIVE</span></div><div class="w-9 h-5 bg-primary-fixed rounded-full flex items-center justify-end px-0.5 cursor-pointer shadow-inner"><div class="w-4 h-4 rounded-full bg-primary shadow"></div></div></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-16 bg-surface/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.04)] flex items-center justify-between px-gutter-desktop gap-space-md"><div class="flex items-center gap-space-sm overflow-x-auto py-1"><div class="flex items-center gap-2 px-space-sm py-1 rounded bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="font-label-code text-on-surface-variant text-[10px] uppercase font-bold">Revenue</span><span class="font-label-numeric text-label-numeric text-primary">₹18,450</span><span class="font-label-code text-[10px] text-primary font-bold bg-primary-fixed px-1 rounded">+14%</span></div><div class="flex items-center gap-2 px-space-sm py-1 rounded bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="font-label-code text-on-surface-variant text-[10px] uppercase font-bold">UPI</span><span class="font-label-numeric text-label-numeric text-on-surface">₹12,200</span><span class="font-label-code text-[10px] text-on-surface-variant">(28)</span></div><div class="flex items-center gap-2 px-space-sm py-1 rounded bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="font-label-code text-on-surface-variant text-[10px] uppercase font-bold">COD</span><span class="font-label-numeric text-label-numeric text-secondary">₹6,250</span><span class="font-label-code text-[10px] text-on-surface-variant">(14)</span></div><div class="flex items-center gap-2 px-space-sm py-1 rounded bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="font-label-code text-on-surface-variant text-[10px] uppercase font-bold">Avg Pack</span><span class="font-label-numeric text-label-numeric text-tertiary">3m 12s</span></div></div><div class="flex items-center gap-space-sm flex-shrink-0"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-2 text-on-surface-variant text-[18px]">barcode_scanner</span><input class="h-[34px] w-60 pl-8 pr-3 text-body-sm bg-surface-container-lowest text-on-surface rounded placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-1 focus:ring-primary shadow-[0_1px_8px_rgba(0,0,0,0.04)] font-body-sm" placeholder="Scan barcode or #SAS-ID..." type="text"/></div><button class="h-[34px] px-2.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-[11px] flex items-center gap-1 transition-colors" type="button"><span class="material-symbols-outlined text-[16px]">translate</span>EN / தமிழ்</button><button class="h-[34px] px-3 rounded bg-primary-container text-on-primary font-title-md text-body-sm hover:bg-primary transition-colors flex items-center gap-1.5 shadow-[0_1px_8px_rgba(0,0,0,0.04)]" type="button"><span class="material-symbols-outlined text-[16px]">file_download</span>Export Daybook CSV</button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 w-full min-h-screen bg-background"><div class="flex flex-col w-full">
+<div class="px-gutter-desktop py-space-md flex flex-col gap-space-lg w-full max-w-[1720px] mx-auto">
+<!-- SUB-BANNER / RUNNING METRICS TICKER -->
+<div class="flex flex-wrap items-center justify-between gap-space-md p-space-sm rounded bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Fulfillment Floor Terminal • Madurai West</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">விற்பனை மற்றும் விநியோக கட்டுப்பாட்டு மையம்</span>
+</div>
+<div class="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-code text-label-code">
+<span>ZONE ID: MAD-SL-04</span>
+<span>•</span>
+<span>WEIGH SCALE: ONLINE (0.000 KG)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-label-code text-label-code">
+<span class="material-symbols-outlined text-[15px]">timer</span>
+<span>DISPATCH SLA: < 8 MINS</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-primary-fixed text-on-primary-fixed font-label-code text-label-code">
+<span class="material-symbols-outlined text-[15px]">electric_moped</span>
+<span>RIDERS AT DOCK: 3 ACTIVE</span>
+</div>
+</div>
+</div>
+<!-- ZONE A: 4-COLUMN LIVE ORDER DISPATCH BOARD -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">dynamic_feed</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Active Dispatch Floor</h2>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">நேரடி விநியோக வரிசை</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-code text-label-code">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+<span>AUTO-REFRESH: 5s</span>
+</div>
+</div>
+<!-- 4-Column Pipeline Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter-desktop items-start">
+<!-- COLUMN 1: NEW / AUTO-PRINTED -->
+<div class="flex flex-col gap-space-sm rounded bg-surface-container-low p-space-sm shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span class="font-title-md text-title-md text-on-surface font-semibold tracking-wide">NEW / AUTO-PRINTED</span>
+</div>
+<span class="px-2 py-0.5 rounded font-label-code text-label-code bg-secondary-fixed text-on-secondary-fixed font-bold">1</span>
+</div>
+<!-- Order Card #SAS-4821 -->
+<article class="flex flex-col gap-space-sm p-space-md rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded font-label-code text-[10px] bg-secondary-fixed text-on-secondary-fixed uppercase tracking-wider font-bold animate-pulse">
+                AUTO-PRINTED SLIP • 20s ago
+              </span>
+<span class="font-label-numeric text-label-numeric text-on-surface font-bold">#SAS-4821</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Lakshmi Narayanan</span>
+<span class="font-label-code text-label-code text-on-surface-variant">+91 98421 XXXXX</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+<span>Anna Nagar • 1.8 km</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant/80">(அண்ணா நகர்)</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded font-label-numeric text-[11px] bg-primary-fixed text-on-primary-fixed font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">check_circle</span>
+                UPI PAID • ₹408
+              </span>
+<span class="font-label-code text-[11px] text-on-surface-variant">3 Items Verified</span>
+</div>
+<!-- Packing Checklist -->
+<div class="flex flex-col gap-1.5 p-space-xs rounded bg-surface-container-low font-body-sm text-body-sm">
+<label class="flex items-start gap-2 cursor-pointer select-none">
+<input checked="" class="mt-0.5 accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+<div class="flex flex-col leading-tight">
+<span class="text-on-surface font-medium">Ponni Boiled Rice 5kg x1</span>
+<span class="font-tamil-subtitle text-[10px] text-on-surface-variant">பொன்னி புழுங்கல் அரிசி (Aged 1 Year)</span>
+</div>
+</label>
+<label class="flex items-start gap-2 cursor-pointer select-none">
+<input checked="" class="mt-0.5 accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+<div class="flex flex-col leading-tight">
+<span class="text-on-surface font-medium">Gold Winner Sunflower Oil 1L x1</span>
+<span class="font-tamil-subtitle text-[10px] text-on-surface-variant">சூரியகாந்தி எண்ணெய்</span>
+</div>
+</label>
+<label class="flex items-start gap-2 cursor-pointer select-none">
+<input checked="" class="mt-0.5 accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+<div class="flex flex-col leading-tight">
+<span class="text-on-surface font-medium">Aavin Full Cream Milk 500ml x1</span>
+<span class="font-tamil-subtitle text-[10px] text-on-surface-variant">ஆவின் பால் (Orange Pouch)</span>
+</div>
+</label>
+</div>
+<!-- Packing Bag Special Instruction -->
+<div class="p-2 rounded bg-surface-container flex items-start gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-secondary">info</span>
+<div class="font-body-sm text-body-sm leading-snug">
+<span class="font-semibold text-on-surface">Packing Note:</span> Double carry box (Fragile milk pouch)
+              </div>
+</div>
+<!-- Action Controls -->
+<div class="grid grid-cols-2 gap-space-xs pt-space-xs">
+<button class="h-[34px] px-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-[11px] flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">print</span>
+                Re-Print 80mm
+              </button>
+<button class="h-[34px] px-2 rounded bg-primary-container hover:bg-primary text-on-primary font-title-md text-[11px] flex items-center justify-center gap-1 transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">done_all</span>
+                Ready for Rider
+              </button>
+</div>
+</article>
+</div>
+<!-- COLUMN 2: PACKED & WAITING FOR RIDER -->
+<div class="flex flex-col gap-space-sm rounded bg-surface-container-low p-space-sm shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-container"></span>
+<span class="font-title-md text-title-md text-on-surface font-semibold tracking-wide">PACKED & WAITING</span>
+</div>
+<span class="px-2 py-0.5 rounded font-label-code text-label-code bg-tertiary-fixed text-on-tertiary-fixed font-bold">1</span>
+</div>
+<!-- Order Card #SAS-4819 -->
+<article class="flex flex-col gap-space-sm p-space-md rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded font-label-code text-[10px] bg-surface-container text-on-surface-variant uppercase tracking-wider font-bold">
+                BAGGED AT DOCK BAY 2
+              </span>
+<span class="font-label-numeric text-label-numeric text-on-surface font-bold">#SAS-4819</span>
+</div>
+<!-- Large Monospace Pickup Code -->
+<div class="p-space-sm rounded bg-tertiary text-on-tertiary flex flex-col items-center justify-center text-center shadow-sm">
+<span class="font-label-code text-[10px] tracking-widest uppercase opacity-80">Rider Pickup Pin</span>
+<span class="font-label-numeric text-[26px] tracking-wider font-extrabold text-on-tertiary">PICKUP CODE: 4819</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">M. Senthil Kumar</span>
+<span class="font-label-code text-label-code text-on-surface-variant">+91 94432 XXXXX</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px] text-tertiary">location_on</span>
+<span>Simmakkal • 2.1 km</span>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant/80">(சிம்மக்கல்)</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>5 items packed</span>
+<span class="font-medium text-on-surface">Checked: Murugan (Staff #12)</span>
+</div>
+<!-- COD Warning Pill -->
+<div class="px-2.5 py-1.5 rounded bg-secondary-fixed text-on-secondary-fixed flex items-center justify-between font-label-numeric text-label-numeric font-bold">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">payments</span>
+                COD CASH ORDER
+              </span>
+<span>COLLECT ₹645</span>
+</div>
+<!-- Rider Proximity Status -->
+<div class="p-2 rounded bg-tertiary-fixed/40 flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-tertiary animate-bounce">electric_moped</span>
+<div class="flex flex-col leading-tight">
+<span class="font-title-md text-[12px] font-semibold">Rider Arriving in 2 mins</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Karthik S. • Electric Scooter (TN-59-BZ-1102)</span>
+</div>
+</div>
+<!-- Action Button -->
+<button class="h-[36px] w-full px-3 rounded bg-tertiary text-on-tertiary font-title-md text-body-sm hover:bg-tertiary-container transition-colors flex items-center justify-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">handshake</span>
+              Assign / Hand to Rider
+            </button>
+</article>
+</div>
+<!-- COLUMN 3: OUT FOR DELIVERY -->
+<div class="flex flex-col gap-space-sm rounded bg-surface-container-low p-space-sm shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="font-title-md text-title-md text-on-surface font-semibold tracking-wide">OUT FOR DELIVERY</span>
+</div>
+<span class="px-2 py-0.5 rounded font-label-code text-label-code bg-primary-fixed text-on-primary-fixed font-bold">1</span>
+</div>
+<!-- Order Card #SAS-4815 -->
+<article class="flex flex-col gap-space-sm p-space-md rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded font-label-code text-[10px] bg-primary-fixed text-on-primary-fixed uppercase tracking-wider font-bold">
+                ON ROUTE TO CUSTOMER
+              </span>
+<span class="font-label-numeric text-label-numeric text-on-surface font-bold">#SAS-4815</span>
+</div>
+<div class="p-2 rounded bg-surface-container flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">sports_motorsports</span>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-semibold">Vignesh M.</span>
+<span class="font-label-code text-[10px] text-on-surface-variant">DIRECT STORE FLEET #03</span>
+</div>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+</div>
+<!-- Elapsed Live Timer -->
+<div class="flex items-center justify-between px-2.5 py-1.5 rounded bg-primary-fixed text-on-primary-fixed font-label-code text-[11px] font-bold">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+                11 MINS ON ROUTE
+              </span>
+<span>EXP. ETA: 4 MINS</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Sundar Rajan</span>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">₹820</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">location_on</span>
+<span>KK Nagar • 2.4 km (UPI Settled)</span>
+</div>
+<span class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">3 items • மளிகை பொருட்கள்</span>
+</div>
+<!-- Quick Action Row -->
+<div class="grid grid-cols-3 gap-1 pt-space-xs">
+<button class="h-[32px] px-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-[11px] flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">call</span>
+                Call
+              </button>
+<button class="h-[32px] px-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-[11px] flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">chat</span>
+                WhatsApp
+              </button>
+<button class="h-[32px] px-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-[11px] flex items-center justify-center gap-1 transition-colors" type="button">
+<span class="material-symbols-outlined text-[15px]">near_me</span>
+                Track Pin
+              </button>
+</div>
+</article>
+</div>
+<!-- COLUMN 4: DELIVERED TODAY -->
+<div class="flex flex-col gap-space-sm rounded bg-surface-container-low p-space-sm shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+<span class="font-title-md text-title-md text-on-surface font-semibold tracking-wide">DELIVERED TODAY</span>
+</div>
+<span class="px-2 py-0.5 rounded font-label-code text-label-code bg-surface-container-highest text-on-surface font-bold">24 Completed</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Order Card #SAS-4810 -->
+<article class="p-space-sm rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1 hover:bg-surface transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-label-numeric text-[13px] text-on-surface font-semibold">#SAS-4810 • Meenakshi S.</span>
+<span class="font-label-code text-[11px] text-on-surface-variant font-medium">2:38 PM</span>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-on-surface-variant">₹945 • 4 items</span>
+<span class="px-1.5 py-0.2 rounded font-label-code text-[10px] bg-primary-fixed text-on-primary-fixed font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">check</span> Settled
+                </span>
+</div>
+<div class="font-label-code text-[10px] text-secondary font-medium">
+                COD Cash Deposited to Cashier • Gayoo Synced
+              </div>
+</article>
+<!-- Order Card #SAS-4808 -->
+<article class="p-space-sm rounded bg-surface-container-lowest shadow-sm flex flex-col gap-1 hover:bg-surface transition-colors">
+<div class="flex items-center justify-between">
+<span class="font-label-numeric text-[13px] text-on-surface font-semibold">#SAS-4808 • Anitha R.</span>
+<span class="font-label-code text-[11px] text-on-surface-variant font-medium">2:15 PM</span>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm">
+<span class="text-on-surface-variant">₹1,420 • 8 items</span>
+<span class="px-1.5 py-0.2 rounded font-label-code text-[10px] bg-primary-fixed text-on-primary-fixed font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">check</span> Settled
+                </span>
+</div>
+<div class="font-label-code text-[10px] text-primary font-medium">
+                GPay UPI Verified • Gayoo Voucher #GY-884
+              </div>
+</article>
+<!-- Card Link -->
+<button class="mt-1 w-full py-2 rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-title-md text-[11px] flex items-center justify-center gap-1 transition-colors" type="button">
+<span>View all 24 completed orders</span>
+<span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ZONE B: LIVE STOCK SWITCHBOARD & GAYOO POS SYNC PANEL -->
+<section class="grid grid-cols-1 xl:grid-cols-12 gap-gutter-desktop items-stretch pb-space-lg">
+<!-- LEFT PANEL (65% / 8 COLS): INSTANT STOCK & PRICE SWITCHBOARD -->
+<div class="xl:col-span-8 flex flex-col gap-space-md p-space-md rounded bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-space-sm pb-space-xs">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">toggle_on</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Instant Stock & Price Switchboard</h3>
+</div>
+<div class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">
+              தானியங்கி கையிருப்பு மேலாண்மை • 5 அலகுகளுக்கு கீழ் இருந்தால் ஆன்லைனில் முடக்கப்படும்
+            </div>
+</div>
+<span class="px-2.5 py-1 rounded font-label-code text-[10px] bg-error-container text-on-error-container font-bold uppercase">
+            Auto Out-of-Stock Guard < 5 Units
+          </span>
+</div>
+<!-- Search & Filter Controls -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-on-surface-variant text-[18px]">search</span>
+<input class="h-[36px] w-full pl-9 pr-3 text-body-sm bg-surface-container-low text-on-surface rounded placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-1 focus:ring-primary shadow-sm" placeholder="Search 1,000+ products in English, Tamil, or Thanglish..." type="text"/>
+</div>
+<!-- Category filter pills -->
+<div class="flex items-center gap-1 overflow-x-auto py-0.5">
+<button class="px-2.5 py-1 rounded bg-primary text-on-primary font-title-md text-[11px] shadow-sm" type="button">All</button>
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-title-md text-[11px] transition-colors" type="button">Rice & Grains</button>
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-title-md text-[11px] transition-colors" type="button">Cooking Oils</button>
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-title-md text-[11px] transition-colors" type="button">Dairy</button>
+<button class="px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-title-md text-[11px] transition-colors" type="button">Dals</button>
+</div>
+</div>
+<!-- Dense Data Table -->
+<div class="w-full overflow-x-auto rounded shadow-sm">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead class="bg-surface-container font-label-code text-[11px] uppercase tracking-wider text-on-surface-variant">
+<tr>
+<th class="py-2.5 px-3">Product Name / தமிழ் விவரம்</th>
+<th class="py-2.5 px-2">Pack Variant</th>
+<th class="py-2.5 px-2">Selling Price</th>
+<th class="py-2.5 px-2">MRP</th>
+<th class="py-2.5 px-2">Counter Stock</th>
+<th class="py-2.5 px-3">Buffer Status</th>
+<th class="py-2.5 px-3 text-right">Online Toggle</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container bg-surface-container-lowest">
+<!-- ROW 1: Gold Winner Oil (Low stock, disabled) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2 px-3">
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] text-on-surface font-semibold">Gold Winner Sunflower Oil</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">கோல்ட் வின்னர் எண்ணெய்</span>
+</div>
+</td>
+<td class="py-2 px-2 font-label-code text-[11px] text-on-surface">1 Ltr Pouch</td>
+<td class="py-2 px-2">
+<input class="w-16 h-7 px-1.5 font-label-numeric text-[13px] text-on-surface bg-surface-container rounded focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="₹135"/>
+</td>
+<td class="py-2 px-2 font-label-numeric text-[12px] text-on-surface-variant line-through">₹160</td>
+<td class="py-2 px-2 font-label-numeric text-[13px] text-error font-bold">4 units left</td>
+<td class="py-2 px-3">
+<span class="px-2 py-0.5 rounded font-label-code text-[9px] bg-error-container text-on-error-container font-bold uppercase">
+                    AUTO-DISABLED ONLINE (<5 BUFFER)
+                  </span>
+</td>
+<td class="py-2 px-3 text-right">
+<div class="inline-flex items-center cursor-pointer">
+<div class="w-8 h-4 bg-error-container rounded-full flex items-center justify-start px-0.5 shadow-inner">
+<div class="w-3 h-3 rounded-full bg-error shadow"></div>
+</div>
+</div>
+</td>
+</tr>
+<!-- ROW 2: Deluxe Ponni Boiled Rice (Active) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2 px-3">
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] text-on-surface font-semibold">Sri Amman Deluxe Ponni Boiled Rice</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">பொன்னி புழுங்கல் அரிசி (முதல் ரகம்)</span>
+</div>
+</td>
+<td class="py-2 px-2 font-label-code text-[11px] text-on-surface">25 kg Bag</td>
+<td class="py-2 px-2">
+<input class="w-16 h-7 px-1.5 font-label-numeric text-[13px] text-on-surface bg-surface-container rounded focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="₹1,450"/>
+</td>
+<td class="py-2 px-2 font-label-numeric text-[12px] text-on-surface-variant line-through">₹1,650</td>
+<td class="py-2 px-2 font-label-numeric text-[13px] text-primary font-bold">32 units left</td>
+<td class="py-2 px-3">
+<span class="px-2 py-0.5 rounded font-label-code text-[9px] bg-primary-fixed text-on-primary-fixed font-bold uppercase">
+                    Active & In Stock
+                  </span>
+</td>
+<td class="py-2 px-3 text-right">
+<div class="inline-flex items-center cursor-pointer">
+<div class="w-8 h-4 bg-primary-fixed rounded-full flex items-center justify-end px-0.5 shadow-inner">
+<div class="w-3 h-3 rounded-full bg-primary shadow"></div>
+</div>
+</div>
+</td>
+</tr>
+<!-- ROW 3: Aavin Milk (Active) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2 px-3">
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] text-on-surface font-semibold">Aavin Green Magic Standardized Milk</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">ஆவின் பசும்பால் (பச்சை பாக்கெட்)</span>
+</div>
+</td>
+<td class="py-2 px-2 font-label-code text-[11px] text-on-surface">500 ml Pouch</td>
+<td class="py-2 px-2">
+<input class="w-16 h-7 px-1.5 font-label-numeric text-[13px] text-on-surface bg-surface-container rounded focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="₹30"/>
+</td>
+<td class="py-2 px-2 font-label-numeric text-[12px] text-on-surface-variant line-through">₹32</td>
+<td class="py-2 px-2 font-label-numeric text-[13px] text-primary font-bold">18 units left</td>
+<td class="py-2 px-3">
+<span class="px-2 py-0.5 rounded font-label-code text-[9px] bg-primary-fixed text-on-primary-fixed font-bold uppercase">
+                    Active & In Stock
+                  </span>
+</td>
+<td class="py-2 px-3 text-right">
+<div class="inline-flex items-center cursor-pointer">
+<div class="w-8 h-4 bg-primary-fixed rounded-full flex items-center justify-end px-0.5 shadow-inner">
+<div class="w-3 h-3 rounded-full bg-primary shadow"></div>
+</div>
+</div>
+</td>
+</tr>
+<!-- ROW 4: Udhaiyam Toor Dal (Low stock, disabled) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2 px-3">
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] text-on-surface font-semibold">Udhaiyam First Quality Toor Dal</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">உதயம் துவரம் பருப்பு</span>
+</div>
+</td>
+<td class="py-2 px-2 font-label-code text-[11px] text-on-surface">2 kg Pack</td>
+<td class="py-2 px-2">
+<input class="w-16 h-7 px-1.5 font-label-numeric text-[13px] text-on-surface bg-surface-container rounded focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="₹310"/>
+</td>
+<td class="py-2 px-2 font-label-numeric text-[12px] text-on-surface-variant line-through">₹350</td>
+<td class="py-2 px-2 font-label-numeric text-[13px] text-error font-bold">3 units left</td>
+<td class="py-2 px-3">
+<span class="px-2 py-0.5 rounded font-label-code text-[9px] bg-error-container text-on-error-container font-bold uppercase">
+                    AUTO-DISABLED ONLINE (<5 BUFFER)
+                  </span>
+</td>
+<td class="py-2 px-3 text-right">
+<div class="inline-flex items-center cursor-pointer">
+<div class="w-8 h-4 bg-error-container rounded-full flex items-center justify-start px-0.5 shadow-inner">
+<div class="w-3 h-3 rounded-full bg-error shadow"></div>
+</div>
+</div>
+</td>
+</tr>
+<!-- ROW 5: Idhayam Gingelly Oil (Active) -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="py-2 px-3">
+<div class="flex flex-col">
+<span class="font-title-md text-[13px] text-on-surface font-semibold">Idhayam Pure Gingelly Oil</span>
+<span class="font-tamil-subtitle text-[11px] text-on-surface-variant">இதயம் நல்லெண்ணெய்</span>
+</div>
+</td>
+<td class="py-2 px-2 font-label-code text-[11px] text-on-surface">1 Ltr Bottle</td>
+<td class="py-2 px-2">
+<input class="w-16 h-7 px-1.5 font-label-numeric text-[13px] text-on-surface bg-surface-container rounded focus:outline-none focus:ring-1 focus:ring-primary" type="text" value="₹410"/>
+</td>
+<td class="py-2 px-2 font-label-numeric text-[12px] text-on-surface-variant line-through">₹450</td>
+<td class="py-2 px-2 font-label-numeric text-[13px] text-primary font-bold">14 units left</td>
+<td class="py-2 px-3">
+<span class="px-2 py-0.5 rounded font-label-code text-[9px] bg-primary-fixed text-on-primary-fixed font-bold uppercase">
+                    Active & In Stock
+                  </span>
+</td>
+<td class="py-2 px-3 text-right">
+<div class="inline-flex items-center cursor-pointer">
+<div class="w-8 h-4 bg-primary-fixed rounded-full flex items-center justify-end px-0.5 shadow-inner">
+<div class="w-3 h-3 rounded-full bg-primary shadow"></div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-code text-label-code pt-space-xs">
+<span>Showing 5 of 1,248 synchronized supermarket SKUs</span>
+<span class="text-primary font-bold">POS Counter Master Database V4.19</span>
+</div>
+</div>
+<!-- RIGHT PANEL (35% / 4 COLS): GAYOO POS / ERP SYNC PANEL -->
+<div class="xl:col-span-4 flex flex-col justify-between gap-space-md p-space-md rounded bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">hub</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Gayoo POS / ERP Sync</h3>
+</div>
+<span class="px-2 py-0.5 rounded font-label-code text-[10px] bg-primary-fixed text-on-primary-fixed font-bold uppercase">Live Bridge</span>
+</div>
+<div class="font-tamil-subtitle text-tamil-subtitle text-on-surface-variant">
+            கேயூ பில்லிங் மென்பொருள் ஒருங்கிணைப்பு
+          </div>
+<!-- Drag and Drop Dropzone -->
+<div class="mt-space-xs p-space-lg rounded bg-surface-container-low flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface-container transition-colors shadow-inner">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-2 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">upload_file</span>
+</div>
+<span class="font-title-md text-title-md text-on-surface font-semibold">Drop Gayoo POS Stock CSV / Excel Here</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Sync 1,000+ prices & counter physical inventory in 1 click</span>
+<div class="mt-space-sm px-2 py-1 rounded bg-surface-container-highest text-on-surface font-label-code text-[10px]">
+              .CSV, .XLS, .XLSX exported from Gayoo Retail counter terminal
+            </div>
+</div>
+<!-- Real-Time Sync Indicator Card -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded bg-surface-container text-on-surface">
+<div class="flex items-center gap-2 font-label-code text-[11px] font-semibold text-primary">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+              Last Synced with Counter Gayoo POS: Today, 2:45 PM
+            </div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span>0 Conflicts Detected</span>
+<span class="font-label-numeric text-label-numeric font-bold text-on-surface">1,248 Items Reconciled</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-full"></div>
+</div>
+</div>
+</div>
+<!-- Action Export Section -->
+<div class="flex flex-col gap-2 pt-space-xs">
+<button class="h-[42px] w-full px-3 rounded bg-inverse-surface text-inverse-on-surface font-title-md text-body-sm hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-md" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+            Download Today's Online Bills for Gayoo Daybook
+          </button>
+<div class="text-center font-label-code text-[10px] text-on-surface-variant">
+            Formatted specifically for Gayoo Tally XML & Daybook Auto-Import
+          </div>
+</div>
+</div>
+</section>
+</div>
+</div></main></div></body></html>
