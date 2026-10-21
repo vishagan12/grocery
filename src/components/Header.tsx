@@ -387,7 +387,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
 
   const handleCompleteLogin = () => {
     const finalName = name.trim() || 'Vishagan';
-    const finalPhone = `+91-${phone || '6379398981'}`;
+    const finalPhone = `+91-${phone || '1234567890'}`;
 
     let formattedDob = '12 Dec 2006';
     if (dob) {
@@ -472,7 +472,7 @@ function LoginModal({ onClose }: { onClose: () => void }) {
                 <input
                   type="tel"
                   maxLength={10}
-                  placeholder="6379398981"
+                  placeholder="1234567890"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                   className="flex-1 px-3 py-2.5 text-sm outline-none font-medium text-slate-900"
