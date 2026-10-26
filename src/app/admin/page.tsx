@@ -61,6 +61,9 @@ interface AdminOrder {
   status: number; // 0: New, 1: Packing/Ready, 2: Out for delivery, 3: Delivered
   deliverySlot: string;
   createdAt: string;
+  isForSomeoneElse?: boolean;
+  recipientName?: string;
+  recipientPhone?: string;
   items: OrderItem[];
 }
 
@@ -524,8 +527,21 @@ export default function AdminPage() {
 
           <div className="text-[10px] space-y-0.5 pb-2 border-b border-black">
             <div><b>Date:</b> {new Date(printOrder.createdAt).toLocaleString()}</div>
-            <div><b>Customer:</b> {printOrder.customerName}</div>
-            <div><b>Phone:</b> {printOrder.phone}</div>
+            {printOrder.isForSomeoneElse ? (
+              <>
+                <div className="font-bold text-[11px] text-black">
+                  <b>DELIVER TO:</b> {printOrder.recipientName} (Ph: +91 {printOrder.recipientPhone})
+                </div>
+                <div>
+                  <b>ORDERED BY:</b> {printOrder.customerName || 'Account Holder'} (+91 {printOrder.phone})
+                </div>
+              </>
+            ) : (
+              <>
+                <div><b>Customer:</b> {printOrder.customerName}</div>
+                <div><b>Phone:</b> {printOrder.phone}</div>
+              </>
+            )}
             <div><b>Address:</b> {printOrder.address}</div>
             <div><b>Distance:</b> {printOrder.distanceKm} km from store</div>
             <div><b>Slot:</b> {printOrder.deliverySlot.toUpperCase()}</div>
@@ -827,9 +843,18 @@ export default function AdminPage() {
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-slate-900">{order.customerName}</span>
-                        <span className="text-[11px] font-mono text-slate-500">{order.phone}</span>
+                        <span className="font-bold text-xs text-slate-900">
+                          {order.isForSomeoneElse ? `For: ${order.recipientName}` : order.customerName}
+                        </span>
+                        <span className="text-[11px] font-mono text-slate-500">
+                          {order.isForSomeoneElse ? `+91 ${order.recipientPhone}` : order.phone}
+                        </span>
                       </div>
+                      {order.isForSomeoneElse && (
+                        <p className="text-[10px] text-amber-700 font-medium">
+                          Ordered by: {order.customerName || 'Account Holder'} ({order.phone})
+                        </p>
+                      )}
                       <div className="flex items-center gap-1 text-[11px] text-slate-600 mt-0.5">
                         <MapPin className="w-3 h-3 text-[#005d42] shrink-0" />
                         <span className="truncate">{order.address} • {order.distanceKm} km</span>
@@ -926,9 +951,18 @@ export default function AdminPage() {
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-slate-900">{order.customerName}</span>
-                        <span className="text-[11px] font-mono text-slate-500">{order.phone}</span>
+                        <span className="font-bold text-xs text-slate-900">
+                          {order.isForSomeoneElse ? `For: ${order.recipientName}` : order.customerName}
+                        </span>
+                        <span className="text-[11px] font-mono text-slate-500">
+                          {order.isForSomeoneElse ? `+91 ${order.recipientPhone}` : order.phone}
+                        </span>
                       </div>
+                      {order.isForSomeoneElse && (
+                        <p className="text-[10px] text-amber-700 font-medium">
+                          Ordered by: {order.customerName || 'Account Holder'} ({order.phone})
+                        </p>
+                      )}
                       <div className="flex items-center gap-1 text-[11px] text-slate-600 mt-0.5">
                         <MapPin className="w-3 h-3 text-[#0047bf] shrink-0" />
                         <span className="truncate">{order.address} • {order.distanceKm} km</span>
@@ -979,9 +1013,16 @@ export default function AdminPage() {
 
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-xs text-slate-900">{order.customerName}</span>
+                        <span className="font-bold text-xs text-slate-900">
+                          {order.isForSomeoneElse ? `For: ${order.recipientName}` : order.customerName}
+                        </span>
                         <span className="font-bold text-xs text-[#005d42]">₹{order.total}</span>
                       </div>
+                      {order.isForSomeoneElse && (
+                        <p className="text-[10px] text-amber-800 font-bold">
+                          Deliver To: {order.recipientName} (+91 {order.recipientPhone}) • By: {order.customerName}
+                        </p>
+                      )}
                       <div className="flex items-center gap-1 text-[11px] text-slate-600 mt-0.5">
                         <MapPin className="w-3 h-3 text-[#005d42] shrink-0" />
                         <span className="truncate">{order.address} ({order.distanceKm} km)</span>
@@ -990,14 +1031,14 @@ export default function AdminPage() {
 
                     <div className="grid grid-cols-3 gap-1 pt-1">
                       <a
-                        href={`tel:${order.phone}`}
+                        href={`tel:${order.recipientPhone || order.phone}`}
                         className="py-1.5 px-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"
                       >
                         <Phone className="w-3.5 h-3.5" />
                         Call
                       </a>
                       <a
-                        href={`https://wa.me/${order.phone.replace(/\D/g, '')}?text=Your%20Sri%20Amman%20Supermarket%20order%20is%20on%20the%20way!`}
+                        href={`https://wa.me/${(order.recipientPhone || order.phone).replace(/\D/g, '')}?text=Your%20Sri%20Amman%20Supermarket%20order%20is%20on%20the%20way!`}
                         target="_blank"
                         rel="noreferrer"
                         className="py-1.5 px-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] flex items-center justify-center gap-1 transition-colors"

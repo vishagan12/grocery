@@ -46,6 +46,9 @@ interface RiderOrder {
   paymentStatus: string;
   status: number; // 0, 1: Ready at counter, 2: Out for delivery, 3: Delivered
   createdAt: string;
+  isForSomeoneElse?: boolean;
+  recipientName?: string;
+  recipientPhone?: string;
   items: RiderOrderItem[];
 }
 
@@ -379,11 +382,43 @@ export default function RiderPage() {
             {/* Customer Details Content */}
             <div className="p-4 space-y-3">
               <div>
-                <span className="text-[10px] font-mono uppercase text-slate-400">Customer / வாடிக்கையாளர்</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">
+                    {activeOrder.isForSomeoneElse
+                      ? (lang === 'ta' ? 'வீட்டு வாசலில் பெறுபவர்' : 'Doorstep Recipient')
+                      : (lang === 'ta' ? 'வாடிக்கையாளர்' : 'Customer')}
+                  </span>
+                  {activeOrder.isForSomeoneElse && (
+                    <span className="px-2 py-0.5 rounded-full font-mono text-[10px] bg-amber-100 text-amber-900 font-bold">
+                      {lang === 'ta' ? 'மற்றொருவருக்கு' : 'For Someone Else'}
+                    </span>
+                  )}
+                </div>
                 <h3 className="text-lg font-bold text-slate-900 leading-tight">
-                  {activeOrder.customerName}
+                  {activeOrder.recipientName || activeOrder.customerName}
                 </h3>
-                <span className="text-xs font-mono text-slate-600 font-bold">{activeOrder.phone}</span>
+                <span className="text-xs font-mono text-slate-600 font-bold">
+                  +91 {(activeOrder.recipientPhone || activeOrder.phone).replace(/\D/g, '').slice(-10)}
+                </span>
+
+                {/* Helpful info badge if isForSomeoneElse */}
+                {activeOrder.isForSomeoneElse && (
+                  <div className="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 text-xs flex items-start gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 mt-1 shrink-0" />
+                    <div>
+                      <p className="font-bold leading-snug">
+                        {lang === 'ta'
+                          ? `ஆர்டர் செய்தவர்: +91 ${activeOrder.phone.replace(/\D/g, '').slice(-10)} (${activeOrder.customerName || 'கணக்கு வைத்திருப்பவர்'})`
+                          : `Ordered by +91 ${activeOrder.phone.replace(/\D/g, '').slice(-10)} for ${activeOrder.recipientName}`}
+                      </p>
+                      <p className="text-[11px] text-amber-800/80 mt-0.5">
+                        {lang === 'ta'
+                          ? 'வீட்டு வாசலில் பெறுபவர் ஆச்சரியப்பட்டால், யார் அனுப்பினார் என்பதைத் தெரிவிக்கவும்.'
+                          : 'If recipient looks surprised at the door, mention who ordered these groceries.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Full Address Box with Highlighted Door No */}
@@ -420,14 +455,16 @@ export default function RiderPage() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <a
-                    href={`tel:${activeOrder.phone}`}
+                    href={`tel:+91${(activeOrder.recipientPhone || activeOrder.phone).replace(/\D/g, '').slice(-10)}`}
                     className="h-11 rounded-xl bg-[#283044] hover:bg-[#1e2330] text-white flex items-center justify-center gap-2 text-xs font-bold transition-colors"
                   >
                     <Phone className="w-4 h-4" />
-                    <span>Call Customer</span>
+                    <span>{lang === 'ta' ? 'அழைக்க' : 'Call Doorstep'}</span>
                   </a>
                   <a
-                    href={`https://wa.me/${activeOrder.phone.replace(/\D/g, '')}?text=Hello%20from%20Sri%20Amman%20Supermarket.%20I%20am%20delivering%20your%20order%20${activeOrder.id}.`}
+                    href={`https://wa.me/91${(activeOrder.recipientPhone || activeOrder.phone).replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(
+                      `Hello from Sri Amman Supermarket delivery partner. I am delivering your order ${activeOrder.id}${activeOrder.isForSomeoneElse ? ` (ordered by ${activeOrder.customerName})` : ''}.`
+                    )}`}
                     target="_blank"
                     rel="noreferrer"
                     className="h-11 rounded-xl bg-[#047857] hover:bg-[#035f44] text-white flex items-center justify-center gap-2 text-xs font-bold transition-colors"

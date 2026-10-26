@@ -24,6 +24,9 @@ interface PlaceOrderRequestBody {
   paymentMethod?: 'cod' | 'upi';
   deliverySlot?: string;
   appliedCoupon?: string | null;
+  isForSomeoneElse?: boolean;
+  recipientName?: string;
+  recipientPhone?: string;
 }
 
 // Indian 10-digit mobile number format
@@ -50,6 +53,7 @@ export async function POST(req: NextRequest) {
 
   const {
     idempotencyKey,
+    customerName,
     phone: rawPhone,
     address: rawAddress,
     lat,
@@ -58,6 +62,9 @@ export async function POST(req: NextRequest) {
     paymentMethod = 'cod',
     deliverySlot = 'express',
     appliedCoupon,
+    isForSomeoneElse = false,
+    recipientName: rawRecipientName,
+    recipientPhone: rawRecipientPhone,
   } = body;
 
   // 1. Validate Idempotency Key
@@ -77,6 +84,27 @@ export async function POST(req: NextRequest) {
     );
   }
   const formattedPhone = `+91-${cleanPhone}`;
+
+  // 2b. Validate Recipient Details (if ordering for someone else)
+  let sanitizedRecipientName: string | null = null;
+  let formattedRecipientPhone: string | null = null;
+  if (isForSomeoneElse) {
+    sanitizedRecipientName = sanitizeInput(rawRecipientName || '', 100);
+    if (!sanitizedRecipientName || sanitizedRecipientName.length < 2) {
+      return NextResponse.json(
+        { error: 'Recipient name is required when ordering for someone else.' },
+        { status: 400, headers: { 'x-request-id': requestId } }
+      );
+    }
+    const cleanRecipientPhone = (rawRecipientPhone || '').replace(/\D/g, '').slice(-10);
+    if (!INDIAN_PHONE_REGEX.test(cleanRecipientPhone)) {
+      return NextResponse.json(
+        { error: 'Invalid recipient phone number. Must be a valid 10-digit Indian mobile number.' },
+        { status: 400, headers: { 'x-request-id': requestId } }
+      );
+    }
+    formattedRecipientPhone = cleanRecipientPhone;
+  }
 
   // 3. Sanitize Address
   const sanitizedAddress = sanitizeInput(rawAddress || '', 300);
@@ -230,6 +258,9 @@ export async function POST(req: NextRequest) {
           p_delivery_slot: deliverySlot,
           p_order_secret: orderSecret,
           p_items: validatedItems,
+          p_is_for_someone_else: !!isForSomeoneElse,
+          p_recipient_name: sanitizedRecipientName,
+          p_recipient_phone: formattedRecipientPhone,
         });
 
         // Fallback to direct relational insert if RPC is not present
@@ -237,6 +268,7 @@ export async function POST(req: NextRequest) {
           const { error: orderError } = await supabase.from('orders').insert({
             id: orderId,
             phone: formattedPhone,
+            customer_name: customerName ? sanitizeInput(customerName, 100) : null,
             address: sanitizedAddress,
             subtotal: serverSubtotal,
             discount: totalDiscount,
@@ -248,6 +280,9 @@ export async function POST(req: NextRequest) {
             delivery_slot: deliverySlot,
             idempotency_key: idempotencyKey,
             order_secret: orderSecret,
+            is_for_someone_else: !!isForSomeoneElse,
+            recipient_name: sanitizedRecipientName,
+            recipient_phone: formattedRecipientPhone,
           });
 
           if (orderError) throw orderError;
@@ -275,6 +310,7 @@ export async function POST(req: NextRequest) {
       phone: formattedPhone,
       total: serverFinalTotal,
       distanceKm: serverDistanceKm,
+      isForSomeoneElse: !!isForSomeoneElse,
     }, requestId);
 
     return NextResponse.json(
@@ -287,6 +323,9 @@ export async function POST(req: NextRequest) {
         total: serverFinalTotal,
         distanceKm: serverDistanceKm,
         status: 0,
+        isForSomeoneElse: !!isForSomeoneElse,
+        recipientName: sanitizedRecipientName,
+        recipientPhone: formattedRecipientPhone,
         message: 'Order placed successfully',
       },
       { status: 201, headers: { 'x-request-id': requestId } }

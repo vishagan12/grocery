@@ -103,6 +103,9 @@ export async function GET(req: NextRequest) {
       status: typeof o.status === 'number' ? o.status : 0,
       deliverySlot: o.delivery_slot || 'express',
       createdAt: o.created_at || new Date().toISOString(),
+      isForSomeoneElse: Boolean(o.is_for_someone_else),
+      recipientName: o.recipient_name || undefined,
+      recipientPhone: o.recipient_phone || undefined,
       items: Array.isArray(o.order_items)
         ? o.order_items.map((item: any) => {
             const prod = catalog.find((p) => p.id === item.product_id);

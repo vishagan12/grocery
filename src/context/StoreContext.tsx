@@ -24,6 +24,9 @@ export type Order = {
   phone: string;
   status: number; // 0-4 milestone
   timestamp: number;
+  isForSomeoneElse?: boolean;
+  recipientName?: string;
+  recipientPhone?: string;
 };
 
 export type UserLocation = {
@@ -51,6 +54,9 @@ export interface SavedAddress {
   lng: number;
   distanceKm: number;
   isDefault: boolean;
+  isForSomeoneElse?: boolean;
+  recipientName?: string;
+  recipientPhone?: string;
 }
 
 type StoreState = {
@@ -109,6 +115,7 @@ type StoreAction =
   | { type: 'UPDATE_ORDER_STATUS_LIVE'; orderId: string; status: number }
   | { type: 'SET_ADDRESSES'; addresses: SavedAddress[]; selectedId?: string | null }
   | { type: 'ADD_ADDRESS'; address: SavedAddress }
+  | { type: 'UPDATE_ADDRESS'; address: SavedAddress }
   | { type: 'SELECT_ADDRESS'; id: string }
   | { type: 'DELETE_ADDRESS'; id: string }
   | { type: 'SET_SHOP_COORDS'; coords: { lat: number; lng: number; shopUrl: string } }
@@ -327,6 +334,19 @@ function reducer(state: StoreState, action: StoreAction): StoreState {
       };
     }
 
+    case 'UPDATE_ADDRESS': {
+      const updated = state.savedAddresses.map((a) => (a.id === action.address.id ? action.address : a));
+      if (action.address.isDefault) {
+        updated.forEach((a) => {
+          if (a.id !== action.address.id) a.isDefault = false;
+        });
+      }
+      return {
+        ...state,
+        savedAddresses: updated,
+      };
+    }
+
     case 'SELECT_ADDRESS': {
       const chosen = state.savedAddresses.find((a) => a.id === action.id);
       return {
@@ -383,6 +403,7 @@ type StoreContextType = {
   toggleWishlist: (productId: string) => void;
   showToast: (msg: string) => void;
   saveAddress: (addr: Omit<SavedAddress, 'id'>) => Promise<SavedAddress>;
+  updateAddress: (addr: SavedAddress) => Promise<SavedAddress>;
   deleteAddress: (id: string) => Promise<void>;
   selectAddress: (id: string) => void;
 };
@@ -506,6 +527,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             lng: Number(row.lng) || 0,
             distanceKm: Number(row.distance_km) || 0,
             isDefault: Boolean(row.is_default),
+            isForSomeoneElse: Boolean(row.is_for_someone_else),
+            recipientName: row.recipient_name || undefined,
+            recipientPhone: row.recipient_phone || undefined,
           }));
 
           const mergedMap = new Map<string, SavedAddress>();
@@ -751,6 +775,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             lng: newAddr.lng,
             distance_km: newAddr.distanceKm,
             is_default: newAddr.isDefault,
+            is_for_someone_else: !!newAddr.isForSomeoneElse,
+            recipient_name: newAddr.recipientName || null,
+            recipient_phone: newAddr.recipientPhone || null,
           });
         } catch (err) {
           console.warn('Supabase address insert failed:', err);
@@ -758,6 +785,53 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
 
       return newAddr;
+    },
+    [state.loginPhone, state.savedAddresses]
+  );
+
+  const updateAddress = useCallback(
+    async (addr: SavedAddress): Promise<SavedAddress> => {
+      dispatch({ type: 'UPDATE_ADDRESS', address: addr });
+
+      const currentPhone = state.loginPhone || 'guest';
+      const updated = state.savedAddresses.map((a) => (a.id === addr.id ? addr : a));
+      if (addr.isDefault) {
+        updated.forEach((a) => {
+          if (a.id !== addr.id) a.isDefault = false;
+        });
+      }
+      try {
+        localStorage.setItem(`sas_addresses_${currentPhone}`, JSON.stringify(updated));
+      } catch {}
+
+      if (state.loginPhone) {
+        try {
+          await supabase
+            .from('addresses')
+            .update({
+              tag: addr.tag,
+              custom_label: addr.customLabel || null,
+              house_no: addr.houseNo,
+              street: addr.street,
+              area: addr.area,
+              landmark: addr.landmark || null,
+              city: addr.city || 'Madurai',
+              pincode: addr.pincode,
+              lat: addr.lat,
+              lng: addr.lng,
+              distance_km: addr.distanceKm,
+              is_default: addr.isDefault,
+              is_for_someone_else: !!addr.isForSomeoneElse,
+              recipient_name: addr.recipientName || null,
+              recipient_phone: addr.recipientPhone || null,
+            })
+            .eq('id', addr.id);
+        } catch (err) {
+          console.warn('Supabase address update failed:', err);
+        }
+      }
+
+      return addr;
     },
     [state.loginPhone, state.savedAddresses]
   );
@@ -807,6 +881,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         toggleWishlist,
         showToast,
         saveAddress,
+        updateAddress,
         deleteAddress,
         selectAddress,
       }}

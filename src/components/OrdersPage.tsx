@@ -29,6 +29,8 @@ import {
   Copy,
   AlertCircle,
   X,
+  Share2,
+  Users,
 } from 'lucide-react';
 
 const milestoneKeys = [
@@ -343,6 +345,45 @@ export default function OrdersPage() {
           </div>
         </div>
 
+        {/* Prominent WhatsApp Share Action Banner for "Ordering for Someone Else" */}
+        {activeOrder.isForSomeoneElse && activeOrder.recipientPhone && (
+          <div className="mb-6 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-3xl p-4 sm:p-5 text-white shadow-lg shadow-emerald-700/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border border-emerald-500/30">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30 text-white">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-black text-sm sm:text-base leading-tight">
+                  {lang === 'ta'
+                    ? `${activeOrder.recipientName}-க்கு ஆர்டர் செய்துள்ளீர்கள்`
+                    : `Ordering for ${activeOrder.recipientName}`}
+                </p>
+                <p className="text-xs text-emerald-100/90 font-medium mt-0.5">
+                  {lang === 'ta'
+                    ? `டெலிவரி தொடர்பு: +91 ${activeOrder.recipientPhone.replace(/\D/g, '').slice(-10)} • நேரடி டிராக்கிங் விவரத்தைப் பகிருங்கள்`
+                    : `Doorstep contact: +91 ${activeOrder.recipientPhone.replace(/\D/g, '').slice(-10)} • Keep them updated with 1-click live tracking`}
+                </p>
+              </div>
+            </div>
+
+            <a
+              href={`https://wa.me/91${activeOrder.recipientPhone.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(
+                `Hi ${activeOrder.recipientName || 'there'}, I've ordered groceries for you from Sri Amman Supermarket (Order ${activeOrder.id} • ${activeOrder.paymentMethod === 'upi' ? 'Already Paid Online' : 'Cash on Delivery: ₹' + activeOrder.total}). It will arrive shortly at your doorstep!`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white hover:bg-emerald-50 text-emerald-900 font-black text-xs sm:text-sm px-5 py-3 rounded-2xl transition-all shadow-md active:scale-98 shrink-0"
+            >
+              <Share2 className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                {lang === 'ta'
+                  ? `${activeOrder.recipientName}-க்கு வாட்ஸ்அப்பில் ஆர்டர் விவரத்தை அனுப்பு`
+                  : `Share Order Details on WhatsApp with ${activeOrder.recipientName}`}
+              </span>
+            </a>
+          </div>
+        )}
+
         {/* Multi-Order Tabs */}
         {state.orders.length > 1 && (
           <div className="mb-6">
@@ -609,15 +650,30 @@ export default function OrdersPage() {
 
               {/* Delivery Destination Address Box */}
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-xs space-y-1.5">
-                <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                  <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{lang === 'ta' ? 'டெலிவரி முகவரி' : 'Delivery Address'}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                    <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{lang === 'ta' ? 'டெலிவரி முகவரி' : 'Delivery Address'}</span>
+                  </div>
+                  {activeOrder.isForSomeoneElse && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md">
+                      <Users className="w-3 h-3 text-amber-700" />
+                      <span>{lang === 'ta' ? 'மற்றொருவருக்கு' : 'For Someone Else'}</span>
+                    </span>
+                  )}
                 </div>
                 <p className="text-slate-600 font-medium leading-relaxed pl-5 break-words">
                   {activeOrder.address}
                 </p>
+                {activeOrder.isForSomeoneElse && (
+                  <p className="text-emerald-800 font-bold pl-5 text-[11px]">
+                    {lang === 'ta' ? 'பெறுபவர்' : 'Deliver To'}: {activeOrder.recipientName} ({cleanPhone(activeOrder.recipientPhone || '')})
+                  </p>
+                )}
                 <p className="text-slate-500 pl-5 font-mono text-[11px]">
-                  Phone: {cleanPhone(activeOrder.phone)}
+                  {activeOrder.isForSomeoneElse
+                    ? `${lang === 'ta' ? 'ஆர்டர் செய்தவர்' : 'Ordered by'}: ${cleanPhone(activeOrder.phone)}`
+                    : `Phone: ${cleanPhone(activeOrder.phone)}`}
                 </p>
               </div>
             </div>
@@ -645,6 +701,11 @@ export default function OrdersPage() {
                   <p className="font-bold text-slate-700">
                     {activeOrder.id} &bull; {orderDate}
                   </p>
+                  {activeOrder.isForSomeoneElse && (
+                    <p className="text-emerald-700 font-bold">
+                      DELIVER TO: {activeOrder.recipientName} (Ph: +91 {activeOrder.recipientPhone})
+                    </p>
+                  )}
                 </div>
               </div>
 

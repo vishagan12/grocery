@@ -36,6 +36,9 @@ import {
   X,
   ShieldCheck,
   Sparkles,
+  Users,
+  UserCheck,
+  Phone,
 } from 'lucide-react';
 
 export default function CheckoutPage() {
@@ -99,6 +102,17 @@ export default function CheckoutPage() {
   const [isDetectingGps, setIsDetectingGps] = useState(false);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+
+  // Recipient / Multi-Recipient State ("Ordering for Someone Else")
+  const [isForSomeoneElse, setIsForSomeoneElse] = useState(false);
+  const [recipientName, setRecipientName] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
+
+  // Single Order Recipient Override (for selected saved address)
+  const [orderOverrideOpen, setOrderOverrideOpen] = useState(false);
+  const [orderOverrideEnabled, setOrderOverrideEnabled] = useState(false);
+  const [overrideRecipientName, setOverrideRecipientName] = useState('');
+  const [overrideRecipientPhone, setOverrideRecipientPhone] = useState('');
 
   useEffect(() => {
     if (state.loginPhone) {
@@ -285,6 +299,22 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (isForSomeoneElse) {
+      if (!recipientName.trim()) {
+        showToast(lang === 'ta' ? 'பெறுபவரின் பெயரை உள்ளிடவும்' : "Please enter recipient's name");
+        return;
+      }
+      const cleanPhone = recipientPhone.replace(/\D/g, '');
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        showToast(
+          lang === 'ta'
+            ? 'செல்லுபடியாகும் 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்'
+            : 'Please enter a valid 10-digit Indian mobile number for recipient'
+        );
+        return;
+      }
+    }
+
     setIsSavingAddress(true);
     try {
       await saveAddress({
@@ -300,6 +330,9 @@ export default function CheckoutPage() {
         lng: formLng,
         distanceKm: finalDist,
         isDefault: state.savedAddresses.length === 0,
+        isForSomeoneElse: !!isForSomeoneElse,
+        recipientName: isForSomeoneElse ? recipientName.trim() : undefined,
+        recipientPhone: isForSomeoneElse ? recipientPhone.replace(/\D/g, '').slice(-10) : undefined,
       });
 
       setShowAddForm(false);
@@ -311,6 +344,9 @@ export default function CheckoutPage() {
       setPlaceQuery('');
       setFormDistanceCalculated(false);
       setAutoFilled(false);
+      setIsForSomeoneElse(false);
+      setRecipientName('');
+      setRecipientPhone('');
       showToast(lang === 'ta' ? 'முகவரி வெற்றிகரமாக சேமிக்கப்பட்டது' : 'Address saved successfully');
     } catch {
       showToast(lang === 'ta' ? 'முகவரியைச் சேமிக்க முடியவில்லை' : 'Failed to save address');
@@ -372,6 +408,49 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Multi-recipient resolution (address setting vs single-order inline override)
+    const orderIsForSomeoneElse = orderOverrideEnabled
+      ? true
+      : activeSavedAddress
+      ? Boolean(activeSavedAddress.isForSomeoneElse)
+      : isForSomeoneElse;
+
+    const orderRecipientName = orderOverrideEnabled
+      ? overrideRecipientName.trim()
+      : activeSavedAddress?.isForSomeoneElse
+      ? activeSavedAddress.recipientName
+      : isForSomeoneElse
+      ? recipientName.trim()
+      : undefined;
+
+    const orderRecipientPhone = orderOverrideEnabled
+      ? overrideRecipientPhone.trim()
+      : activeSavedAddress?.isForSomeoneElse
+      ? activeSavedAddress.recipientPhone
+      : isForSomeoneElse
+      ? recipientPhone.trim()
+      : undefined;
+
+    if (orderIsForSomeoneElse) {
+      if (!orderRecipientName) {
+        showToast(
+          lang === 'ta'
+            ? 'பெறுபவரின் முழு பெயரை உள்ளிடவும்'
+            : "Please enter recipient's full name"
+        );
+        return;
+      }
+      const cleanRecPhone = (orderRecipientPhone || '').replace(/\D/g, '').slice(-10);
+      if (!/^[6-9]\d{9}$/.test(cleanRecPhone)) {
+        showToast(
+          lang === 'ta'
+            ? 'பெறுநருக்கு சரியான 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்'
+            : 'Please enter a valid 10-digit Indian mobile number for recipient'
+        );
+        return;
+      }
+    }
+
     setIsSubmittingOrder(true);
     const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `sas-idem-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const finalPhone = phone.startsWith('+91') ? phone : `+91-${phone.replace(/\D/g, '').slice(-10)}`;
@@ -415,6 +494,9 @@ export default function CheckoutPage() {
           deliverySlot: deliverySlot || 'express',
           couponCode: state.appliedCoupon,
           items: orderItems,
+          isForSomeoneElse: !!orderIsForSomeoneElse,
+          recipientName: orderRecipientName || undefined,
+          recipientPhone: orderRecipientPhone ? orderRecipientPhone.replace(/\D/g, '').slice(-10) : undefined,
         }),
       });
 
@@ -458,6 +540,9 @@ export default function CheckoutPage() {
       phone: finalPhone,
       status: 0,
       timestamp: Date.now(),
+      isForSomeoneElse: !!orderIsForSomeoneElse,
+      recipientName: orderRecipientName || undefined,
+      recipientPhone: orderRecipientPhone ? orderRecipientPhone.replace(/\D/g, '').slice(-10) : undefined,
     };
 
     dispatch({ type: 'ADD_ORDER', order: placedOrder });
@@ -651,18 +736,27 @@ export default function CheckoutPage() {
                             }`}
                           >
                             <div className="w-full min-w-0">
-                              {/* Top Card Row: Tag + Distance */}
+                              {/* Top Card Row: Tag + Recipient Badge + Distance */}
                               <div className="flex items-center justify-between gap-2 mb-2 w-full min-w-0">
-                                <span className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-800 text-[11px] font-black px-2.5 py-0.5 rounded-lg shadow-2xs shrink-0">
-                                  {addr.tag === 'Home' ? (
-                                    <HomeIcon className="w-3 h-3 text-emerald-600 shrink-0" />
-                                  ) : addr.tag === 'Work' ? (
-                                    <Briefcase className="w-3 h-3 text-blue-600 shrink-0" />
-                                  ) : (
-                                    <MapPin className="w-3 h-3 text-purple-600 shrink-0" />
+                                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                                  <span className="inline-flex items-center gap-1.5 bg-white border border-slate-200 text-slate-800 text-[11px] font-black px-2.5 py-0.5 rounded-lg shadow-2xs shrink-0">
+                                    {addr.tag === 'Home' ? (
+                                      <HomeIcon className="w-3 h-3 text-emerald-600 shrink-0" />
+                                    ) : addr.tag === 'Work' ? (
+                                      <Briefcase className="w-3 h-3 text-blue-600 shrink-0" />
+                                    ) : (
+                                      <MapPin className="w-3 h-3 text-purple-600 shrink-0" />
+                                    )}
+                                    <span className="break-words">{addr.customLabel || addr.tag}</span>
+                                  </span>
+
+                                  {(addr.isForSomeoneElse || (addr.recipientPhone && addr.recipientPhone !== (state.loginPhone || '').replace(/\D/g, '').slice(-10))) && (
+                                    <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0">
+                                      <Users className="w-3 h-3 text-amber-700 shrink-0" />
+                                      <span>For: {addr.recipientName || 'Someone Else'} (+91 {addr.recipientPhone})</span>
+                                    </span>
                                   )}
-                                  <span className="break-words">{addr.customLabel || addr.tag}</span>
-                                </span>
+                                </div>
 
                                 <span
                                   className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap ${
@@ -723,6 +817,123 @@ export default function CheckoutPage() {
                         );
                       })}
                     </div>
+
+                    {/* Quick Recipient Override for Selected Address */}
+                    {activeSavedAddress && (
+                      <div className="bg-emerald-50/40 border border-emerald-200/80 rounded-2xl p-3.5 transition-all">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Users className="w-4 h-4 text-emerald-700 shrink-0" />
+                            <div className="text-xs">
+                              <span className="font-extrabold text-slate-800">
+                                {orderOverrideEnabled
+                                  ? (lang === 'ta'
+                                      ? `பெறுநர்: ${overrideRecipientName || '...'} (+91 ${overrideRecipientPhone || '...'})`
+                                      : `Recipient: ${overrideRecipientName || '...'} (+91 ${overrideRecipientPhone || '...'})`)
+                                  : activeSavedAddress.isForSomeoneElse
+                                  ? (lang === 'ta'
+                                      ? `பெறுநர்: ${activeSavedAddress.recipientName} (+91 ${activeSavedAddress.recipientPhone})`
+                                      : `Recipient: ${activeSavedAddress.recipientName} (+91 ${activeSavedAddress.recipientPhone})`)
+                                  : (lang === 'ta'
+                                      ? 'பெறுபவர்: நானே (கணக்கு எண்)'
+                                      : 'Recipient: Myself (Account phone)')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!orderOverrideOpen && !orderOverrideEnabled && activeSavedAddress.isForSomeoneElse) {
+                                setOverrideRecipientName(activeSavedAddress.recipientName || '');
+                                setOverrideRecipientPhone(activeSavedAddress.recipientPhone || '');
+                              }
+                              setOrderOverrideOpen(!orderOverrideOpen);
+                            }}
+                            className="text-xs font-black text-emerald-800 hover:text-emerald-950 underline underline-offset-2 flex items-center gap-1 shrink-0"
+                          >
+                            <span>
+                              {lang === 'ta'
+                                ? 'வேறு ஒருவருக்கு ஆர்டர் செய்கிறீர்களா? பெறுநரை மாற்றுக'
+                                : 'Ordering for someone else at this address? Edit recipient'}
+                            </span>
+                          </button>
+                        </div>
+
+                        {orderOverrideOpen && (
+                          <div className="mt-3 pt-3 border-t border-emerald-200/60 space-y-3 animate-fade-in">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-black text-emerald-900">
+                                {lang === 'ta' ? 'இந்த ஒரு ஆர்டருக்கான பெறுநர்' : 'Recipient for this specific order'}
+                              </span>
+                              {orderOverrideEnabled && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOrderOverrideEnabled(false);
+                                    setOverrideRecipientName('');
+                                    setOverrideRecipientPhone('');
+                                    setOrderOverrideOpen(false);
+                                  }}
+                                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800"
+                                >
+                                  {lang === 'ta' ? 'இயல்புநிலைக்கு மீட்டமை' : 'Reset to default'}
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                                  {lang === 'ta' ? 'பெறுநரின் முழு பெயர் *' : "Recipient's Full Name *"}
+                                </label>
+                                <input
+                                  type="text"
+                                  value={overrideRecipientName}
+                                  onChange={(e) => {
+                                    setOverrideRecipientName(e.target.value);
+                                    setOrderOverrideEnabled(true);
+                                  }}
+                                  placeholder={lang === 'ta' ? 'எ.கா: அம்மா / திரு. இளங்கோ' : 'e.g. Amma / Mr. Elango'}
+                                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 outline-none focus:border-emerald-600"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                                  {lang === 'ta' ? '10 இலக்க மொபைல் எண் *' : '10-Digit Mobile Number *'}
+                                </label>
+                                <div className="flex items-center border border-slate-300 rounded-xl bg-white overflow-hidden focus-within:border-emerald-600">
+                                  <span className="bg-slate-100 text-slate-700 text-xs font-black px-2.5 py-1.5 border-r border-slate-300">
+                                    +91
+                                  </span>
+                                  <input
+                                    type="tel"
+                                    maxLength={10}
+                                    value={overrideRecipientPhone}
+                                    onChange={(e) => {
+                                      setOverrideRecipientPhone(e.target.value.replace(/\D/g, ''));
+                                      setOrderOverrideEnabled(true);
+                                    }}
+                                    placeholder="98421 XXXXX"
+                                    className="w-full px-2.5 py-1.5 text-xs font-semibold text-slate-900 outline-none bg-transparent"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-start gap-1.5 text-[11px] text-slate-600 font-medium leading-relaxed">
+                              <Phone className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                              <span>
+                                {lang === 'ta'
+                                  ? 'டெலிவரி ஊழியர் இந்த எண்ணிற்கு அழைப்பார். பில் மற்றும் டிராக்கிங் உங்கள் கணக்கில் இருக்கும்.'
+                                  : 'Our delivery partner will call this number at the doorstep. Order bill & live tracking stay on your account.'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Dashed Add New Address Button */}
                     <button
@@ -975,6 +1186,87 @@ export default function CheckoutPage() {
                             placeholder="e.g. Mom's House, Shop, Friend's Flat"
                             className="w-full min-w-0 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none focus:border-emerald-600 box-border"
                           />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Blinkit-Style "Who will receive this order?" Segmented Selector */}
+                    <div className="w-full min-w-0 pt-2 border-t border-slate-100">
+                      <label className="block font-bold text-slate-800 text-xs mb-1.5">
+                        {lang === 'ta' ? 'இந்த ஆர்டரைப் பெறுபவர் யார்?' : 'Who will receive this order?'}
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 w-full">
+                        <button
+                          type="button"
+                          onClick={() => setIsForSomeoneElse(false)}
+                          className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black border transition-all ${
+                            !isForSomeoneElse
+                              ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <UserCheck className="w-4 h-4 shrink-0" />
+                          <span>{lang === 'ta' ? 'நானே' : 'Myself'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsForSomeoneElse(true)}
+                          className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black border transition-all ${
+                            isForSomeoneElse
+                              ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <Users className="w-4 h-4 shrink-0" />
+                          <span>{lang === 'ta' ? 'மற்றொருவருக்கு' : 'Someone Else'}</span>
+                        </button>
+                      </div>
+
+                      {/* Recipient Details Sub-Card */}
+                      {isForSomeoneElse && (
+                        <div className="mt-3 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-4 space-y-3 animate-fade-in">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-800 mb-1">
+                              {lang === 'ta' ? 'பெறுபவர் முழு பெயர் *' : "Recipient's Full Name *"}
+                            </label>
+                            <input
+                              type="text"
+                              required={isForSomeoneElse}
+                              value={recipientName}
+                              onChange={(e) => setRecipientName(e.target.value)}
+                              placeholder={lang === 'ta' ? 'எ.கா: அம்மா / திரு. இளங்கோ' : 'e.g. Amma / Mr. Elango'}
+                              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-emerald-600 box-border"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-800 mb-1">
+                              {lang === 'ta' ? 'பெறுபவரின் 10 இலக்க மொபைல் எண் *' : "Recipient's 10-Digit Mobile Number *"}
+                            </label>
+                            <div className="flex items-center border border-slate-300 rounded-xl bg-white overflow-hidden focus-within:border-emerald-600">
+                              <span className="bg-slate-100 text-slate-700 text-xs font-black px-3 py-2 border-r border-slate-300">
+                                +91
+                              </span>
+                              <input
+                                type="tel"
+                                required={isForSomeoneElse}
+                                maxLength={10}
+                                value={recipientPhone}
+                                onChange={(e) => setRecipientPhone(e.target.value.replace(/\D/g, ''))}
+                                placeholder="98421 XXXXX"
+                                className="w-full px-3 py-2 text-xs font-semibold text-slate-900 outline-none bg-transparent box-border"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-2 bg-white/70 border border-emerald-200/60 rounded-xl p-2.5">
+                            <Phone className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                            <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                              {lang === 'ta'
+                                ? 'டெலிவரி ஊழியர் இந்த எண்ணிற்கு அழைப்பார். பில் மற்றும் டிராக்கிங் உங்கள் கணக்கில் இருக்கும்.'
+                                : 'Our delivery partner will call this number at the doorstep. Order bill & live tracking stay on your account.'}
+                            </p>
+                          </div>
                         </div>
                       )}
                     </div>

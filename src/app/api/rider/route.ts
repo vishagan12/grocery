@@ -31,6 +31,9 @@ export async function GET(req: NextRequest) {
         paymentMethod: o.payment_method || 'cod',
         paymentStatus: o.payment_status || 'pending',
         status: typeof o.status === 'number' ? o.status : 0,
+        isForSomeoneElse: Boolean(o.is_for_someone_else),
+        recipientName: o.recipient_name || undefined,
+        recipientPhone: o.recipient_phone || undefined,
       }));
 
       return NextResponse.json({
@@ -98,6 +101,9 @@ export async function GET(req: NextRequest) {
         paymentStatus: orderRow.payment_status || 'pending',
         status: typeof orderRow.status === 'number' ? orderRow.status : 0,
         createdAt: orderRow.created_at || new Date().toISOString(),
+        isForSomeoneElse: Boolean(orderRow.is_for_someone_else),
+        recipientName: orderRow.recipient_name || undefined,
+        recipientPhone: orderRow.recipient_phone || undefined,
         items,
       },
     });
