@@ -52,11 +52,11 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-3 sm:bottom-4 inset-x-0 z-40 px-3 sm:px-4 pointer-events-none flex flex-col items-center justify-end pb-[env(safe-area-inset-bottom)]">
-      <div className="w-full max-w-md pointer-events-auto">
+    <div className="fixed bottom-6 sm:bottom-8 inset-x-0 z-40 px-3 sm:px-4 pointer-events-none flex flex-col items-center justify-end pb-[env(safe-area-inset-bottom)]">
+      <div className="w-full max-w-sm sm:max-w-md pointer-events-auto">
         {/* Layer 1: Dark Free-Delivery Nudge Strip (only shown while unlocking; disappears once free delivery is reached) */}
         {cartCount > 0 && cartSubtotal < 499 && (
-          <div className="mx-1 mb-2 bg-[#1E293B]/95 backdrop-blur-md text-white text-xs px-3.5 py-2 rounded-2xl shadow-xl flex flex-col gap-1 border border-slate-700/60 animate-slide-up">
+          <div className="mx-1 mb-2.5 bg-[#1E293B]/95 backdrop-blur-md text-white text-xs px-4 py-2 rounded-full shadow-xl flex flex-col gap-1 border border-slate-700/60 animate-slide-up">
             <div className="flex items-center justify-between font-bold text-[11px]">
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                 <Truck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -84,7 +84,7 @@ export default function MobileBottomNav() {
         {cartCount > 0 && (
           <div
             onClick={() => dispatch({ type: 'SET_CART_OPEN', open: true })}
-            className="mx-1 mb-2 bg-[#76CA3E] hover:bg-[#60B328] text-white rounded-2xl p-2.5 sm:p-3 shadow-2xl flex items-center justify-between border border-white/25 cursor-pointer transition-all active:scale-[0.99] select-none gap-2"
+            className="mx-1 mb-2.5 bg-[#76CA3E] hover:bg-[#60B328] text-white rounded-full px-3.5 sm:px-4 py-2 sm:py-2.5 shadow-2xl flex items-center justify-between border border-white/25 cursor-pointer transition-all active:scale-[0.99] select-none gap-2"
           >
             {/* Left: Overlapping circular thumbnails + item count & subtotal */}
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -121,7 +121,7 @@ export default function MobileBottomNav() {
             </div>
 
             {/* Right: Bold View Cart CTA with Lucide Arrow */}
-            <div className="flex items-center gap-1 sm:gap-1.5 bg-white text-[#143B0D] font-black text-xs px-2.5 sm:px-3 py-1.5 rounded-xl shadow-md shrink-0 whitespace-nowrap">
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-white text-[#143B0D] font-black text-xs px-3 py-1.5 rounded-full shadow-md shrink-0 whitespace-nowrap">
               <span>{lang === 'ta' ? 'கூடை' : 'View Cart'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -129,8 +129,8 @@ export default function MobileBottomNav() {
         )}
       </div>
 
-      {/* Layer 3: Sleek Elevated Floating Pill Dock */}
-      <nav className="pointer-events-auto w-full max-w-md bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl sm:rounded-3xl shadow-[0_12px_36px_-8px_rgba(15,23,42,0.18),0_4px_12px_-2px_rgba(4,120,87,0.08)] px-2 py-1.5 flex items-center justify-around transition-all duration-300">
+      {/* Layer 3: Sleek Elevated Floating Capsule Dock */}
+      <nav className="pointer-events-auto w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-full shadow-[0_16px_40px_-10px_rgba(15,23,42,0.22),0_6px_18px_-4px_rgba(5,150,105,0.12)] px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-around ring-1 ring-black/5 transition-all duration-300">
         {navItems.map((item) => {
           const isActive = item.isCart
             ? state.cartOpen
@@ -154,8 +154,8 @@ export default function MobileBottomNav() {
               }}
               className={`flex flex-col items-center justify-center transition-all duration-200 active:scale-95 relative select-none ${
                 isActive
-                  ? 'bg-emerald-50 text-emerald-700 font-semibold rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1 sm:py-1.5 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-800 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl'
+                  ? 'bg-emerald-100/90 text-emerald-800 font-bold rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 shadow-2xs ring-1 ring-emerald-300/40'
+                  : 'text-slate-500 hover:text-slate-800 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-slate-100/70'
               }`}
             >
               <div className="relative flex items-center justify-center">
@@ -166,7 +166,7 @@ export default function MobileBottomNav() {
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] font-semibold leading-none mt-1 whitespace-nowrap ${isActive ? 'text-emerald-800 font-bold' : 'text-slate-500'}`}>
+              <span className={`text-[10px] font-semibold leading-none mt-1 whitespace-nowrap ${isActive ? 'text-emerald-900 font-bold' : 'text-slate-500'}`}>
                 {item.label}
               </span>
             </button>

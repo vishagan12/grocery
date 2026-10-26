@@ -12,7 +12,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAF7] text-slate-900 w-full relative">
       <Header />
-      <main className="flex-1 w-full pb-16 sm:pb-8">
+      <main className="flex-1 w-full pb-28 sm:pb-16">
         {children}
       </main>
       <Footer />
