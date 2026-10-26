@@ -10,9 +10,12 @@ import LocationModal from '@/components/LocationModal';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAF7] text-slate-900 w-full relative">
+    <div className="min-h-screen min-h-dvh flex flex-col bg-brand-cream text-slate-900 w-full relative">
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Header />
-      <main className="flex-1 w-full pb-28 sm:pb-16">
+      <main id="main-content" tabIndex={-1} className="flex-1 w-full pb-28 sm:pb-16 focus:outline-none">
         {children}
       </main>
       <Footer />

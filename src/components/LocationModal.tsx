@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useStore, UserLocation } from '@/context/StoreContext';
+import { useDialog } from '@/hooks/useDialog';
 import { calculateDistanceKm, SHOP_MAPS_URL } from '@/lib/geofence';
 import { PlaceSuggestion } from '@/app/api/places/route';
 import GpsDeniedModal from '@/components/GpsDeniedModal';
@@ -29,6 +30,16 @@ export default function LocationModal() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const closeModal = () => dispatch({ type: 'SET_LOCATION_MODAL', open: false });
+  const panelRef = useDialog(state.locationModalOpen, closeModal);
+
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   if (!state.locationModalOpen) return null;
 
@@ -67,6 +78,7 @@ export default function LocationModal() {
           `/api/places?q=${encodeURIComponent(clean)}&shopLat=${state.shopCoords.lat}&shopLng=${state.shopCoords.lng}`,
           { signal: abortControllerRef.current.signal }
         );
+        if (!res.ok) throw new Error(`Places search failed: ${res.status}`);
         const data = await res.json();
         if (data && Array.isArray(data.suggestions)) {
           setSuggestions(data.suggestions);
@@ -134,9 +146,8 @@ export default function LocationModal() {
           setDetecting(false);
         }
       },
-      (error) => {
+      () => {
         setDetecting(false);
-        console.warn('Geolocation error:', error);
         setGpsDeniedOpen(true);
       },
       { timeout: 8000, enableHighAccuracy: true }
@@ -147,10 +158,15 @@ export default function LocationModal() {
     <>
       <div
         className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 animate-fade-in text-slate-900 box-border"
-        onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: false })}
+        onClick={closeModal}
       >
         <div
-          className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-5 md:p-6 animate-scale-up max-h-[85vh] flex flex-col box-border"
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="location-modal-title"
+          tabIndex={-1}
+          className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-5 md:p-6 animate-scale-up max-h-[85vh] max-h-[85dvh] flex flex-col box-border"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -160,9 +176,9 @@ export default function LocationModal() {
                 <MapPin className="w-5 h-5" />
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-extrabold text-base sm:text-lg text-slate-900 leading-tight break-words">
+                <h2 id="location-modal-title" className="font-extrabold text-base sm:text-lg text-slate-900 leading-tight break-words">
                   {lang === 'ta' ? 'டெலிவரி இடத்தை தேர்வு செய்யவும்' : 'Select Delivery Location'}
-                </h3>
+                </h2>
                 <p className="text-xs text-slate-500 break-words mt-0.5">
                   {lang === 'ta' ? 'ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட் • 3.0 கி.மீ. சுற்றளவு' : 'Sri Amman Supermarket • 3.0 km Express Radius'}
                 </p>
@@ -170,9 +186,9 @@ export default function LocationModal() {
             </div>
             <button
               type="button"
-              aria-label="Close location modal"
-              onClick={() => dispatch({ type: 'SET_LOCATION_MODAL', open: false })}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+              aria-label={lang === 'ta' ? 'மூடு' : 'Close location dialog'}
+              onClick={closeModal}
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors shrink-0"
             >
               <X className="w-5 h-5" />
             </button>
@@ -210,11 +226,14 @@ export default function LocationModal() {
             </span>
             <input
               ref={searchInputRef}
-              type="text"
+              type="search"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder={lang === 'ta' ? 'மதுரை பகுதி அல்லது தெரு தேடவும்...' : 'Search street or area in Madurai...'}
-              className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 focus:bg-white outline-none transition-all box-border"
+              aria-label={lang === 'ta' ? 'பகுதி அல்லது தெருவைத் தேடுங்கள்' : 'Search street or area'}
+              autoComplete="off"
+              enterKeyHint="search"
+              className="w-full min-h-[44px] pl-10 pr-9 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:border-brand-forest focus:ring-2 focus:ring-apple/40 focus:bg-white outline-none transition-all box-border"
             />
             {isSearching && (
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
@@ -232,10 +251,10 @@ export default function LocationModal() {
                   {lang === 'ta' ? 'தேடல் முடிவுகள்' : 'Search Results'}
                 </p>
                 {suggestions.map((item) => (
-                  <div
+                  <button
+                    type="button"
                     key={item.id}
-                    onMouseDown={(e) => {
-                      e.preventDefault();
+                    onClick={() => {
                       handleSelect({
                         area: item.area || item.title,
                         city: item.city || 'Madurai',
@@ -247,7 +266,7 @@ export default function LocationModal() {
                         lng: item.lng,
                       });
                     }}
-                    className="p-3 rounded-xl border border-slate-200 hover:border-emerald-500 bg-white hover:bg-slate-50 cursor-pointer flex items-center justify-between gap-3 transition-all box-border"
+                    className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-emerald-500 bg-white hover:bg-slate-50 cursor-pointer flex items-center justify-between gap-3 transition-all box-border"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-xs sm:text-sm text-slate-900 break-words leading-tight">{item.title}</p>
@@ -260,7 +279,7 @@ export default function LocationModal() {
                     >
                       {item.deliverable ? `${item.distanceKm} km` : `${item.distanceKm} km • Out of 3km`}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -276,13 +295,15 @@ export default function LocationModal() {
                   const within3km = addr.distanceKm <= 3.0;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={addr.id}
+                      aria-pressed={isSelected}
                       onClick={() => {
                         selectAddress(addr.id);
-                        dispatch({ type: 'SET_LOCATION_MODAL', open: false });
+                        closeModal();
                       }}
-                      className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 box-border ${
+                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 box-border ${
                         isSelected
                           ? 'border-emerald-600 bg-emerald-50/40 shadow-xs'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
@@ -302,7 +323,7 @@ export default function LocationModal() {
                           <div className="flex items-center gap-2">
                             <p className="font-extrabold text-xs text-slate-900">{addr.customLabel || addr.tag}</p>
                             <span
-                              className={`text-[9px] font-black px-1.5 py-0.2 rounded ${
+                              className={`text-[9px] font-black px-1.5 py-0.5 rounded ${
                                 within3km ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
                               }`}
                             >
@@ -320,7 +341,7 @@ export default function LocationModal() {
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
                         </div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>

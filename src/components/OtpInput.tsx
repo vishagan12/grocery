@@ -94,6 +94,7 @@ export default function OtpInput({ value, onChange, onComplete, autoFocus = true
           }}
           type="text"
           inputMode="numeric"
+          autoComplete={i === 0 ? 'one-time-code' : 'off'}
           pattern="[0-9]*"
           maxLength={1}
           value={value[i] || ''}
@@ -102,8 +103,8 @@ export default function OtpInput({ value, onChange, onComplete, autoFocus = true
           onPaste={handlePaste}
           className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-xl font-bold rounded-xl border-2 transition-all outline-none bg-white text-slate-900 shadow-2xs ${
             value[i]
-              ? 'border-emerald-600 ring-2 ring-emerald-500/20 bg-emerald-50/30'
-              : 'border-slate-200 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/15'
+              ? 'border-brand-forest ring-2 ring-apple/40 bg-brand-mint'
+              : 'border-slate-300 focus:border-brand-forest focus:ring-4 focus:ring-apple/30'
           }`}
           aria-label={`Digit ${i + 1}`}
         />

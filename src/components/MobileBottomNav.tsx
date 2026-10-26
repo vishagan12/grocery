@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
 import { products } from '@/data/products';
+import { FREE_DELIVERY_THRESHOLD } from '@/lib/brand';
 import {
   Home,
   LayoutGrid,
@@ -31,8 +32,8 @@ export default function MobileBottomNav() {
   const cartCount = mounted ? getCartItemCount() : 0;
   const cartSubtotal = mounted ? getCartSubtotal() : 0;
   const cartSavings = mounted ? getCartDiscount() : 0;
-  const freeDeliveryDiff = Math.max(0, 499 - cartSubtotal);
-  const freeDeliveryProgress = Math.min(100, Math.round((cartSubtotal / 499) * 100));
+  const freeDeliveryDiff = Math.max(0, FREE_DELIVERY_THRESHOLD - cartSubtotal);
+  const freeDeliveryProgress = Math.min(100, Math.round((cartSubtotal / FREE_DELIVERY_THRESHOLD) * 100));
 
   // Get last 3 products added to cart for thumbnail stack
   const recentCartProducts = mounted
@@ -55,25 +56,24 @@ export default function MobileBottomNav() {
     <div className="fixed bottom-6 sm:bottom-8 inset-x-0 z-40 px-3 sm:px-4 pointer-events-none flex flex-col items-center justify-end pb-[env(safe-area-inset-bottom)]">
       <div className="w-full max-w-sm sm:max-w-md pointer-events-auto">
         {/* Layer 1: Dark Free-Delivery Nudge Strip (only shown while unlocking; disappears once free delivery is reached) */}
-        {cartCount > 0 && cartSubtotal < 499 && (
+        {cartCount > 0 && cartSubtotal < FREE_DELIVERY_THRESHOLD && (
           <div className="mx-1 mb-2.5 bg-[#1E293B]/95 backdrop-blur-md text-white text-xs px-4 py-2 rounded-full shadow-xl flex flex-col gap-1 border border-slate-700/60 animate-slide-up">
             <div className="flex items-center justify-between font-bold text-[11px]">
               <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <Truck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <Truck aria-hidden="true" className="w-3.5 h-3.5 text-apple shrink-0" />
                 <span className="leading-tight truncate">
                   {lang === 'ta'
                     ? `இலவச டெலிவரிக்கு மேலும் ₹${freeDeliveryDiff} சேருங்கள்`
                     : `Add ₹${freeDeliveryDiff} more for FREE delivery!`}
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono shrink-0 ml-2">
-                ₹{cartSubtotal}/₹499
+              <span className="text-[10px] text-slate-300 font-mono shrink-0 ml-2">
+                ₹{cartSubtotal}/₹{FREE_DELIVERY_THRESHOLD}
               </span>
             </div>
-            {/* Mini Lime Progress Bar */}
-            <div className="w-full bg-slate-700/80 h-1.5 rounded-full overflow-hidden">
+            <div aria-hidden="true" className="w-full bg-slate-700/80 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-[#76CA3E] h-full rounded-full transition-all duration-300"
+                className="bg-apple h-full rounded-full transition-all duration-300"
                 style={{ width: `${freeDeliveryProgress}%` }}
               />
             </div>
@@ -82,55 +82,62 @@ export default function MobileBottomNav() {
 
         {/* Layer 2: The Blinkit Floating Green "View Cart" Pill (when cartCount > 0) */}
         {cartCount > 0 && (
-          <div
+          <button
+            type="button"
+            aria-haspopup="dialog"
             onClick={() => dispatch({ type: 'SET_CART_OPEN', open: true })}
-            className="mx-1 mb-2.5 bg-[#76CA3E] hover:bg-[#60B328] text-white rounded-full px-3.5 sm:px-4 py-2 sm:py-2.5 shadow-2xl flex items-center justify-between border border-white/25 cursor-pointer transition-all active:scale-[0.99] select-none gap-2"
+            className="w-[calc(100%-0.5rem)] text-left mx-1 mb-2.5 bg-apple hover:bg-apple-hover text-brand-forest rounded-full px-3.5 sm:px-4 py-2 sm:py-2.5 shadow-2xl flex items-center justify-between border border-white/25 cursor-pointer transition-all active:scale-[0.99] select-none gap-2"
           >
             {/* Left: Overlapping circular thumbnails + item count & subtotal */}
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="flex items-center -space-x-2 shrink-0">
+            <span className="flex items-center gap-2.5 min-w-0 flex-1">
+              <span aria-hidden="true" className="flex items-center -space-x-2 shrink-0">
                 {recentCartProducts.map((p, idx) => (
-                  <div
+                  <span
                     key={p?.id || idx}
                     className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white border-2 border-white shadow-md overflow-hidden shrink-0 relative"
                   >
                     <img
                       src={p?.image}
-                      alt={p?.nameEn}
+                      alt=""
+                      width={32}
+                      height={32}
                       className="w-full h-full object-cover rounded-full"
                       loading="lazy"
+                      decoding="async"
                     />
-                  </div>
+                  </span>
                 ))}
-              </div>
+              </span>
 
-              <div className="flex flex-col min-w-0 leading-tight flex-1">
-                <span className="font-extrabold text-xs sm:text-sm text-white truncate">
+              <span className="flex flex-col min-w-0 leading-tight flex-1">
+                <span className="font-extrabold text-xs sm:text-sm text-brand-forest truncate">
                   {cartCount} {t('items', lang)} • ₹{cartSubtotal}
                 </span>
                 {cartSavings > 0 ? (
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-100 truncate">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-brand-forest/90 truncate">
                     {lang === 'ta' ? `ரூ. ${cartSavings} சேமிப்பு` : `Saved ₹${cartSavings}`}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-emerald-100 font-medium truncate">
+                  <span className="text-[10px] text-brand-forest/90 font-semibold truncate">
                     {lang === 'ta' ? 'அதிவேக டெலிவரி' : 'Express Delivery'}
                   </span>
                 )}
-              </div>
-            </div>
+              </span>
+            </span>
 
-            {/* Right: Bold View Cart CTA with Lucide Arrow */}
-            <div className="flex items-center gap-1 sm:gap-1.5 bg-white text-[#143B0D] font-black text-xs px-3 py-1.5 rounded-full shadow-md shrink-0 whitespace-nowrap">
+            <span className="flex items-center gap-1 sm:gap-1.5 bg-white text-brand-forest font-black text-xs px-3 py-1.5 rounded-full shadow-md shrink-0 whitespace-nowrap">
               <span>{lang === 'ta' ? 'கூடை' : 'View Cart'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
+              <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
+            </span>
+          </button>
         )}
       </div>
 
       {/* Layer 3: Sleek Elevated Floating Capsule Dock */}
-      <nav className="pointer-events-auto w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-full shadow-[0_16px_40px_-10px_rgba(15,23,42,0.22),0_6px_18px_-4px_rgba(5,150,105,0.12)] px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-around ring-1 ring-black/5 transition-all duration-300">
+      <nav
+        aria-label={lang === 'ta' ? 'முதன்மை வழிசெலுத்தல்' : 'Main navigation'}
+        className="pointer-events-auto w-full max-w-sm sm:max-w-md bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-full shadow-[0_16px_40px_-10px_rgba(15,23,42,0.22),0_6px_18px_-4px_rgba(5,150,105,0.12)] px-2.5 sm:px-3.5 py-1.5 sm:py-2 flex items-center justify-around ring-1 ring-black/5 transition-all duration-300"
+      >
         {navItems.map((item) => {
           const isActive = item.isCart
             ? state.cartOpen
@@ -152,21 +159,24 @@ export default function MobileBottomNav() {
                   }
                 }
               }}
-              className={`flex flex-col items-center justify-center transition-all duration-200 active:scale-95 relative select-none ${
+              aria-current={isActive && !item.isCart ? 'page' : undefined}
+              aria-haspopup={item.isCart ? 'dialog' : undefined}
+              className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] transition-all duration-200 active:scale-95 relative select-none ${
                 isActive
-                  ? 'bg-emerald-100/90 text-emerald-800 font-bold rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 shadow-2xs ring-1 ring-emerald-300/40'
-                  : 'text-slate-500 hover:text-slate-800 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-slate-100/70'
+                  ? 'bg-brand-mint text-brand-forest font-bold rounded-full px-3 sm:px-3.5 py-1 sm:py-1.5 shadow-2xs ring-1 ring-apple/50'
+                  : 'text-slate-600 hover:text-slate-900 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-slate-100/70'
               }`}
             >
-              <div className="relative flex items-center justify-center">
-                <NavIcon className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110 text-emerald-700' : 'text-slate-500'}`} />
+              <span className="relative flex items-center justify-center">
+                <NavIcon aria-hidden="true" className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110 text-brand-highlight' : 'text-slate-600'}`} />
                 {item.isCart && cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-emerald-600 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-white shadow-xs px-1">
+                  <span className="absolute -top-1.5 -right-2 bg-brand-forest text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center ring-2 ring-white shadow-xs px-1">
+                    <span className="sr-only">{lang === 'ta' ? 'பொருட்கள்:' : 'Items:'} </span>
                     {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}
-              </div>
-              <span className={`text-[10px] font-semibold leading-none mt-1 whitespace-nowrap ${isActive ? 'text-emerald-900 font-bold' : 'text-slate-500'}`}>
+              </span>
+              <span className={`text-[10px] font-semibold leading-none mt-1 whitespace-nowrap ${isActive ? 'text-brand-forest font-bold' : 'text-slate-600'}`}>
                 {item.label}
               </span>
             </button>
