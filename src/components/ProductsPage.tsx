@@ -182,7 +182,7 @@ export default function ProductsPage() {
               <select
                 value={state.sortBy}
                 onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value })}
-                className="text-[10px] sm:text-[11px] font-medium bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-slate-700 outline-none focus:border-[#76CA3E] shadow-2xs cursor-pointer"
+                className="text-[10px] sm:text-[11px] font-medium bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-slate-700 outline-none focus:border-apple shadow-2xs cursor-pointer"
               >
                 <option value="popularity" className="text-[10px]">{t('popularity', lang)}</option>
                 <option value="price-low" className="text-[10px]">{t('priceLowHigh', lang)}</option>

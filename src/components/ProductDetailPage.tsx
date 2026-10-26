@@ -68,7 +68,7 @@ export default function ProductDetailPage() {
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200/90 overflow-hidden mb-10">
           <div className="grid md:grid-cols-12 gap-0">
             {/* Left Image Section (5 cols) */}
-            <div className="md:col-span-5 p-6 md:p-10 bg-[#F8FAF7] border-b md:border-b-0 md:border-r border-slate-200/80 flex flex-col items-center justify-center relative">
+            <div className="md:col-span-5 p-6 md:p-10 bg-brand-cream border-b md:border-b-0 md:border-r border-slate-200/80 flex flex-col items-center justify-center relative">
               {/* Single Actual Discount Badge (Always visible on top with z-30) */}
               <div className="absolute top-4 left-4 z-30 flex flex-col gap-1.5 pointer-events-none">
                 {discount > 0 ? (
@@ -76,7 +76,7 @@ export default function ProductDetailPage() {
                     {discount}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
                   </span>
                 ) : product.badge ? (
-                  <span className="bg-[#143B0D] text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md">
+                  <span className="bg-brand-forest text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md">
                     {lang === 'ta' && product.badgeTa ? product.badgeTa : product.badge}
                   </span>
                 ) : null}
@@ -110,8 +110,8 @@ export default function ProductDetailPage() {
                 />
               </div>
 
-              <div className="mt-4 flex items-center gap-2 text-xs font-black text-[#143B0D] bg-[#F1F9EC] px-3.5 py-1.5 rounded-full border border-[#76CA3E]/20 shadow-2xs z-10">
-                <IconCheckCircle className="w-4 h-4 text-[#76CA3E]" />
+              <div className="mt-4 flex items-center gap-2 text-xs font-black text-brand-forest bg-brand-mint px-3.5 py-1.5 rounded-full border border-apple/20 shadow-2xs z-10">
+                <IconCheckCircle className="w-4 h-4 text-apple" />
                 <span>{lang === 'ta' ? '100% நேரடி கவுண்டர் தரம்' : '100% Genuine Counter Quality'}</span>
               </div>
             </div>
@@ -120,8 +120,8 @@ export default function ProductDetailPage() {
             <div className="md:col-span-7 p-6 md:p-8 flex flex-col justify-between bg-white space-y-6">
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-3">
-                  <span className="inline-flex items-center gap-1.5 bg-[#F1F9EC] text-[#143B0D] text-xs font-black px-3 py-1 rounded-full border border-[#76CA3E]/30">
-                    <span className="w-2 h-2 rounded-full bg-[#76CA3E] inline-block animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 bg-brand-mint text-brand-forest text-xs font-black px-3 py-1 rounded-full border border-apple/30">
+                    <span className="w-2 h-2 rounded-full bg-apple inline-block animate-pulse" />
                     <span>{t('inStock', lang)}</span>
                   </span>
                   <span className="text-xs text-slate-600 font-bold bg-slate-100 px-3 py-1 rounded-full">
@@ -138,7 +138,7 @@ export default function ProductDetailPage() {
 
                 {/* Description */}
                 {(product.descriptionEn || product.descriptionTa) && (
-                  <p className="text-xs sm:text-sm text-slate-700 mb-5 leading-relaxed bg-[#F8FAF7] p-4 rounded-2xl border border-slate-200/80">
+                  <p className="text-xs sm:text-sm text-slate-700 mb-5 leading-relaxed bg-brand-cream p-4 rounded-2xl border border-slate-200/80">
                     {lang === 'ta' && product.descriptionTa ? product.descriptionTa : product.descriptionEn}
                   </p>
                 )}
@@ -155,8 +155,8 @@ export default function ProductDetailPage() {
                         onClick={() => setSelectedVariant(i)}
                         className={`px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm transition-all border-2 touch-target ${
                           i === activeVariantIndex
-                            ? 'bg-[#143B0D] text-white border-[#143B0D] shadow-sm'
-                            : 'bg-[#F8FAF7] text-slate-800 border-slate-200 hover:border-[#76CA3E]'
+                            ? 'bg-brand-forest text-white border-brand-forest shadow-sm'
+                            : 'bg-brand-cream text-slate-800 border-slate-200 hover:border-apple'
                         }`}
                       >
                         {v.label}
@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Prominent Price & Active Offer Display */}
-                <div className="bg-gradient-to-r from-[#F1F9EC] to-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80 mb-5">
+                <div className="bg-gradient-to-r from-brand-mint to-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80 mb-5">
                   <div className="flex items-baseline gap-3 mb-1.5 flex-wrap">
                     <span className="text-3xl sm:text-4xl font-black text-slate-900">₹{variant.price}</span>
                     <span className="text-base sm:text-lg text-slate-400 line-through">MRP ₹{variant.mrp}</span>
@@ -177,8 +177,8 @@ export default function ProductDetailPage() {
                     )}
                   </div>
                   {savings > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-[#143B0D] pt-1">
-                      <IconCheckCircle className="w-4 h-4 text-[#76CA3E] shrink-0" />
+                    <div className="flex items-center gap-1.5 text-xs sm:text-sm font-black text-brand-forest pt-1">
+                      <IconCheckCircle className="w-4 h-4 text-apple shrink-0" />
                       <span>{t('savingsCallout', lang, { amount: savings })}</span>
                     </div>
                   )}
@@ -193,13 +193,13 @@ export default function ProductDetailPage() {
                       dispatch({ type: 'ADD_TO_CART', productId: product.id, variantIndex: activeVariantIndex });
                       showToast(t('addedToCart', lang));
                     }}
-                    className="w-full bg-[#4CB01E] hover:bg-[#3D9415] text-white font-black text-base sm:text-lg py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98"
+                    className="w-full bg-brand-primary hover:bg-brand-highlight text-white font-black text-base sm:text-lg py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98"
                   >
                     <IconCart className="w-5 h-5 text-white" />
                     <span>{t('addToCart', lang)}</span>
                   </button>
                 ) : (
-                  <div className="flex items-center justify-between bg-[#143B0D] rounded-2xl overflow-hidden shadow-md px-5 py-2.5">
+                  <div className="flex items-center justify-between bg-brand-forest rounded-2xl overflow-hidden shadow-md px-5 py-2.5">
                     <span className="text-white text-xs sm:text-sm font-black">
                       {lang === 'ta' ? 'கூடையில் உள்ளது:' : 'In Cart:'}
                     </span>
@@ -240,7 +240,7 @@ export default function ProductDetailPage() {
                 {/* Assurance Points */}
                 <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-200 text-xs text-slate-600 font-semibold">
                   <div className="flex items-center gap-1.5">
-                    <IconTruck className="w-4 h-4 text-[#76CA3E] shrink-0" />
+                    <IconTruck className="w-4 h-4 text-apple shrink-0" />
                     <span>{t('delivery30', lang)}</span>
                   </div>
                   <div className="flex items-center gap-1.5">

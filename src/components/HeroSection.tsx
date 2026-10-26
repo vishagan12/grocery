@@ -139,17 +139,17 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-[#76CA3E]/30 via-[#76CA3E]/10 to-white pt-2.5 sm:pt-3.5 pb-5 sm:pb-7 px-3 sm:px-6">
+    <section className="bg-gradient-to-b from-apple/30 via-apple/10 to-white pt-2.5 sm:pt-3.5 pb-5 sm:pb-7 px-3 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Top Headline Banner: Super Saver Typography - 100% full text visible without ellipses */}
-        <div className="py-2 px-3 mb-3 bg-white/95 rounded-2xl border border-[#76CA3E]/20 shadow-2xs flex items-center justify-center gap-1.5 sm:gap-2">
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#76CA3E] shrink-0" />
-          <h2 className="text-[11px] xs:text-xs sm:text-sm font-extrabold text-[#143B0D] tracking-tight text-center whitespace-normal sm:whitespace-nowrap leading-tight">
+        <div className="py-2 px-3 mb-3 bg-white/95 rounded-2xl border border-apple/20 shadow-2xs flex items-center justify-center gap-1.5 sm:gap-2">
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-apple shrink-0" />
+          <h2 className="text-[11px] xs:text-xs sm:text-sm font-extrabold text-brand-forest tracking-tight text-center whitespace-normal sm:whitespace-nowrap leading-tight">
             {lang === 'ta'
               ? 'ஸ்ரீ அம்மன் சூப்பர் சேவர் • அத்தியாவசிய மளிகைக்கு 30% வரை தள்ளுபடி'
               : 'Sri Amman Super Saver • Up to 30% OFF Daily Essentials'}
           </h2>
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#76CA3E] shrink-0" />
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-apple shrink-0" />
         </div>
 
         {/* 3-Column Asymmetric Bento Grid (Mobile & Desktop) */}
@@ -185,7 +185,7 @@ export default function HeroSection() {
             {/* Content Top with smooth fade */}
             <div key={`content-${activeSlide}`} className="relative z-10 animate-fade-in">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[11px] sm:text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-2xs whitespace-nowrap">
+                <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-brand-forest text-[11px] sm:text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-2xs whitespace-nowrap">
                   <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
                   <span>{lang === 'ta' ? currentSlide.tagTa : currentSlide.tagEn}</span>
                 </div>
@@ -228,7 +228,7 @@ export default function HeroSection() {
                   {lang === 'ta' ? currentSlide.saveTa : currentSlide.saveEn}
                 </span>
               </div>
-              <span className="bg-white text-[#143B0D] font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+              <span className="bg-white text-brand-forest font-black text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-xs group-hover:bg-yellow-300 transition-colors flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                 <span>{lang === 'ta' ? currentSlide.actionTa : currentSlide.actionEn}</span>
                 <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </span>
@@ -244,7 +244,7 @@ export default function HeroSection() {
                   dispatch({ type: 'SET_CATEGORY', category: card.id });
                   dispatch({ type: 'SET_PAGE', page: 'products' });
                 }}
-                className="relative rounded-2xl overflow-hidden bg-white p-3 sm:p-4 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all cursor-pointer border border-slate-200/80 hover:border-[#76CA3E] group min-h-[195px] sm:min-h-[215px] select-none"
+                className="relative rounded-2xl overflow-hidden bg-white p-3 sm:p-4 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all cursor-pointer border border-slate-200/80 hover:border-apple group min-h-[195px] sm:min-h-[215px] select-none"
               >
                 {/* Card Top: Badge & Full Title visible on multiple lines */}
                 <div className="min-w-0">
@@ -252,7 +252,7 @@ export default function HeroSection() {
                     <span className="text-[10px] sm:text-[11px] font-black text-emerald-900 bg-emerald-100/90 px-2 sm:px-2.5 py-0.5 rounded-full inline-block">
                       {lang === 'ta' ? card.badgeTa : card.badgeEn}
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-bold text-[#76CA3E] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0 whitespace-nowrap">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-apple group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0 whitespace-nowrap">
                       <span>{lang === 'ta' ? 'பார்க்க' : 'Shop'}</span>
                       <ArrowRight className="w-3 h-3 shrink-0" />
                     </span>
@@ -263,7 +263,7 @@ export default function HeroSection() {
                 </div>
 
                 {/* Card Center: Prominent, High-Resolution Studio Image Showcase */}
-                <div className="w-full h-20 sm:h-24 my-1.5 rounded-xl overflow-hidden bg-[#F8FAF7] border border-slate-100/80 shadow-2xs flex items-center justify-center relative group-hover:bg-[#F1F9EC] transition-colors">
+                <div className="w-full h-20 sm:h-24 my-1.5 rounded-xl overflow-hidden bg-brand-cream border border-slate-100/80 shadow-2xs flex items-center justify-center relative group-hover:bg-brand-mint transition-colors">
                   <img
                     src={card.image}
                     alt={card.titleEn}
@@ -284,14 +284,14 @@ export default function HeroSection() {
         {/* Wide Action Strip Below Bento Grid: 1-Tap Reorder (Full text visible) */}
         <div
           onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-          className="mt-2.5 sm:mt-4 bg-[#F1F9EC] hover:bg-[#E6F5DE] border border-[#76CA3E]/30 rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 shadow-2xs transition-all cursor-pointer select-none group"
+          className="mt-2.5 sm:mt-4 bg-brand-mint hover:bg-[#E6F5DE] border border-apple/30 rounded-2xl p-3 sm:p-3.5 flex items-center justify-between gap-2.5 shadow-2xs transition-all cursor-pointer select-none group"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[#76CA3E] text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-8 h-8 rounded-xl bg-apple text-white flex items-center justify-center shrink-0 shadow-2xs">
               <Zap className="w-4 h-4 text-yellow-300 fill-current" />
             </div>
             <p className="text-xs sm:text-sm text-slate-800 font-semibold leading-snug">
-              <strong className="font-extrabold text-[#143B0D]">
+              <strong className="font-extrabold text-brand-forest">
                 {lang === 'ta'
                   ? 'கடந்த மாத மளிகையை 1 தட்டலில் மீண்டும் ஆர்டர் செய்'
                   : "Reorder Last Month's Groceries in 1 Tap"}
@@ -302,7 +302,7 @@ export default function HeroSection() {
               </span>
             </p>
           </div>
-          <div className="w-8 h-8 rounded-full bg-white border border-[#76CA3E]/30 flex items-center justify-center text-[#76CA3E] font-bold group-hover:bg-[#76CA3E] group-hover:text-white transition-all shrink-0">
+          <div className="w-8 h-8 rounded-full bg-white border border-apple/30 flex items-center justify-center text-apple font-bold group-hover:bg-apple group-hover:text-white transition-all shrink-0">
             <ArrowRight className="w-4 h-4" />
           </div>
         </div>

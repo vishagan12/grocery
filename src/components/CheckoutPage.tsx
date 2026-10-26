@@ -554,8 +554,8 @@ export default function CheckoutPage() {
 
   if (getCartItemCount() === 0) {
     return (
-      <section className="py-20 text-center min-h-[70vh] bg-[#F8FAF7] flex flex-col items-center justify-center px-4 w-full">
-        <div className="w-20 h-20 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-[#76CA3E] mb-4 shadow-sm">
+      <section className="py-20 text-center min-h-[70vh] bg-brand-cream flex flex-col items-center justify-center px-4 w-full">
+        <div className="w-20 h-20 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-apple mb-4 shadow-sm">
           <IconCart className="w-10 h-10" />
         </div>
         <h2 className="text-xl font-extrabold text-slate-900 mb-1">{t('cartEmpty', lang)}</h2>
@@ -563,7 +563,7 @@ export default function CheckoutPage() {
         <button
           type="button"
           onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-          className="bg-[#76CA3E] hover:bg-[#60B328] text-white px-8 py-3.5 rounded-xl font-extrabold touch-target shadow-md transition-all text-sm active:scale-95"
+          className="bg-apple hover:bg-apple-hover text-white px-8 py-3.5 rounded-xl font-extrabold touch-target shadow-md transition-all text-sm active:scale-95"
         >
           {t('shopNow', lang)}
         </button>
@@ -573,7 +573,7 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <section className="py-6 md:py-10 bg-[#F8FAF7] min-h-screen w-full max-w-full overflow-x-hidden box-border text-slate-900">
+      <section className="py-6 md:py-10 bg-brand-cream min-h-screen w-full max-w-full overflow-x-hidden box-border text-slate-900">
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 w-full box-border">
           {/* Header Breadcrumb & Title */}
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full min-w-0">
@@ -652,7 +652,7 @@ export default function CheckoutPage() {
                         type="button"
                         onClick={handleSendOtp}
                         disabled={phone.replace(/\D/g, '').length < 10}
-                        className="w-full bg-[#76CA3E] hover:bg-[#60B328] disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-98 text-xs sm:text-sm box-border"
+                        className="w-full bg-apple hover:bg-apple-hover disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-98 text-xs sm:text-sm box-border"
                       >
                         {lang === 'ta' ? 'OTP அனுப்பவும்' : 'Send 4-Digit OTP'}
                       </button>
@@ -671,7 +671,7 @@ export default function CheckoutPage() {
                         type="button"
                         onClick={handleVerifyOtp}
                         disabled={otpDigits.join('').length < 4}
-                        className="w-full bg-[#76CA3E] hover:bg-[#60B328] disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-98 text-xs sm:text-sm box-border"
+                        className="w-full bg-apple hover:bg-apple-hover disabled:bg-slate-200 disabled:text-slate-400 text-white font-extrabold py-3 px-4 rounded-xl transition-all shadow-sm active:scale-98 text-xs sm:text-sm box-border"
                       >
                         {lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}
                       </button>
@@ -730,7 +730,7 @@ export default function CheckoutPage() {
                             className={`relative rounded-2xl p-3.5 sm:p-4 border-2 transition-all cursor-pointer text-left flex flex-col justify-between w-full min-w-0 box-border ${
                               isSelected
                                 ? within3km
-                                  ? 'border-[#76CA3E] bg-[#F1F9EC]/60 shadow-md ring-2 ring-[#76CA3E]/20'
+                                  ? 'border-apple bg-brand-mint/60 shadow-md ring-2 ring-apple/20'
                                   : 'border-rose-400 bg-rose-50/60 shadow-md ring-2 ring-rose-400/20'
                                 : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                             }`}
@@ -1081,7 +1081,7 @@ export default function CheckoutPage() {
                           placeholder="e.g. 12/B, Amman Illam"
                           className={`w-full min-w-0 border rounded-xl px-3 py-2 text-xs font-semibold bg-white text-slate-900 outline-none transition-all box-border ${
                             highlightHouseNo
-                              ? 'border-[#76CA3E] ring-2 ring-[#76CA3E]/30 bg-[#F1F9EC]/30 animate-pulse'
+                              ? 'border-apple ring-2 ring-apple/30 bg-brand-mint/30 animate-pulse'
                               : 'border-slate-300 focus:border-emerald-600'
                           }`}
                         />
@@ -1157,7 +1157,7 @@ export default function CheckoutPage() {
                             onClick={() => setTag(tVal)}
                             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-extrabold border transition-all ${
                               tag === tVal
-                                ? 'bg-[#76CA3E] text-white border-[#76CA3E] shadow-2xs'
+                                ? 'bg-apple text-white border-apple shadow-2xs'
                                 : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                             }`}
                           >
@@ -1288,7 +1288,7 @@ export default function CheckoutPage() {
                       <button
                         type="submit"
                         disabled={isSavingAddress || (formDistanceCalculated && formDistanceKm > 3.0)}
-                        className="flex-1 w-full min-w-0 bg-[#76CA3E] hover:bg-[#60B328] disabled:bg-slate-300 text-white font-black py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-all box-border active:scale-98 text-center"
+                        className="flex-1 w-full min-w-0 bg-apple hover:bg-apple-hover disabled:bg-slate-300 text-white font-black py-2.5 px-4 rounded-xl text-xs sm:text-sm shadow-sm transition-all box-border active:scale-98 text-center"
                       >
                         {isSavingAddress
                           ? lang === 'ta'
@@ -1361,7 +1361,7 @@ export default function CheckoutPage() {
                       onClick={() => setDeliverySlot('express')}
                       className={`p-3 rounded-xl border-2 text-left transition-all w-full min-w-0 box-border ${
                         deliverySlot === 'express'
-                          ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                          ? 'border-apple bg-brand-mint'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
                     >
@@ -1379,7 +1379,7 @@ export default function CheckoutPage() {
                       onClick={() => setDeliverySlot('scheduled')}
                       className={`p-3 rounded-xl border-2 text-left transition-all w-full min-w-0 box-border ${
                         deliverySlot === 'scheduled'
-                          ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                          ? 'border-apple bg-brand-mint'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
                     >
@@ -1417,7 +1417,7 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod('upi')}
                     className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 box-border ${
                       paymentMethod === 'upi'
-                        ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                        ? 'border-apple bg-brand-mint'
                         : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                     }`}
                   >
@@ -1438,7 +1438,7 @@ export default function CheckoutPage() {
                     onClick={() => setPaymentMethod('cod')}
                     className={`w-full p-3.5 sm:p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3.5 box-border ${
                       paymentMethod === 'cod'
-                        ? 'border-[#76CA3E] bg-[#F1F9EC]'
+                        ? 'border-apple bg-brand-mint'
                         : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
                     }`}
                   >
@@ -1473,7 +1473,7 @@ export default function CheckoutPage() {
                     disabled={isSubmittingOrder || !isDeliverable || !phoneVerified}
                     className={`flex-1 w-full min-w-0 px-4 py-3 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center text-center shadow-md box-border ${
                       isDeliverable && phoneVerified && !isSubmittingOrder
-                        ? 'bg-[#76CA3E] hover:bg-[#60B328] text-white shadow-emerald-500/20 active:scale-98 cursor-pointer'
+                        ? 'bg-apple hover:bg-apple-hover text-white shadow-emerald-500/20 active:scale-98 cursor-pointer'
                         : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
                     }`}
                     style={{ minHeight: '48px' }}

@@ -1,210 +1,285 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --brand-primary: #4CB01E;
-  --brand-highlight: #3D9415;
-  --brand-deep: #1E4D12;
-  --brand-forest: #143B0D;
-  --brand-cream: #F8FAF7;
-  --brand-cream-card: #FFFFFF;
-  --brand-cream-dark: #EAEFE7;
-  --brand-mint: #F1F9EC;
-  --brand-slate: #0F172A;
-}
+/* Design tokens (--color-primary, --brand-*, radii, durations) are emitted
+   into :root from tailwind.config.js so colors live in exactly one place. */
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: none;
-}
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior-x: none;
+  }
 
-body {
-  overflow-x: hidden;
-  max-width: 100vw;
-  width: 100%;
-  position: relative;
-  overscroll-behavior-x: none;
-  touch-action: pan-y;
-}
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 
-/* Prevent auto-zooming on iOS Safari and mobile browsers by enforcing 16px minimum font size */
-@media screen and (max-width: 768px) {
-  input, select, textarea {
-    font-size: 16px !important;
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    overscroll-behavior-x: none;
+    /* Allow vertical panning and pinch-zoom; zoom must never be blocked (WCAG 1.4.4). */
+    touch-action: pan-y pinch-zoom;
+    font-family: var(--font-inter), var(--font-noto-tamil), system-ui, -apple-system, sans-serif;
+    color: var(--brand-slate);
+    background: var(--brand-cream);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    min-height: 100dvh;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+
+  :focus {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Prevent iOS Safari auto-zoom on focus by keeping form controls at 16px on small screens */
+  @media screen and (max-width: 768px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: var(--duration-base);
+    transition-timing-function: ease;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  html[lang='ta'] body,
+  html[data-lang='ta'] body,
+  [data-lang='ta'] {
+    font-family: var(--font-noto-tamil), var(--font-inter), system-ui, -apple-system, sans-serif;
+    letter-spacing: normal;
+    line-height: 1.5;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  /* Ensure Tamil headers and labels use space without premature clipping */
+  html[lang='ta'] h1,
+  html[lang='ta'] h2,
+  html[lang='ta'] h3,
+  html[lang='ta'] h4,
+  [data-lang='ta'] h1,
+  [data-lang='ta'] h2,
+  [data-lang='ta'] h3,
+  [data-lang='ta'] h4 {
+    line-height: 1.3;
+    letter-spacing: normal;
+    word-break: keep-all;
+  }
+
+  html[lang='ta'] button,
+  [data-lang='ta'] button {
+    line-height: 1.25;
+    word-break: keep-all;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--brand-cream-dark);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 3px;
   }
 }
 
-body {
-  font-family: 'Inter', 'Noto Sans Tamil', system-ui, -apple-system, sans-serif;
-  color: var(--brand-slate);
-  background: #F8FAF7;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  text-rendering: optimizeLegibility;
+@layer components {
+  /* Buttons: .btn + one variant (.btn-primary | .btn-secondary | .btn-outline | .btn-ghost) + optional size */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 font-extrabold text-sm leading-none select-none whitespace-nowrap;
+    min-height: 44px;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    @apply bg-slate-200 text-slate-500 border-transparent shadow-none;
+  }
+  .btn[aria-busy='true'] {
+    @apply cursor-wait opacity-80;
+  }
+  .btn-sm {
+    @apply px-3 text-xs rounded-lg;
+    min-height: 36px;
+  }
+  .btn-lg {
+    @apply px-6 text-base;
+    min-height: 50px;
+  }
+  .btn-block {
+    @apply w-full;
+  }
+
+  /* Apple green fails contrast with white text (2.0:1); forest text on it passes AA (6.2:1). */
+  .btn-primary {
+    @apply bg-apple text-brand-forest shadow-sm hover:bg-apple-hover;
+  }
+  .btn-secondary {
+    @apply bg-brand-forest text-white shadow-sm hover:bg-brand-deep;
+  }
+  .btn-outline {
+    @apply bg-white text-brand-forest border-2 border-apple hover:bg-brand-mint;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-brand-forest hover:bg-brand-mint;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-500 outline-none;
+    min-height: 44px;
+  }
+  .input:focus,
+  .input:focus-within {
+    @apply border-brand-forest ring-2 ring-apple/40;
+  }
+  .input[aria-invalid='true'] {
+    @apply border-rose-500 ring-rose-500/20;
+  }
+  .field-label {
+    @apply mb-1 block text-xs font-bold text-slate-700;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200/90 bg-white shadow-2xs;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-black;
+  }
+  .badge-primary {
+    @apply bg-brand-mint text-brand-forest border border-apple/40;
+  }
+
+  .skip-link {
+    @apply fixed left-3 top-3 z-[300] -translate-y-24 rounded-xl bg-brand-forest px-4 py-3 text-sm font-bold text-white shadow-lg;
+  }
+  .skip-link:focus {
+    @apply translate-y-0;
+  }
 }
 
-/* GPU Hardware acceleration for silky smooth 60/120fps scrolling */
+@layer utilities {
+  /* Expands the pointer hit area to at least 44x44px without changing visual size. */
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+
+  /* Hide scrollbar for horizontal scroll rails & category bars */
+  .no-scrollbar::-webkit-scrollbar,
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .no-scrollbar,
+  .hide-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Edge-to-edge horizontal scroller with comfortable peek */
+  .edge-scroll {
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1rem;
+    scroll-padding-right: 1rem;
+  }
+  .edge-scroll > * {
+    scroll-snap-align: start;
+  }
+
+  .glass-header {
+    background: rgba(23, 59, 14, 0.72);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .stepper-btn {
+    @apply flex items-center justify-center font-bold text-lg select-none cursor-pointer;
+    min-width: 40px;
+    min-height: 48px;
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .touch-target {
+    min-height: 48px;
+    @apply flex items-center justify-center;
+  }
+}
+
+/* GPU-composited sticky layers for smooth scrolling */
 .sticky {
   will-change: transform;
   transform: translateZ(0);
-  -webkit-transform: translateZ(0);
 }
 
-html[lang="ta"] body,
-html[data-lang="ta"] body,
-[data-lang="ta"] {
-  font-family: 'Noto Sans Tamil', 'Inter', system-ui, -apple-system, sans-serif;
-  letter-spacing: normal;
-  line-height: 1.5;
-  word-break: keep-all;
-  overflow-wrap: normal;
-}
-
-/* Ensure Tamil headers and labels utilize space optimally without premature clipping */
-html[lang="ta"] h1, html[lang="ta"] h2, html[lang="ta"] h3, html[lang="ta"] h4,
-[data-lang="ta"] h1, [data-lang="ta"] h2, [data-lang="ta"] h3, [data-lang="ta"] h4 {
-  line-height: 1.3;
-  letter-spacing: normal;
-  word-break: keep-all;
-}
-
-html[lang="ta"] button, [data-lang="ta"] button {
-  line-height: 1.25;
-  word-break: keep-all;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #EAEFE7;
-}
-::-webkit-scrollbar-thumb {
-  background: #76CA3E;
-  border-radius: 3px;
-}
-
-/* Smooth transitions globally */
-button, a, input, select {
-  transition: all 0.2s ease;
-}
-
-/* Hide scrollbar for horizontal scroll rails & category bars */
-.no-scrollbar::-webkit-scrollbar,
-.hide-scrollbar::-webkit-scrollbar {
-  display: none !important;
-}
-.no-scrollbar,
-.hide-scrollbar {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-}
-
-/* Edge-to-edge horizontal scroller with comfortable peek */
-.edge-scroll {
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: 1rem;
-  scroll-padding-right: 1rem;
-}
-.edge-scroll > * {
-  scroll-snap-align: start;
-}
-
-/* Pulse animation for cart badge */
-@keyframes pulse-badge {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-}
-.animate-pulse-badge {
-  animation: pulse-badge 0.3s ease-in-out;
-}
-
-/* Toast slide in */
-@keyframes slide-up {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-/* Cart drawer slide */
-@keyframes slide-right {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
-.animate-slide-right {
-  animation: slide-right 0.3s ease-out;
-}
-
-/* Fade in */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-  animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes smooth-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-smooth-fade {
-  animation: smooth-fade 0.4s ease-out forwards;
-}
-
-/* Glassmorphism backdrop blur enhancement */
-.glass-header {
-  background: rgba(23, 59, 14, 0.72);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-}
-
-/* Progress bar animation */
-@keyframes progress-fill {
-  from { width: 0; }
-}
-.animate-progress {
-  animation: progress-fill 0.5s ease-out;
-}
-
-/* Stepper morph */
-.stepper-btn {
-  @apply flex items-center justify-center font-bold text-lg select-none cursor-pointer;
-  min-width: 40px;
-  min-height: 48px;
-}
-
-/* Mobile bottom bar safe area */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-/* Line clamp utility */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Large touch target */
-.touch-target {
-  min-height: 48px;
-  @apply flex items-center justify-center;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Print Stylesheet: Isolate bill receipt, start from top of page, and eliminate extra pages */
@@ -214,7 +289,8 @@ button, a, input, select {
     size: portrait;
   }
 
-  html, body {
+  html,
+  body {
     margin: 0 !important;
     padding: 0 !important;
     height: auto !important;
@@ -228,7 +304,6 @@ button, a, input, select {
     display: none !important;
   }
 
-  /* Make main or body container allow visible receipt */
   body {
     display: block !important;
   }
@@ -254,12 +329,10 @@ button, a, input, select {
     break-inside: avoid !important;
   }
 
-  /* Show all elements inside the printable receipt */
   #printable-receipt * {
     visibility: visible !important;
   }
 
-  /* Ensure the print button inside the receipt is completely removed from flow */
   .print-receipt-btn,
   #printable-receipt button {
     display: none !important;
@@ -292,7 +365,6 @@ button, a, input, select {
     color: #000000 !important;
   }
 
-  /* Crisp monochrome printing */
   #printable-receipt p,
   #printable-receipt span,
   #printable-receipt h3,
@@ -304,4 +376,3 @@ button, a, input, select {
     border-color: #555555 !important;
   }
 }
-

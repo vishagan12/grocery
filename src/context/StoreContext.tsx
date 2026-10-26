@@ -5,6 +5,7 @@ import { products, Product } from '@/data/products';
 import { Lang } from '@/data/translations';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_SHOP_COORDS, SHOP_MAPS_URL } from '@/lib/geofence';
+import { FREE_DELIVERY_THRESHOLD } from '@/lib/brand';
 
 export type CartItem = {
   productId: string;
@@ -680,7 +681,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const getCartDiscount = useCallback(() => getCartMrpTotal() - getCartSubtotal(), [getCartMrpTotal, getCartSubtotal]);
 
-  const getDeliveryFee = useCallback(() => (state.cart.length === 0 || getCartSubtotal() >= 499 ? 0 : 30), [state.cart.length, getCartSubtotal]);
+  const getDeliveryFee = useCallback(() => (state.cart.length === 0 || getCartSubtotal() >= FREE_DELIVERY_THRESHOLD ? 0 : 30), [state.cart.length, getCartSubtotal]);
 
   const getCartTotal = useCallback(() => {
     if (state.cart.length === 0) return 0;

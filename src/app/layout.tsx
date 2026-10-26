@@ -1,8 +1,25 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, Noto_Sans_Tamil } from 'next/font/google';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
 import SeoSchema from '@/components/SeoSchema';
 import MetaPixel from '@/components/MetaPixel';
+import { BRAND_PRIMARY } from '@/lib/brand';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const notoSansTamil = Noto_Sans_Tamil({
+  subsets: ['tamil'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-noto-tamil',
+  preload: false,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://sriammansupermarket.in'),
@@ -12,6 +29,7 @@ export const metadata: Metadata = {
   },
   description:
     'Order fresh vegetables, Ponni boiled rice, dals, cooking oils, Aavin milk, and daily essentials online from Sri Amman Supermarket, Madurai. Fast doorstep delivery within 3 km. மதுரையில் விரைவான மளிகை டெலிவரி.',
+  applicationName: 'Sri Amman Supermarket',
   keywords: [
     'Sri Amman Supermarket',
     'Madurai supermarket online',
@@ -44,14 +62,13 @@ export const metadata: Metadata = {
       'Order fresh groceries in English or Tamil with fast 3 km doorstep delivery in Madurai.',
   },
   manifest: '/manifest.json',
-  icons: {
-    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
-    apple: [{ url: '/icon.svg' }],
+  formatDetection: {
+    telephone: false,
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#047857',
+  themeColor: BRAND_PRIMARY,
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -59,7 +76,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${notoSansTamil.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <SeoSchema />
       </head>

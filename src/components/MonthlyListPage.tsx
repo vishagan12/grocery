@@ -426,10 +426,10 @@ export default function MonthlyListPage() {
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in box-border">
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 box-border">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-[#F8FAF7]">
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-brand-cream">
               <div>
                 <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-                  <SlidersHorizontal className="w-5 h-5 text-[#76CA3E]" />
+                  <SlidersHorizontal className="w-5 h-5 text-apple" />
                   <span>{lang === 'ta' ? 'மாதாந்திர பட்டியலில் பொருட்கள் சேர்க்க' : 'Customize Monthly Provision List'}</span>
                 </h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -449,8 +449,8 @@ export default function MonthlyListPage() {
 
             {/* Search Input Inside Modal */}
             <div className="p-4 border-b border-slate-100 bg-white">
-              <div className="flex items-center bg-[#F1F9EC] rounded-2xl px-3.5 py-2.5 border border-[#76CA3E]/30">
-                <Search className="w-4 h-4 text-[#76CA3E] mr-2 shrink-0" />
+              <div className="flex items-center bg-brand-mint rounded-2xl px-3.5 py-2.5 border border-apple/30">
+                <Search className="w-4 h-4 text-apple mr-2 shrink-0" />
                 <input
                   type="text"
                   placeholder={lang === 'ta' ? 'அரிசி, பருப்பு, எண்ணெய் தேடவும்...' : 'Search items to add (rice, oil, dal, snacks)...'}
@@ -481,7 +481,7 @@ export default function MonthlyListPage() {
                   return (
                     <div key={prod.id} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-11 h-11 rounded-xl bg-[#F8FAF7] border border-slate-200 shrink-0 overflow-hidden p-0.5">
+                        <div className="w-11 h-11 rounded-xl bg-brand-cream border border-slate-200 shrink-0 overflow-hidden p-0.5">
                           <img src={prod.image} alt={prod.nameEn} className="w-full h-full object-contain" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -512,7 +512,7 @@ export default function MonthlyListPage() {
                         <button
                           type="button"
                           onClick={() => addItemToList(prod.id)}
-                          className="bg-[#4CB01E] hover:bg-[#3D9415] text-white px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1 shrink-0 shadow-xs active:scale-95"
+                          className="bg-brand-primary hover:bg-brand-highlight text-white px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1 shrink-0 shadow-xs active:scale-95"
                         >
                           <Plus className="w-3.5 h-3.5 stroke-[3]" />
                           <span>{lang === 'ta' ? 'சேர்' : 'Add to List'}</span>
@@ -524,7 +524,7 @@ export default function MonthlyListPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-100 bg-[#F8FAF7] flex items-center justify-between">
+            <div className="p-4 border-t border-slate-100 bg-brand-cream flex items-center justify-between">
               <span className="text-xs font-bold text-slate-600">
                 {items.length} {lang === 'ta' ? 'பொருட்கள் பட்டியலில் உள்ளன' : 'total items in monthly list'}
               </span>

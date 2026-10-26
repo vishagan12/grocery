@@ -39,7 +39,7 @@ export default function WishlistPage() {
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 hover:text-[#76CA3E] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 hover:text-apple transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>{t('backToProducts', lang)}</span>
@@ -50,7 +50,7 @@ export default function WishlistPage() {
               <button
                 type="button"
                 onClick={handleAddAllToCart}
-                className="inline-flex items-center gap-1.5 bg-[#4CB01E] hover:bg-[#3D9415] text-white text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl shadow-xs transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 bg-brand-primary hover:bg-brand-highlight text-white text-xs sm:text-sm font-bold px-3.5 py-2 rounded-xl shadow-xs transition-all active:scale-95"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>{lang === 'ta' ? 'அனைத்தையும் சேர்' : 'Add All to Cart'}</span>
@@ -109,7 +109,7 @@ export default function WishlistPage() {
             <button
               type="button"
               onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-              className="bg-[#4CB01E] hover:bg-[#3D9415] text-white px-7 py-3 rounded-2xl font-black text-sm shadow-md transition-all active:scale-95 inline-flex items-center gap-2"
+              className="bg-brand-primary hover:bg-brand-highlight text-white px-7 py-3 rounded-2xl font-black text-sm shadow-md transition-all active:scale-95 inline-flex items-center gap-2"
             >
               <span>{t('shopNow', lang)}</span>
             </button>

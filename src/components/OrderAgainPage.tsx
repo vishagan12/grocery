@@ -93,9 +93,9 @@ export default function OrderAgainPage() {
   // Empty State: No previous orders
   if (state.orders.length === 0) {
     return (
-      <section className="py-16 md:py-24 bg-[#F8FAF7] min-h-[80vh] flex flex-col items-center justify-center px-4 w-full box-border">
+      <section className="py-16 md:py-24 bg-brand-cream min-h-[80vh] flex flex-col items-center justify-center px-4 w-full box-border">
         <div className="w-full max-w-md mx-auto text-center bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-xl box-border">
-          <div className="w-20 h-20 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#4CB01E] mx-auto mb-5 shadow-xs">
+          <div className="w-20 h-20 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-brand-primary mx-auto mb-5 shadow-xs">
             <RotateCcw className="w-10 h-10" />
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-2">
@@ -109,7 +109,7 @@ export default function OrderAgainPage() {
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#4CB01E] hover:bg-[#3D9415] text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-md shadow-emerald-700/20 active:scale-98 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-highlight text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-md shadow-emerald-700/20 active:scale-98 transition-all"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>{lang === 'ta' ? 'ஷாப்பிங் செய்ய தொடங்கு' : 'Start Shopping Now'}</span>
@@ -120,12 +120,12 @@ export default function OrderAgainPage() {
   }
 
   return (
-    <section className="py-6 sm:py-10 md:py-12 bg-[#F8FAF7] min-h-screen text-slate-900 w-full overflow-x-hidden box-border">
+    <section className="py-6 sm:py-10 md:py-12 bg-brand-cream min-h-screen text-slate-900 w-full overflow-x-hidden box-border">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 box-border">
         {/* Top Header Card */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 box-border">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F9EC] border border-[#76CA3E]/30 text-[#3D9415] text-xs font-black uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-mint border border-apple/30 text-brand-highlight text-xs font-black uppercase tracking-wider mb-2">
               <RotateCcw className="w-3.5 h-3.5" />
               <span>{lang === 'ta' ? 'விரைவு மறு-ஆர்டர்' : '1-Click Express Reorder'}</span>
             </div>
@@ -146,7 +146,7 @@ export default function OrderAgainPage() {
             <button
               type="button"
               onClick={() => dispatch({ type: 'SET_PAGE', page: 'orders' })}
-              className="inline-flex items-center gap-1.5 bg-[#4CB01E] hover:bg-[#3D9415] text-white px-4 py-2 rounded-xl text-xs font-black shadow-xs active:scale-98 transition-all"
+              className="inline-flex items-center gap-1.5 bg-brand-primary hover:bg-brand-highlight text-white px-4 py-2 rounded-xl text-xs font-black shadow-xs active:scale-98 transition-all"
             >
               <Receipt className="w-3.5 h-3.5" />
               <span>{lang === 'ta' ? 'லைவ் டிராக்கிங்' : 'Track Active'}</span>
@@ -159,7 +159,7 @@ export default function OrderAgainPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3 px-1">
               <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#4CB01E]" />
+                <Sparkles className="w-4 h-4 text-brand-primary" />
                 <span>{lang === 'ta' ? 'நீங்கள் அடிக்கடி வாங்கிய பொருட்கள்' : 'Items You Ordered Previously'}</span>
               </h2>
               <span className="text-xs text-slate-400 font-semibold">
@@ -203,7 +203,7 @@ export default function OrderAgainPage() {
                       <button
                         type="button"
                         onClick={() => handleAddSingleItem(pastItem.productId, pastItem.variantIndex)}
-                        className="inline-flex items-center gap-1 bg-[#F1F9EC] hover:bg-[#4CB01E] text-[#3D9415] hover:text-white border border-[#76CA3E]/30 px-2.5 py-1 rounded-xl text-xs font-black transition-all active:scale-95 shadow-2xs"
+                        className="inline-flex items-center gap-1 bg-brand-mint hover:bg-brand-primary text-brand-highlight hover:text-white border border-apple/30 px-2.5 py-1 rounded-xl text-xs font-black transition-all active:scale-95 shadow-2xs"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>ADD</span>
@@ -220,7 +220,7 @@ export default function OrderAgainPage() {
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <Package className="w-4 h-4 text-[#4CB01E]" />
+              <Package className="w-4 h-4 text-brand-primary" />
               <span>{lang === 'ta' ? 'முந்தைய முழு ஆர்டர் வரலாறு' : 'Previous Order History'}</span>
             </h2>
           </div>
@@ -293,7 +293,7 @@ export default function OrderAgainPage() {
                         type="button"
                         onClick={() => handleReorderFullOrder(order.id)}
                         disabled={isReordering}
-                        className="inline-flex items-center gap-2 bg-[#4CB01E] hover:bg-[#3D9415] text-white px-5 py-2.5 rounded-2xl font-black text-xs transition-all shadow-md shadow-emerald-700/20 active:scale-98"
+                        className="inline-flex items-center gap-2 bg-brand-primary hover:bg-brand-highlight text-white px-5 py-2.5 rounded-2xl font-black text-xs transition-all shadow-md shadow-emerald-700/20 active:scale-98"
                       >
                         <RotateCcw className={`w-3.5 h-3.5 ${isReordering ? 'animate-spin' : ''}`} />
                         <span>{lang === 'ta' ? 'அனைத்தையும் மீண்டும் ஆர்டர் செய்' : 'Reorder Entire Order'}</span>
@@ -344,7 +344,7 @@ export default function OrderAgainPage() {
                           <button
                             type="button"
                             onClick={() => handleAddSingleItem(item.productId, item.variantIndex)}
-                            className="w-7 h-7 rounded-lg bg-white hover:bg-[#4CB01E] text-slate-700 hover:text-white border border-slate-200 flex items-center justify-center transition-colors shrink-0 shadow-2xs"
+                            className="w-7 h-7 rounded-lg bg-white hover:bg-brand-primary text-slate-700 hover:text-white border border-slate-200 flex items-center justify-center transition-colors shrink-0 shadow-2xs"
                             title="Add single item to cart"
                           >
                             <Plus className="w-3.5 h-3.5" />

@@ -61,7 +61,7 @@ export default function PromoBanners() {
             <div className="absolute inset-0 bg-gradient-to-r from-[#142C12]/95 via-[#1D3E1A]/85 to-transparent" />
 
             <div className="relative z-10 max-w-sm text-white min-w-0">
-              <span className="inline-flex items-center gap-1.5 bg-[#76CA3E] text-white text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
+              <span className="inline-flex items-center gap-1.5 bg-apple text-white text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
                 <IconTruck className="w-3 h-3 text-white shrink-0" />
                 <span>{t('expressRider', lang)}</span>
               </span>

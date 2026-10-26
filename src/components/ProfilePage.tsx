@@ -320,7 +320,7 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-apple"
                   />
                 </div>
 
@@ -333,7 +333,7 @@ export default function ProfilePage() {
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-apple"
                   />
                 </div>
 
@@ -346,13 +346,13 @@ export default function ProfilePage() {
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
                     placeholder="e.g. 12 Dec 2006"
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 font-semibold focus:outline-none focus:border-apple"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-[#4CB01E] hover:bg-[#3D9415] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-sm active:scale-98"
+                  className="w-full bg-brand-primary hover:bg-brand-highlight text-white font-bold py-3 rounded-xl text-sm transition-all shadow-sm active:scale-98"
                 >
                   Save Changes
                 </button>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -385,11 +385,11 @@ export default function ProfilePage() {
                 </p>
                 <div className="pt-2 border-t border-slate-200 flex flex-col gap-2.5 text-xs text-slate-700 font-medium">
                   <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-[#76CA3E]" />
+                    <Phone className="w-4 h-4 text-apple" />
                     <span>Store Helpline: +91 94432 10890 / +91 63793 98981</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4 text-[#76CA3E]" />
+                    <MessageCircle className="w-4 h-4 text-apple" />
                     <span>WhatsApp: +91 63793 98981 (Instant Order Help)</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -419,7 +419,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -435,7 +435,7 @@ export default function ProfilePage() {
                   onClick={() => handleSavePaymentPref('upi')}
                   className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
                     selectedPaymentPref === 'upi'
-                      ? 'border-[#76CA3E] bg-emerald-50/40 text-slate-900'
+                      ? 'border-apple bg-emerald-50/40 text-slate-900'
                       : 'border-slate-200 bg-white text-slate-700'
                   }`}
                 >
@@ -449,7 +449,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   {selectedPaymentPref === 'upi' && (
-                    <Check className="w-5 h-5 text-[#76CA3E]" />
+                    <Check className="w-5 h-5 text-apple" />
                   )}
                 </button>
 
@@ -458,7 +458,7 @@ export default function ProfilePage() {
                   onClick={() => handleSavePaymentPref('cod')}
                   className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all ${
                     selectedPaymentPref === 'cod'
-                      ? 'border-[#76CA3E] bg-emerald-50/40 text-slate-900'
+                      ? 'border-apple bg-emerald-50/40 text-slate-900'
                       : 'border-slate-200 bg-white text-slate-700'
                   }`}
                 >
@@ -472,7 +472,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   {selectedPaymentPref === 'cod' && (
-                    <Check className="w-5 h-5 text-[#76CA3E]" />
+                    <Check className="w-5 h-5 text-apple" />
                   )}
                 </button>
               </div>
@@ -487,12 +487,12 @@ export default function ProfilePage() {
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     placeholder="yourname@upi"
-                    className="flex-1 border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-900 font-semibold focus:outline-none focus:border-[#76CA3E]"
+                    className="flex-1 border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-900 font-semibold focus:outline-none focus:border-apple"
                   />
                   <button
                     type="button"
                     onClick={() => handleSavePaymentPref(selectedPaymentPref)}
-                    className="bg-[#4CB01E] text-white px-4 py-2 rounded-xl text-xs font-bold"
+                    className="bg-brand-primary text-white px-4 py-2 rounded-xl text-xs font-bold"
                   >
                     Save
                   </button>
@@ -511,7 +511,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -527,7 +527,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-                    className="bg-[#4CB01E] text-white px-5 py-2 rounded-xl text-xs font-bold"
+                    className="bg-brand-primary text-white px-5 py-2 rounded-xl text-xs font-bold"
                   >
                     Start Shopping
                   </button>
@@ -541,7 +541,7 @@ export default function ProfilePage() {
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-900">{order.id}</span>
-                        <span className="text-[11px] font-bold text-[#76CA3E] bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-bold text-apple bg-emerald-50 px-2 py-0.5 rounded-full">
                           {order.status === 4 ? 'Delivered' : 'Order Placed'}
                         </span>
                       </div>
@@ -565,7 +565,7 @@ export default function ProfilePage() {
                             dispatch({ type: 'SET_CART_OPEN', open: true });
                             showToast('Items added to cart from previous order');
                           }}
-                          className="text-xs font-bold text-[#76CA3E] hover:underline"
+                          className="text-xs font-bold text-apple hover:underline"
                         >
                           Reorder All Items
                         </button>
@@ -594,7 +594,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -610,7 +610,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-                    className="bg-[#4CB01E] text-white px-5 py-2 rounded-xl text-xs font-bold"
+                    className="bg-brand-primary text-white px-5 py-2 rounded-xl text-xs font-bold"
                   >
                     Browse Catalog
                   </button>
@@ -649,7 +649,7 @@ export default function ProfilePage() {
                             });
                             showToast(`Added ${prod.nameEn} to cart`);
                           }}
-                          className="bg-[#4CB01E] text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs active:scale-95"
+                          className="bg-brand-primary text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs active:scale-95"
                         >
                           ADD
                         </button>
@@ -680,7 +680,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -731,7 +731,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setShowAddAddrForm(true)}
-                  className="w-full border-2 border-dashed border-slate-200 hover:border-[#76CA3E] text-slate-600 hover:text-[#76CA3E] py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full border-2 border-dashed border-slate-200 hover:border-apple text-slate-600 hover:text-apple py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Address</span>
@@ -759,7 +759,7 @@ export default function ProfilePage() {
                         onClick={() => setNewAddrTag(tag)}
                         className={`py-1.5 text-xs font-bold rounded-xl border transition-all ${
                           newAddrTag === tag
-                            ? 'bg-[#76CA3E] text-white border-[#76CA3E]'
+                            ? 'bg-apple text-white border-apple'
                             : 'bg-white text-slate-700 border-slate-200'
                         }`}
                       >
@@ -773,7 +773,7 @@ export default function ProfilePage() {
                     placeholder="House / Flat / Door Number"
                     value={newAddrHouse}
                     onChange={(e) => setNewAddrHouse(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-apple"
                   />
                   <input
                     type="text"
@@ -781,7 +781,7 @@ export default function ProfilePage() {
                     placeholder="Street / Area / Road Name"
                     value={newAddrStreet}
                     onChange={(e) => setNewAddrStreet(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-apple"
                   />
                   <input
                     type="text"
@@ -789,11 +789,11 @@ export default function ProfilePage() {
                     placeholder="Pincode (e.g. 625020)"
                     value={newAddrPincode}
                     onChange={(e) => setNewAddrPincode(e.target.value)}
-                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:border-apple"
                   />
                   <button
                     type="submit"
-                    className="w-full bg-[#4CB01E] text-white py-2.5 rounded-xl text-xs font-bold"
+                    className="w-full bg-brand-primary text-white py-2.5 rounded-xl text-xs font-bold"
                   >
                     Save Address
                   </button>
@@ -810,7 +810,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -830,7 +830,7 @@ export default function ProfilePage() {
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
                     placeholder="e.g. Sri Amman Enterprises"
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-[#4CB01E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-brand-primary"
                   />
                 </div>
 
@@ -844,13 +844,13 @@ export default function ProfilePage() {
                     value={gstin}
                     onChange={(e) => setGstin(e.target.value.toUpperCase())}
                     placeholder="33AAAAA0000A1Z5"
-                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 uppercase focus:outline-none focus:border-[#76CA3E]"
+                    className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 uppercase focus:outline-none focus:border-apple"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-[#4CB01E] hover:bg-[#3D9415] text-white font-bold py-3 rounded-xl text-sm transition-all shadow-sm active:scale-98"
+                  className="w-full bg-brand-primary hover:bg-brand-highlight text-white font-bold py-3 rounded-xl text-sm transition-all shadow-sm active:scale-98"
                 >
                   Save GST Details
                 </button>
@@ -866,7 +866,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -880,7 +880,7 @@ export default function ProfilePage() {
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-sm font-black text-[#143B0D] tracking-wider bg-white border border-emerald-200 px-2 py-0.5 rounded-md">
+                        <span className="font-mono text-sm font-black text-brand-forest tracking-wider bg-white border border-emerald-200 px-2 py-0.5 rounded-md">
                           {c.code}
                         </span>
                       </div>
@@ -890,7 +890,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => handleCopyCoupon(c.code)}
-                      className="inline-flex items-center gap-1 bg-[#4CB01E] hover:bg-[#3D9415] text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition-transform active:scale-95"
+                      className="inline-flex items-center gap-1 bg-brand-primary hover:bg-brand-highlight text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition-transform active:scale-95"
                     >
                       <Copy className="w-3.5 h-3.5" />
                       <span>Copy</span>
@@ -911,7 +911,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -944,7 +944,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -979,7 +979,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setSubView('none')}
-                  className="text-xs font-bold text-[#4CB01E]"
+                  className="text-xs font-bold text-brand-primary"
                 >
                   {lang === 'ta' ? 'சுயவிவரத்திற்கு திரும்பு' : 'Back to Profile'}
                 </button>
@@ -1009,7 +1009,7 @@ export default function ProfilePage() {
                   <div
                     key={item.key}
                     onClick={() => handleToggleNotif(item.key)}
-                    className="border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-3 bg-white cursor-pointer hover:border-[#76CA3E] transition-all"
+                    className="border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-3 bg-white cursor-pointer hover:border-apple transition-all"
                   >
                     <div>
                       <p className="text-xs font-bold text-slate-900">{item.label}</p>
@@ -1017,7 +1017,7 @@ export default function ProfilePage() {
                     </div>
                     <div
                       className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
-                        item.active ? 'bg-[#76CA3E]' : 'bg-slate-300'
+                        item.active ? 'bg-apple' : 'bg-slate-300'
                       }`}
                     >
                       <div
@@ -1068,7 +1068,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={handleLogBackIn}
-                    className="text-xs font-bold text-[#4CB01E] hover:underline mt-1 inline-block"
+                    className="text-xs font-bold text-brand-primary hover:underline mt-1 inline-block"
                   >
                     {lang === 'ta' ? 'விஷாகன் ஆக உள்நுழையவும்' : 'Log in as Vishagan'}
                   </button>
@@ -1080,9 +1080,9 @@ export default function ProfilePage() {
                 {/* 1. Monthly List */}
                 <div
                   onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-                  className="border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center justify-center gap-2 bg-white hover:border-[#4CB01E] cursor-pointer transition-colors shadow-2xs group"
+                  className="border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center justify-center gap-2 bg-white hover:border-brand-primary cursor-pointer transition-colors shadow-2xs group"
                 >
-                  <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-emerald-50 flex items-center justify-center text-slate-700 group-hover:text-[#4CB01E] transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-emerald-50 flex items-center justify-center text-slate-700 group-hover:text-brand-primary transition-colors">
                     <ClipboardList className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 text-center leading-tight">
@@ -1093,9 +1093,9 @@ export default function ProfilePage() {
                 {/* 2. Support */}
                 <div
                   onClick={() => setSubView('support')}
-                  className="border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center justify-center gap-2 bg-white hover:border-[#4CB01E] cursor-pointer transition-colors shadow-2xs group"
+                  className="border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center justify-center gap-2 bg-white hover:border-brand-primary cursor-pointer transition-colors shadow-2xs group"
                 >
-                  <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-emerald-50 flex items-center justify-center text-slate-700 group-hover:text-[#4CB01E] transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-emerald-50 flex items-center justify-center text-slate-700 group-hover:text-brand-primary transition-colors">
                     <MessageSquareText className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 text-center leading-tight">
@@ -1106,9 +1106,9 @@ export default function ProfilePage() {
                 {/* 3. Payments */}
                 <div
                   onClick={() => setSubView('payments')}
-                  className="border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center justify-center gap-2 bg-white hover:border-[#4CB01E] cursor-pointer transition-colors shadow-2xs group"
+                  className="border border-slate-200 rounded-2xl p-3.5 flex flex-col items-center justify-center gap-2 bg-white hover:border-brand-primary cursor-pointer transition-colors shadow-2xs group"
                 >
-                  <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-emerald-50 flex items-center justify-center text-slate-700 group-hover:text-[#4CB01E] transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 group-hover:bg-emerald-50 flex items-center justify-center text-slate-700 group-hover:text-brand-primary transition-colors">
                     <CreditCard className="w-4 h-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 text-center leading-tight">
@@ -1335,10 +1335,10 @@ export default function ProfilePage() {
                       onClick={handleLogBackIn}
                       className="w-full py-3 flex items-center justify-between hover:bg-slate-50/70 transition-colors rounded-xl px-1"
                     >
-                      <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center text-[#4CB01E] shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center text-brand-primary shrink-0">
                         <Check className="w-4 h-4" />
                       </div>
-                      <span className="text-[15px] font-medium text-[#4CB01E] flex-1 ml-3.5 text-left">
+                      <span className="text-[15px] font-medium text-brand-primary flex-1 ml-3.5 text-left">
                         {lang === 'ta' ? 'விஷாகன் ஆக உள்நுழையவும்' : 'Log back in as Vishagan'}
                       </span>
                       <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />

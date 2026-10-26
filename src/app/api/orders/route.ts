@@ -5,6 +5,7 @@ import { calculateDistanceKm, DEFAULT_SHOP_COORDS } from '@/lib/geofence';
 import { sanitizeInput, withExponentialBackoff } from '@/lib/resilience';
 import { logger, enqueueDeadLetter } from '@/lib/logger';
 import { products } from '@/data/products';
+import { FREE_DELIVERY_THRESHOLD } from '@/lib/brand';
 
 interface OrderItemPayload {
   productId: string;
@@ -231,8 +232,8 @@ export async function POST(req: NextRequest) {
   const catalogDiscount = Math.max(0, serverMrpTotal - serverSubtotal);
   const totalDiscount = catalogDiscount + serverCouponDiscount;
 
-  // Free delivery for orders >= 499 or if coupon FREEDEL is used
-  const serverDeliveryFee = serverSubtotal >= 499 || appliedCoupon?.toUpperCase() === 'FREEDEL' ? 0 : 30;
+  // Free delivery above the threshold or if coupon FREEDEL is used
+  const serverDeliveryFee = serverSubtotal >= FREE_DELIVERY_THRESHOLD || appliedCoupon?.toUpperCase() === 'FREEDEL' ? 0 : 30;
   const serverFinalTotal = Math.max(0, serverSubtotal - serverCouponDiscount + serverDeliveryFee);
 
   // 9. Generate Secure Order Identifiers & Secrets (IDOR Protection)

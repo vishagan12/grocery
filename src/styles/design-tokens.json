@@ -1,0 +1,20 @@
+{
+  "colors": {
+    "apple": {
+      "DEFAULT": "#76CA3E",
+      "hover": "#60B328"
+    },
+    "brand": {
+      "primary": "#4CB01E",
+      "highlight": "#3D9415",
+      "deep": "#1E4D12",
+      "forest": "#143B0D",
+      "cream": "#F8FAF7",
+      "creamCard": "#FFFFFF",
+      "creamDark": "#EAEFE7",
+      "creamHover": "#F5EFE6",
+      "mint": "#F1F9EC",
+      "slate": "#0F172A"
+    }
+  }
+}

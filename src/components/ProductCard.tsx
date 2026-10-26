@@ -26,7 +26,7 @@ export default function ProductCard({ product }: Props) {
     <div className="rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md p-2 sm:p-2.5 flex flex-col justify-between relative bg-white transition-all duration-200 group select-none">
       {/* Top-Left Discount Ribbon */}
       {discount > 0 && (
-        <span className="bg-[#76CA3E] text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-tl-xl rounded-br-xl absolute top-0 left-0 z-10 shadow-2xs whitespace-nowrap">
+        <span className="bg-apple text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-tl-xl rounded-br-xl absolute top-0 left-0 z-10 shadow-2xs whitespace-nowrap">
           {discount}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
         </span>
       )}
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: Props) {
 
       {/* Prominent Product Image Box */}
       <div
-        className="w-full aspect-square rounded-xl bg-[#F8FAF7] p-1.5 sm:p-2 mb-2 relative flex items-center justify-center cursor-pointer overflow-hidden group-hover:bg-[#F1F9EC]/50 transition-colors border border-slate-100"
+        className="w-full aspect-square rounded-xl bg-brand-cream p-1.5 sm:p-2 mb-2 relative flex items-center justify-center cursor-pointer overflow-hidden group-hover:bg-brand-mint/50 transition-colors border border-slate-100"
         onClick={() => {
           dispatch({ type: 'SET_PRODUCT_DETAIL', id: product.id });
           dispatch({ type: 'SET_PAGE', page: 'product-detail' });
@@ -79,7 +79,7 @@ export default function ProductCard({ product }: Props) {
 
         {/* Product Title - Prominent, natural font size for elders, fully visible without ellipsis */}
         <h3
-          className="text-xs xs:text-sm sm:text-base font-extrabold text-slate-900 leading-snug cursor-pointer hover:text-[#4CB01E] transition-colors break-words mb-1"
+          className="text-xs xs:text-sm sm:text-base font-extrabold text-slate-900 leading-snug cursor-pointer hover:text-brand-primary transition-colors break-words mb-1"
           onClick={() => {
             dispatch({ type: 'SET_PRODUCT_DETAIL', id: product.id });
             dispatch({ type: 'SET_PAGE', page: 'product-detail' });
@@ -100,8 +100,8 @@ export default function ProductCard({ product }: Props) {
                   onClick={() => setSelectedVariant(i)}
                   className={`text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-lg border whitespace-nowrap transition-all ${
                     i === activeVariantIndex
-                      ? 'bg-[#4CB01E] text-white border-[#4CB01E]'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-[#4CB01E]/40'
+                      ? 'bg-brand-primary text-white border-brand-primary'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-brand-primary/40'
                   }`}
                 >
                   {v.label}
@@ -136,12 +136,12 @@ export default function ProductCard({ product }: Props) {
                   dispatch({ type: 'ADD_TO_CART', productId: product.id, variantIndex: activeVariantIndex });
                   showToast(t('addedToCart', lang));
                 }}
-                className="w-full border-2 border-[#4CB01E] bg-[#F1F9EC] hover:bg-[#4CB01E] text-[#143B0D] hover:text-white font-extrabold text-xs sm:text-sm px-2.5 min-h-[34px] sm:min-h-[40px] rounded-xl shadow-2xs transition-all flex items-center justify-center select-none active:scale-95 whitespace-nowrap"
+                className="w-full border-2 border-brand-primary bg-brand-mint hover:bg-brand-primary text-brand-forest hover:text-white font-extrabold text-xs sm:text-sm px-2.5 min-h-[34px] sm:min-h-[40px] rounded-xl shadow-2xs transition-all flex items-center justify-center select-none active:scale-95 whitespace-nowrap"
               >
                 {lang === 'ta' ? 'சேர்' : 'ADD'}
               </button>
             ) : (
-              <div className="w-full bg-[#4CB01E] text-white font-bold min-h-[34px] sm:min-h-[40px] rounded-xl flex items-center justify-between px-1.5 sm:px-2 shadow-sm select-none">
+              <div className="w-full bg-brand-primary text-white font-bold min-h-[34px] sm:min-h-[40px] rounded-xl flex items-center justify-between px-1.5 sm:px-2 shadow-sm select-none">
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'UPDATE_QUANTITY', productId: product.id, variantIndex: activeVariantIndex, quantity: quantity - 1 })}

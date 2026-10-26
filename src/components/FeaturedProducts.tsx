@@ -15,7 +15,7 @@ export default function FeaturedProducts() {
   const featured = products.slice(0, 12);
 
   return (
-    <section className="py-4 sm:py-7 bg-[#F8FAF7]">
+    <section className="py-4 sm:py-7 bg-brand-cream">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Section Heading - Clean single-line row on all screen sizes */}
         <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b border-slate-200/80 gap-2">
@@ -24,7 +24,7 @@ export default function FeaturedProducts() {
               <h3 className="font-black text-[#0F172A] tracking-tight text-sm sm:text-xl break-words">
                 {t('dealOfDay', lang)}
               </h3>
-              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black bg-[#76CA3E] text-white px-2 py-0.5 rounded-full shadow-2xs whitespace-nowrap shrink-0">
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black bg-apple text-white px-2 py-0.5 rounded-full shadow-2xs whitespace-nowrap shrink-0">
                 <Flame className="w-3 h-3 fill-current shrink-0" />
                 <span>{lang === 'ta' ? 'சிறப்பு சலுகை' : 'HOT DEALS'}</span>
               </span>
@@ -42,7 +42,7 @@ export default function FeaturedProducts() {
               dispatch({ type: 'SET_CATEGORY', category: 'all' });
               dispatch({ type: 'SET_SORT', sort: 'discount' });
             }}
-            className="text-[11px] sm:text-sm font-black text-[#143B0D] hover:text-[#76CA3E] transition-colors bg-white hover:bg-emerald-50/50 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs whitespace-nowrap flex items-center gap-1 sm:gap-1.5 shrink-0"
+            className="text-[11px] sm:text-sm font-black text-brand-forest hover:text-apple transition-colors bg-white hover:bg-emerald-50/50 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs whitespace-nowrap flex items-center gap-1 sm:gap-1.5 shrink-0"
           >
             <span>{t('viewAllDeals', lang)}</span>
             <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />

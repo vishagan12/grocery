@@ -95,7 +95,7 @@ export default function CategoryGrid() {
                     dispatch({ type: 'SET_CATEGORY', category: 'all' });
                     dispatch({ type: 'SET_PAGE', page: 'products' });
                   }}
-                  className="text-xs sm:text-sm font-black text-[#76CA3E] hover:text-[#60B328] transition-colors flex items-center gap-1"
+                  className="text-xs sm:text-sm font-black text-apple hover:text-apple-hover transition-colors flex items-center gap-1"
                 >
                   <span>{lang === 'ta' ? 'அனைத்தும்' : 'See all'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -118,8 +118,8 @@ export default function CategoryGrid() {
                     <div
                       className={`w-full aspect-square rounded-2xl overflow-hidden mb-1.5 transition-all flex items-center justify-center ${
                         isSelected
-                          ? 'ring-2 ring-[#76CA3E] border-2 border-[#76CA3E]'
-                          : 'border border-slate-200/90 hover:border-[#76CA3E]'
+                          ? 'ring-2 ring-apple border-2 border-apple'
+                          : 'border border-slate-200/90 hover:border-apple'
                       } shadow-2xs hover:shadow-xs bg-slate-100`}
                     >
                       <img

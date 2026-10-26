@@ -92,9 +92,9 @@ export default function OrdersPage() {
 
   if (!activeOrder) {
     return (
-      <section className="py-16 md:py-24 bg-[#F8FAF7] min-h-[80vh] flex flex-col items-center justify-center px-4 w-full box-border">
+      <section className="py-16 md:py-24 bg-brand-cream min-h-[80vh] flex flex-col items-center justify-center px-4 w-full box-border">
         <div className="w-full max-w-md mx-auto text-center bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/80 shadow-xl box-border">
-          <div className="w-20 h-20 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#4CB01E] mx-auto mb-5 shadow-xs">
+          <div className="w-20 h-20 rounded-3xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-brand-primary mx-auto mb-5 shadow-xs">
             <Package className="w-10 h-10" />
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-2">
@@ -108,7 +108,7 @@ export default function OrdersPage() {
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_PAGE', page: 'products' })}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#4CB01E] hover:bg-[#3D9415] text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-md shadow-emerald-700/20 active:scale-98 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-highlight text-white px-8 py-3.5 rounded-2xl font-black text-sm shadow-md shadow-emerald-700/20 active:scale-98 transition-all"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>{t('shopNow', lang)}</span>
@@ -271,7 +271,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <section className="py-6 sm:py-10 md:py-12 bg-[#F8FAF7] min-h-screen text-slate-900 w-full overflow-x-hidden box-border">
+    <section className="py-6 sm:py-10 md:py-12 bg-brand-cream min-h-screen text-slate-900 w-full overflow-x-hidden box-border">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 box-border">
         {/* Top Header Card & Demo Switcher */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 box-border">
@@ -400,13 +400,13 @@ export default function OrdersPage() {
                     onClick={() => setSelectedOrderId(o.id)}
                     className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-2.5 shadow-2xs shrink-0 ${
                       isSelected
-                        ? 'bg-gradient-to-r from-[#4CB01E] to-[#60B328] text-white border-[#4CB01E] shadow-md shadow-[#4CB01E]/25 ring-2 ring-[#76CA3E]/50'
+                        ? 'bg-gradient-to-r from-brand-primary to-apple-hover text-white border-brand-primary shadow-md shadow-brand-primary/25 ring-2 ring-apple/50'
                         : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     <span className="font-mono">{o.id}</span>
                     <span className="opacity-40">&bull;</span>
-                    <span className="font-extrabold text-[#76CA3E]">₹{o.total}</span>
+                    <span className="font-extrabold text-apple">₹{o.total}</span>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                         o.status >= 4
@@ -432,9 +432,9 @@ export default function OrdersPage() {
           {/* Left Column (Hero Status Banner, Stepper Timeline, Delivery Partner, Map Pin Details) */}
           <div className="lg:col-span-7 space-y-6 w-full min-w-0 box-border">
             {/* Live Status Hero Banner (Rich Dark Forest & Emerald Gradient for Crystal-Clear Readability) */}
-            <div className="bg-gradient-to-br from-[#0D2608] via-[#143B0D] to-[#1E4D12] rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-emerald-950/25 relative overflow-hidden border border-emerald-700/40 box-border">
+            <div className="bg-gradient-to-br from-[#0D2608] via-brand-forest to-brand-deep rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-emerald-950/25 relative overflow-hidden border border-emerald-700/40 box-border">
               {/* Subtle ambient light glow */}
-              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-52 h-52 bg-[#76CA3E]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-52 h-52 bg-apple/10 rounded-full blur-3xl pointer-events-none" />
 
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                 <div className="min-w-0 flex-1">
@@ -499,7 +499,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden p-0.5 border border-white/10">
                   <div
-                    className="bg-gradient-to-r from-amber-400 via-[#76CA3E] to-[#4CB01E] h-full rounded-full transition-all duration-500 shadow-sm"
+                    className="bg-gradient-to-r from-amber-400 via-apple to-brand-primary h-full rounded-full transition-all duration-500 shadow-sm"
                     style={{ width: `${Math.min(100, Math.round(((activeOrder.status + 1) / 5) * 100))}%` }}
                   />
                 </div>
@@ -537,9 +537,9 @@ export default function OrdersPage() {
                         <div
                           className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-300 ${
                             isCompleted
-                              ? 'bg-[#4CB01E] text-white shadow-md shadow-[#4CB01E]/25'
+                              ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/25'
                               : isActive
-                              ? 'bg-[#4CB01E] text-white ring-4 ring-[#76CA3E]/30 scale-105 shadow-lg shadow-[#4CB01E]/30'
+                              ? 'bg-brand-primary text-white ring-4 ring-apple/30 scale-105 shadow-lg shadow-brand-primary/30'
                               : 'bg-slate-100 text-slate-400 border border-slate-200'
                           }`}
                         >
@@ -554,7 +554,7 @@ export default function OrdersPage() {
                         {i < milestoneKeys.length - 1 && (
                           <div
                             className={`w-0.5 h-12 sm:h-14 transition-colors duration-300 my-1 ${
-                              activeOrder.status > i ? 'bg-[#4CB01E]' : 'bg-slate-200'
+                              activeOrder.status > i ? 'bg-brand-primary' : 'bg-slate-200'
                             }`}
                           />
                         )}
@@ -621,7 +621,7 @@ export default function OrdersPage() {
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#4CB01E] flex items-center justify-center shrink-0 shadow-xs">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-brand-primary flex items-center justify-center shrink-0 shadow-xs">
                     <Bike className="w-7 h-7" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -640,7 +640,7 @@ export default function OrdersPage() {
                 <div className="flex items-center gap-2.5 shrink-0">
                   <a
                     href="tel:+919876543210"
-                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-[#4CB01E] hover:bg-[#3D9415] text-white px-5 py-3 rounded-2xl font-black text-xs transition-all shadow-md shadow-emerald-700/20 active:scale-98"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-highlight text-white px-5 py-3 rounded-2xl font-black text-xs transition-all shadow-md shadow-emerald-700/20 active:scale-98"
                   >
                     <Phone className="w-4 h-4" />
                     <span>{t('callStore', lang)}</span>
@@ -687,7 +687,7 @@ export default function OrdersPage() {
             >
               {/* Receipt Top Header */}
               <div className="text-center pb-5 border-b border-dashed border-slate-300 space-y-1.5">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4CB01E] to-[#60B328] flex items-center justify-center text-white mx-auto mb-3 shadow-md shadow-[#4CB01E]/25 border border-white/20">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-primary to-apple-hover flex items-center justify-center text-white mx-auto mb-3 shadow-md shadow-brand-primary/25 border border-white/20">
                   <Receipt className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="font-black text-lg text-slate-900 tracking-tight font-sans">
@@ -791,7 +791,7 @@ export default function OrdersPage() {
                 <button
                   type="button"
                   onClick={printReceipt}
-                  className="w-full bg-[#4CB01E] hover:bg-[#3D9415] text-white py-3 px-4 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md shadow-[#4CB01E]/25 active:scale-98 font-sans"
+                  className="w-full bg-brand-primary hover:bg-brand-highlight text-white py-3 px-4 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-md shadow-brand-primary/25 active:scale-98 font-sans"
                 >
                   <Printer className="w-4 h-4 text-white" />
                   <span>{lang === 'ta' ? 'ரசீதை பிரிண்ட் செய்' : 'Print Thermal Receipt'}</span>
@@ -893,7 +893,7 @@ export default function OrdersPage() {
               <button
                 type="button"
                 onClick={printReceipt}
-                className="flex-1 bg-[#4CB01E] hover:bg-[#3D9415] text-white py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-[#4CB01E]/20 active:scale-98"
+                className="flex-1 bg-brand-primary hover:bg-brand-highlight text-white py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-brand-primary/20 active:scale-98"
               >
                 <Printer className="w-4 h-4 text-white" />
                 <span>{lang === 'ta' ? 'பிரிண்ட் செய்' : 'Print Receipt'}</span>

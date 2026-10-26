@@ -14,34 +14,34 @@ export function WhyChooseUs() {
     {
       title: t('why1Title', lang),
       desc: t('why1Desc', lang),
-      icon: <IconCheckCircle className="w-5 h-5 text-[#76CA3E]" />,
+      icon: <IconCheckCircle className="w-5 h-5 text-apple" />,
       tag: lang === 'ta' ? '100% தரம்' : '100% Inspected',
     },
     {
       title: t('why2Title', lang),
       desc: t('why2Desc', lang),
-      icon: <IconShield className="w-5 h-5 text-[#76CA3E]" />,
+      icon: <IconShield className="w-5 h-5 text-apple" />,
       tag: lang === 'ta' ? 'மொத்த விலை' : 'Honest Pricing',
     },
     {
       title: t('why3Title', lang),
       desc: t('why3Desc', lang),
-      icon: <IconTruck className="w-5 h-5 text-[#76CA3E]" />,
+      icon: <IconTruck className="w-5 h-5 text-apple" />,
       tag: lang === 'ta' ? '20 நிமிட டெலிவரி' : '20-Min Express',
     },
     {
       title: t('why4Title', lang),
       desc: t('why4Desc', lang),
-      icon: <IconZap className="w-5 h-5 text-[#76CA3E]" />,
+      icon: <IconZap className="w-5 h-5 text-apple" />,
       tag: lang === 'ta' ? 'கூடுதல் சேமிப்பு' : 'Extra Savings',
     },
   ];
 
   return (
-    <section className="py-6 sm:py-10 bg-[#F1F9EC]/50 border-y border-slate-200/60">
+    <section className="py-6 sm:py-10 bg-brand-mint/50 border-y border-slate-200/60">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         <div className="text-center max-w-xl mx-auto mb-5 sm:mb-8">
-          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#143B0D] bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs mb-2 inline-block whitespace-nowrap">
+          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-brand-forest bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs mb-2 inline-block whitespace-nowrap">
             {lang === 'ta' ? 'ஸ்ரீ அம்மன் உறுதிமொழி' : 'The Sri Amman Promise'}
           </span>
           <h3 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
@@ -59,7 +59,7 @@ export function WhyChooseUs() {
               key={i}
               className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-2xs hover:shadow-sm transition-all duration-300 flex items-start gap-3.5 sm:flex-col sm:items-stretch"
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#F1F9EC] border border-[#76CA3E]/20 flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-mint border border-apple/20 flex items-center justify-center shrink-0">
                 {f.icon}
               </div>
               <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ export function WhyChooseUs() {
                   <h4 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug break-words">
                     {f.title}
                   </h4>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-[#143B0D] bg-[#F1F9EC] px-2 py-0.5 rounded-md border border-[#76CA3E]/20 shrink-0">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-brand-forest bg-brand-mint px-2 py-0.5 rounded-md border border-apple/20 shrink-0">
                     {f.tag}
                   </span>
                 </div>
@@ -115,10 +115,10 @@ export function CustomerReviews() {
     <section className="py-6 sm:py-10 bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Kudumba Monthly Provision Callout Banner */}
-        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#0D2608] via-[#143B0D] to-[#76CA3E] rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-6 border border-emerald-500/30">
+        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#0D2608] via-brand-forest to-apple rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-6 border border-emerald-500/30">
           <div className="w-full sm:max-w-xl text-center sm:text-left min-w-0">
-            <span className="inline-flex items-center gap-1.5 bg-yellow-400 text-[#143B0D] text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
-              <IconZap className="w-3.5 h-3.5 text-[#143B0D] shrink-0" />
+            <span className="inline-flex items-center gap-1.5 bg-yellow-400 text-brand-forest text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2 shadow-2xs whitespace-nowrap">
+              <IconZap className="w-3.5 h-3.5 text-brand-forest shrink-0" />
               <span>{lang === 'ta' ? 'குடும்ப மெகா சேமிப்பு' : 'Family Bundle Deal'}</span>
             </span>
             <h3 className={`font-black tracking-tight mb-1.5 text-white ${lang === 'ta' ? 'text-sm sm:text-2xl leading-normal' : 'text-base sm:text-2xl leading-tight'}`}>
@@ -133,7 +133,7 @@ export function CustomerReviews() {
           <button
             type="button"
             onClick={() => dispatch({ type: 'SET_PAGE', page: 'monthly-list' })}
-            className="w-full sm:w-auto justify-center bg-white hover:bg-yellow-300 text-[#143B0D] font-black text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-xs hover:shadow-md transition-all whitespace-nowrap shrink-0 active:scale-95 inline-flex items-center gap-2"
+            className="w-full sm:w-auto justify-center bg-white hover:bg-yellow-300 text-brand-forest font-black text-xs sm:text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-xs hover:shadow-md transition-all whitespace-nowrap shrink-0 active:scale-95 inline-flex items-center gap-2"
           >
             <span>{lang === 'ta' ? 'மாத மளிகை தேர்வு செய்' : t('monthlyListBtn', lang)}</span>
             <ArrowRight className="w-4 h-4" />
@@ -154,7 +154,7 @@ export function CustomerReviews() {
           {reviews.map((rev, i) => (
             <div
               key={i}
-              className="bg-[#F8FAF7] rounded-2xl p-3.5 sm:p-5 border border-slate-200/80 shadow-2xs hover:shadow-xs transition-all duration-300 flex flex-col justify-between"
+              className="bg-brand-cream rounded-2xl p-3.5 sm:p-5 border border-slate-200/80 shadow-2xs hover:shadow-xs transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center gap-1 text-amber-400 mb-2">
