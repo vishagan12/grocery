@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og';
+import { BRAND_DEEP, BRAND_FOREST, BRAND_PRIMARY } from '@/lib/brand';
 
+// Node-runtime @vercel/og fails to load on Windows builds in Next 14, so keep edge.
 export const runtime = 'edge';
 export const alt = 'Sri Amman Supermarket - Madurai Express Grocery Delivery';
 export const size = {
@@ -19,10 +21,10 @@ export default function Image() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #064e3b 0%, #047857 55%, #065f46 100%)',
+          background: `linear-gradient(135deg, ${BRAND_FOREST} 0%, ${BRAND_DEEP} 60%, ${BRAND_FOREST} 100%)`,
           padding: '60px 80px',
           boxSizing: 'border-box',
-          border: '14px solid rgba(245, 158, 11, 0.35)',
+          border: `14px solid ${BRAND_PRIMARY}`,
         }}
       >
         {/* Top Badge Pill */}
@@ -30,8 +32,8 @@ export default function Image() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            backgroundColor: '#f59e0b',
-            color: '#ffffff',
+            backgroundColor: BRAND_PRIMARY,
+            color: BRAND_FOREST,
             padding: '12px 28px',
             borderRadius: '9999px',
             fontSize: '18px',
