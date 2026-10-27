@@ -201,6 +201,8 @@ export default function AdminPage() {
     }
   }, [unlocked]);
 
+  const triggerPrintSlipRef = useRef<(orderId: string) => void>();
+
   // Realtime Supabase Subscription on 'orders'
   useEffect(() => {
     if (!unlocked) return;
@@ -217,7 +219,7 @@ export default function AdminPage() {
           // Auto-print triggered if enabled
           const newRow = payload.new as any;
           if (autoPrintEnabled && newRow?.id) {
-            triggerPrintSlip(newRow.id);
+            triggerPrintSlipRef.current?.(newRow.id);
           }
         }
       )
@@ -250,6 +252,7 @@ export default function AdminPage() {
       window.print();
     }, 320);
   };
+  triggerPrintSlipRef.current = triggerPrintSlip;
 
   // Status transitions
   const handleUpdateOrderStatus = async (orderId: string, nextStatus: number, paymentStatus?: string) => {

@@ -98,6 +98,8 @@ export default function RiderPage() {
     }
   };
 
+  const fetchOrderDetailsRef = useRef<(queryCode: string, showLoadingState?: boolean) => Promise<void>>();
+
   useEffect(() => {
     loadReadyOrders();
 
@@ -106,7 +108,7 @@ export default function RiderPage() {
       const params = new URLSearchParams(window.location.search);
       const urlCode = params.get('id') || params.get('code');
       if (urlCode) {
-        fetchOrderDetails(urlCode);
+        fetchOrderDetailsRef.current?.(urlCode);
       }
     }
   }, []);
@@ -121,7 +123,7 @@ export default function RiderPage() {
         () => {
           loadReadyOrders();
           if (activeOrder) {
-            fetchOrderDetails(activeOrder.id, false);
+            fetchOrderDetailsRef.current?.(activeOrder.id, false);
           }
         }
       )
@@ -159,6 +161,7 @@ export default function RiderPage() {
       if (showLoadingState) setLoading(false);
     }
   };
+  fetchOrderDetailsRef.current = fetchOrderDetails;
 
   const handleDigitChange = (index: number, val: string) => {
     const char = val.slice(-1);
@@ -575,6 +578,9 @@ export default function RiderPage() {
                   `upi://pay?pa=sriammansupermarket.madurai@icici&pn=Sri%20Amman%20Supermarket&am=${activeOrder.total}&cu=INR&tn=Order%20${activeOrder.id}`
                 )}`}
                 alt="Store UPI QR"
+                width={176}
+                height={176}
+                loading="lazy"
                 className="w-44 h-44 object-contain mx-auto"
               />
             </div>
