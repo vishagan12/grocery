@@ -626,7 +626,10 @@ export default function ProfilePage() {
                         <img
                           src={prod.image}
                           alt={prod.nameEn}
+                          width={48}
+                          height={48}
                           className="w-12 h-12 rounded-xl object-contain bg-slate-50 border border-slate-100 p-1"
+                          loading="lazy"
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-bold text-slate-900 break-words">
