@@ -15,16 +15,28 @@ export default function PromoBanners() {
         <div className="grid md:grid-cols-2 gap-3 sm:gap-5">
           {/* Weekend Super Saver Banner - 100% full text visible */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => {
               dispatch({ type: 'SET_PAGE', page: 'products' });
               dispatch({ type: 'SET_CATEGORY', category: 'all' });
               dispatch({ type: 'SET_SORT', sort: 'discount' });
             }}
-            className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch({ type: 'SET_PAGE', page: 'products' });
+                dispatch({ type: 'SET_CATEGORY', category: 'all' });
+                dispatch({ type: 'SET_SORT', sort: 'discount' });
+              }
+            }}
+            className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-apple"
           >
             <img
               src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80"
               alt="Weekend Grocery Deals"
+              width={800}
+              height={360}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
             />
@@ -46,15 +58,26 @@ export default function PromoBanners() {
 
           {/* 20-Min Delivery Banner - 100% full text visible */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => {
               dispatch({ type: 'SET_PAGE', page: 'products' });
               dispatch({ type: 'SET_CATEGORY', category: 'all' });
             }}
-            className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                dispatch({ type: 'SET_PAGE', page: 'products' });
+                dispatch({ type: 'SET_CATEGORY', category: 'all' });
+              }
+            }}
+            className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-apple"
           >
             <img
               src="https://images.unsplash.com/photo-1543168256-418811576931?auto=format&fit=crop&w=800&q=80"
               alt="Express Delivery Fresh Produce"
+              width={800}
+              height={360}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
             />

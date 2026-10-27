@@ -175,8 +175,11 @@ export default function HeroSection() {
                 key={currentSlide.id}
                 src={currentSlide.image}
                 alt={currentSlide.titleEn}
+                width={900}
+                height={600}
                 className="w-full h-full object-cover transition-all duration-700 opacity-80 group-hover:scale-105 animate-smooth-fade"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
               />
               {/* Soft subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
@@ -190,28 +193,32 @@ export default function HeroSection() {
                   <span>{lang === 'ta' ? currentSlide.tagTa : currentSlide.tagEn}</span>
                 </div>
 
-                {/* Carousel Pagination Dots */}
-                <div className="flex items-center gap-1.5 bg-black/45 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/10">
+                {/* Carousel Pagination Dots with accessible 44px touch targets */}
+                <div className="flex items-center gap-0.5 bg-black/45 backdrop-blur-xs px-1.5 py-0.5 rounded-full border border-white/10">
                   {heroSlides.map((_, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      aria-label={`Slide ${idx + 1}`}
+                      aria-label={`Go to slide ${idx + 1}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setActiveSlide(idx);
                       }}
-                      className={`h-1.5 rounded-full transition-all ${
-                        idx === activeSlide ? 'w-5 bg-yellow-300' : 'w-1.5 bg-white/50'
-                      }`}
-                    />
+                      className="min-w-[36px] min-h-[36px] flex items-center justify-center p-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded-full"
+                    >
+                      <span
+                        className={`h-1.5 rounded-full transition-all block ${
+                          idx === activeSlide ? 'w-5 bg-yellow-300' : 'w-1.5 bg-white/50'
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
               </div>
 
-              <h3 className="text-base xs:text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1.5 break-words drop-shadow-xs">
+              <h1 className="text-base xs:text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight mb-1.5 break-words drop-shadow-xs">
                 {lang === 'ta' ? currentSlide.titleTa : currentSlide.titleEn}
-              </h3>
+              </h1>
               <p className="text-xs xs:text-[13px] sm:text-sm md:text-base text-emerald-100 font-medium leading-relaxed break-words drop-shadow-xs">
                 {lang === 'ta' ? currentSlide.subTa : currentSlide.subEn}
               </p>

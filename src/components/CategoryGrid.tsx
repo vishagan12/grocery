@@ -111,8 +111,16 @@ export default function CategoryGrid() {
                 return (
                   <div
                     key={cat.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigateCategory(cat.id)}
-                    className="flex flex-col items-center cursor-pointer group text-center select-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigateCategory(cat.id);
+                      }
+                    }}
+                    className="flex flex-col items-center cursor-pointer group text-center select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-apple rounded-2xl p-1"
                   >
                     {/* Full-bleed rounded image container where image occupies the entire box uniformly */}
                     <div
@@ -125,6 +133,8 @@ export default function CategoryGrid() {
                       <img
                         src={cat.image}
                         alt={cat.nameEn}
+                        width={120}
+                        height={120}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
