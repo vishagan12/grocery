@@ -1530,7 +1530,10 @@ export default function CheckoutPage() {
                           <img
                             src={product.image}
                             alt={product.nameEn}
+                            width={40}
+                            height={40}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
                         </div>
                         <div className="flex-1 min-w-0 text-xs">
