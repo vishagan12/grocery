@@ -22,6 +22,8 @@ export default function ProductImage({ src, alt, category, className = '' }: Pro
           <img
             src={cat.image}
             alt={alt}
+            width={300}
+            height={300}
             className="w-full h-full object-cover rounded-xl"
             loading="lazy"
           />
@@ -48,6 +50,8 @@ export default function ProductImage({ src, alt, category, className = '' }: Pro
       <img
         src={src}
         alt={alt}
+        width={300}
+        height={300}
         className="w-full h-full object-cover rounded-xl transition-transform duration-500 hover:scale-105"
         onError={() => setHasError(true)}
         loading="lazy"
