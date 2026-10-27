@@ -184,6 +184,8 @@ export default function OrderAgainPage() {
                         <img
                           src={prod.image}
                           alt={prod.nameEn}
+                          width={140}
+                          height={140}
                           className="w-full h-full object-contain"
                           loading="lazy"
                         />
@@ -328,6 +330,8 @@ export default function OrderAgainPage() {
                               <img
                                 src={product.image}
                                 alt={product.nameEn}
+                                width={40}
+                                height={40}
                                 className="w-full h-full object-contain"
                                 loading="lazy"
                               />
