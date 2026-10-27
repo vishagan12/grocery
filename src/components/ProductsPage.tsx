@@ -161,7 +161,7 @@ export default function ProductsPage() {
                         : 'bg-[#FFFFFF] text-brand-slate border-slate-200 hover:border-brand-primary'
                     }`}
                   >
-                    <img src={cat.image} alt={cat.nameEn} className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    <img src={cat.image} alt={cat.nameEn} width={16} height={16} className="w-4 h-4 rounded-full object-cover shrink-0" />
                     <span className="whitespace-nowrap">{lang === 'ta' ? cat.nameTa : cat.nameEn}</span>
                     <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ${
                       isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
@@ -178,8 +178,10 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 px-1 sm:px-0">
             <span className="text-[11px] sm:text-xs font-extrabold text-slate-700">{filtered.length} {t('items', lang)}</span>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] sm:text-[11px] font-bold text-slate-500">{t('sortBy', lang)}:</span>
+              <label htmlFor="products-sort-select" className="text-[10px] sm:text-[11px] font-bold text-slate-500">{t('sortBy', lang)}:</label>
               <select
+                id="products-sort-select"
+                aria-label={t('sortBy', lang)}
                 value={state.sortBy}
                 onChange={(e) => dispatch({ type: 'SET_SORT', sort: e.target.value })}
                 className="text-[10px] sm:text-[11px] font-medium bg-white border border-slate-300 rounded-lg px-2 py-0.5 text-slate-700 outline-none focus:border-apple shadow-2xs cursor-pointer"
@@ -239,7 +241,7 @@ export default function ProductsPage() {
                         }`}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <img src={cat.image} alt={cat.nameEn} className="w-5 h-5 rounded-md object-cover shrink-0" />
+                          <img src={cat.image} alt={cat.nameEn} width={20} height={20} className="w-5 h-5 rounded-md object-cover shrink-0" />
                           <span className="break-words leading-tight flex-1">{lang === 'ta' ? cat.nameTa : cat.nameEn}</span>
                         </div>
                         <span className="text-[11px] opacity-75 shrink-0 ml-1">{count}</span>
@@ -346,7 +348,7 @@ export default function ProductsPage() {
           </aside>
 
           {/* Main Products Grid Column */}
-          <main className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
             {/* Desktop Only Title (Hidden on mobile so products appear immediately first) */}
             <div className="hidden md:flex bg-[#FFFFFF] border border-[#EAE2D5] rounded-2xl p-4 md:p-5 mb-4 shadow-2xs items-center justify-between gap-4">
               <div>
@@ -428,7 +430,7 @@ export default function ProductsPage() {
                 ))}
               </div>
             )}
-          </main>
+          </div>
         </div>
       </div>
     </section>
