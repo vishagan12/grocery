@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
   Bike,
@@ -11,17 +11,26 @@ import {
   WifiOff,
   Bell,
   RefreshCw,
+  Wallet,
+  Calendar,
+  User,
 } from 'lucide-react';
 import { RiderAuthView, RiderSession } from '@/components/rider/RiderAuthView';
 import { RiderHomeView, RiderOrder } from '@/components/rider/RiderHomeView';
 import { RiderOrdersListView } from '@/components/rider/RiderOrdersListView';
 import { RiderOrderDetailView } from '@/components/rider/RiderOrderDetailView';
+import { RiderEarningsView } from '@/components/rider/RiderEarningsView';
+import { RiderHistoryView } from '@/components/rider/RiderHistoryView';
+import { RiderNotificationsView } from '@/components/rider/RiderNotificationsView';
+import { RiderProfileView } from '@/components/rider/RiderProfileView';
 import { RiderBottomNav, RiderNavItem } from '@/components/rider/ui/RiderPrimitives';
 
 export default function RiderPage() {
   const [lang, setLang] = useState<'en' | 'ta'>('en');
   const [session, setSession] = useState<RiderSession | null>(null);
-  const [currentTab, setCurrentTab] = useState<'home' | 'orders' | 'detail'>('home');
+  const [currentTab, setCurrentTab] = useState<
+    'home' | 'orders' | 'earnings' | 'history' | 'notifications' | 'profile' | 'detail'
+  >('home');
   const [activeOrder, setActiveOrder] = useState<RiderOrder | null>(null);
   const [selectedDetailOrder, setSelectedDetailOrder] = useState<RiderOrder | null>(null);
   const [orders, setOrders] = useState<RiderOrder[]>([]);
@@ -29,7 +38,7 @@ export default function RiderPage() {
   const [isOnline, setIsOnline] = useState(true);
   const [notificationMsg, setNotificationMsg] = useState<string | null>(null);
 
-  // 2. Fetch Orders Scoped to Rider
+  // 1. Fetch Orders Scoped to Rider
   const fetchOrders = useCallback(async () => {
     if (!session) return;
     setIsSyncing(true);
@@ -60,7 +69,7 @@ export default function RiderPage() {
     }
   }, [session, selectedDetailOrder]);
 
-  // 3. Offline Queue Sync (BUG-05)
+  // 2. Offline Queue Sync (BUG-05)
   const replayOfflineQueue = useCallback(async () => {
     try {
       const rawQueue = localStorage.getItem('sas_rider_pending_mutations');
@@ -86,7 +95,7 @@ export default function RiderPage() {
     } catch {}
   }, [fetchOrders]);
 
-  // 1. Session Initialization & Network listener
+  // 3. Session Initialization & Network listener
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -307,9 +316,24 @@ export default function RiderPage() {
     },
     {
       id: 'orders',
-      label: lang === 'ta' ? 'ஆர்டர்கள்' : 'Orders List',
+      label: lang === 'ta' ? 'ஆர்டர்கள்' : 'Orders',
       icon: <Package className="w-5 h-5" />,
       badge: orders.filter((o) => o.status === 0 || o.status === 1).length,
+    },
+    {
+      id: 'earnings',
+      label: lang === 'ta' ? 'வருமானம்' : 'Earnings',
+      icon: <Wallet className="w-5 h-5" />,
+    },
+    {
+      id: 'history',
+      label: lang === 'ta' ? 'வரலாறு' : 'History',
+      icon: <Calendar className="w-5 h-5" />,
+    },
+    {
+      id: 'profile',
+      label: lang === 'ta' ? 'சுயவிவரம்' : 'Profile',
+      icon: <User className="w-5 h-5" />,
     },
   ];
 
@@ -318,9 +342,13 @@ export default function RiderPage() {
       {/* Top Mobile Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#143B0D] flex items-center justify-center text-white">
+          <button
+            onClick={() => setCurrentTab('home')}
+            className="w-9 h-9 rounded-xl bg-[#143B0D] flex items-center justify-center text-white"
+            aria-label="Home"
+          >
             <Bike className="w-5 h-5 text-[#76CA3E]" />
-          </div>
+          </button>
           <div>
             <h1 className="text-xs font-black tracking-tight leading-none text-[#0F172A]">
               Sri Amman Dispatch
@@ -331,10 +359,24 @@ export default function RiderPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Notifications Trigger */}
+          <button
+            onClick={() => setCurrentTab('notifications')}
+            className={`min-h-[36px] min-w-[36px] rounded-lg border flex items-center justify-center relative transition-colors ${
+              currentTab === 'notifications'
+                ? 'bg-[#143B0D] text-white border-[#143B0D]'
+                : 'bg-[#F8FAF7] border-[#E2E8F0] text-[#0F172A] hover:bg-[#F1F9EC]'
+            }`}
+            aria-label="Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="w-2 h-2 rounded-full bg-[#FE932C] absolute top-1.5 right-1.5" />
+          </button>
+
           {/* Online status indicator */}
           <span
-            className={`w-2.5 h-2.5 rounded-full ${
+            className={`w-2.5 h-2.5 rounded-full mx-1 ${
               isOnline ? 'bg-[#76CA3E]' : 'bg-[#BA1A1A] animate-pulse'
             }`}
             title={isOnline ? 'Online' : 'Offline'}
@@ -398,6 +440,36 @@ export default function RiderPage() {
             isSyncing={isSyncing}
             lang={lang}
           />
+        ) : currentTab === 'earnings' ? (
+          <RiderEarningsView
+            session={session}
+            orders={orders}
+            lang={lang}
+            onDepositConfirmed={fetchOrders}
+          />
+        ) : currentTab === 'history' ? (
+          <RiderHistoryView
+            session={session}
+            orders={orders}
+            onSelectOrder={(ord) => {
+              setSelectedDetailOrder(ord);
+              setCurrentTab('detail');
+            }}
+            lang={lang}
+          />
+        ) : currentTab === 'notifications' ? (
+          <RiderNotificationsView
+            lang={lang}
+            onNavigateTab={(tab) => setCurrentTab(tab as any)}
+          />
+        ) : currentTab === 'profile' ? (
+          <RiderProfileView
+            session={session}
+            onLogout={handleLogout}
+            onToggleShiftStatus={handleToggleShiftStatus}
+            lang={lang}
+            onToggleLang={() => setLang(lang === 'en' ? 'ta' : 'en')}
+          />
         ) : (
           <RiderHomeView
             session={session}
@@ -422,7 +494,7 @@ export default function RiderPage() {
         <RiderBottomNav
           items={navItems}
           activeId={currentTab}
-          onChange={(id) => setCurrentTab(id as 'home' | 'orders')}
+          onChange={(id) => setCurrentTab(id as any)}
         />
       )}
     </div>
