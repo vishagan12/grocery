@@ -106,6 +106,8 @@ export async function GET(req: NextRequest) {
       isForSomeoneElse: Boolean(o.is_for_someone_else),
       recipientName: o.recipient_name || undefined,
       recipientPhone: o.recipient_phone || undefined,
+      assignedRiderName: o.assigned_rider_name || undefined,
+      assignedRiderPhone: o.assigned_rider_phone || undefined,
       items: Array.isArray(o.order_items)
         ? o.order_items.map((item: any) => {
             const prod = catalog.find((p) => p.id === item.product_id);
@@ -269,6 +271,68 @@ export async function PATCH(req: NextRequest) {
       } catch {}
 
       return NextResponse.json({ success: true, acceptingOrders: enabled });
+    }
+
+    // e) ASSIGN_RIDER
+    if (action === 'ASSIGN_RIDER') {
+      const { orderId, riderName, riderPhone } = body;
+      if (!orderId) {
+        return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
+      }
+
+      const updateData: Record<string, any> = {
+        status: 1, // Ready at dock
+      };
+      if (riderName) updateData.assigned_rider_name = sanitizeInput(riderName);
+      if (riderPhone) updateData.assigned_rider_phone = sanitizeInput(riderPhone);
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      try {
+        await supabase.from('audit_logs').insert({
+          action: 'ASSIGN_RIDER',
+          details: { orderId, riderName, riderPhone },
+          timestamp: new Date().toISOString(),
+        });
+      } catch {}
+
+      return NextResponse.json({ success: true, orderId, updateData });
+    }
+
+    // f) CANCEL_ORDER
+    if (action === 'CANCEL_ORDER') {
+      const { orderId, reason } = body;
+      if (!orderId) {
+        return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
+      }
+
+      const updateData: Record<string, any> = {
+        status: 4, // 4: Cancelled / Void
+        payment_status: 'cancelled',
+      };
+      if (reason) updateData.notes = sanitizeInput(reason);
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updateData)
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      try {
+        await supabase.from('audit_logs').insert({
+          action: 'CANCEL_ORDER',
+          details: { orderId, reason },
+          timestamp: new Date().toISOString(),
+        });
+      } catch {}
+
+      return NextResponse.json({ success: true, orderId, status: 4 });
     }
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });

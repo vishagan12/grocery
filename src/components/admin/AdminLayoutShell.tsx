@@ -22,6 +22,7 @@ import {
   Power,
   ShieldCheck,
   User,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Avatar } from '../ui/Miscellaneous';
 
@@ -96,6 +97,11 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
     {
       group: 'Fulfillment & Stock',
       items: [
+        {
+          id: 'dashboard',
+          label: 'Dashboard Overview',
+          icon: <LayoutDashboard className="w-4 h-4 shrink-0" />,
+        },
         {
           id: 'orders',
           label: 'Live Dispatch',

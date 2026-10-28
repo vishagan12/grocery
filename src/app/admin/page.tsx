@@ -42,6 +42,7 @@ import {
   Save,
 } from 'lucide-react';
 import { AdminLayoutShell } from '@/components/admin/AdminLayoutShell';
+import { AdminDashboard, AdminOrdersView } from '@/components/admin';
 
 interface OrderItem {
   id: string;
@@ -68,12 +69,14 @@ interface AdminOrder {
   total: number;
   paymentMethod: string;
   paymentStatus: string;
-  status: number; // 0: New, 1: Packing/Ready, 2: Out for delivery, 3: Delivered
+  status: number; // 0: New, 1: Packing/Ready, 2: Out for delivery, 3: Delivered, 4: Cancelled
   deliverySlot: string;
   createdAt: string;
   isForSomeoneElse?: boolean;
   recipientName?: string;
   recipientPhone?: string;
+  assignedRiderName?: string;
+  assignedRiderPhone?: string;
   items: OrderItem[];
 }
 
@@ -149,8 +152,9 @@ export default function AdminPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [barcodeSearch, setBarcodeSearch] = useState('');
 
-  // Mobile navigation & stage switcher state
-  const [mobileTab, setMobileTab] = useState<'orders' | 'stock' | 'gayoo' | 'revenue'>('orders');
+  // Navigation & stage switcher state
+  const [mobileTab, setMobileTab] = useState<'dashboard' | 'orders' | 'stock' | 'gayoo' | 'revenue'>('dashboard');
+  const [inspectedOrderId, setInspectedOrderId] = useState<string | null>(null);
   const [mobileStage, setMobileStage] = useState<'all' | 'new' | 'packing' | 'out' | 'delivered'>('all');
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [stockQuickFilter, setStockQuickFilter] = useState<'all' | 'low' | 'out'>('all');
@@ -292,6 +296,49 @@ export default function AdminPage() {
       });
     } catch (err) {
       console.warn('Status update failed:', err);
+    }
+  };
+
+  // Assign Rider
+  const handleAssignRider = async (orderId: string, riderName: string, riderPhone: string) => {
+    try {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, assignedRiderName: riderName, assignedRiderPhone: riderPhone } : o))
+      );
+
+      await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ASSIGN_RIDER',
+          orderId,
+          riderName,
+          riderPhone,
+        }),
+      });
+    } catch (err) {
+      console.warn('Assign rider failed:', err);
+    }
+  };
+
+  // Cancel Order
+  const handleCancelOrder = async (orderId: string, reason: string) => {
+    try {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: 4 } : o))
+      );
+
+      await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'CANCEL_ORDER',
+          orderId,
+          reason,
+        }),
+      });
+    } catch (err) {
+      console.warn('Cancel order failed:', err);
     }
   };
 
@@ -567,202 +614,6 @@ export default function AdminPage() {
     );
   }
 
-  // Helper render for single order card (used in both desktop columns and mobile stage stack)
-  const renderOrderCard = (order: AdminOrder) => {
-    return (
-      <article key={order.id} className="p-3.5 sm:p-4 rounded-xl bg-white shadow-sm border border-slate-200 space-y-3">
-        {/* Header Badge & ID */}
-        <div className="flex flex-wrap items-center justify-between gap-1.5">
-          {order.status === 0 && (
-            <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-[#ffdcc3] text-[#2f1500] uppercase font-bold animate-pulse">
-              AUTO-PRINTED SLIP
-            </span>
-          )}
-          {order.status === 1 && (
-            <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-[#dbe1ff] text-[#00174b] font-bold uppercase">
-              BAGGED AT DOCK
-            </span>
-          )}
-          {order.status === 2 && (
-            <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-[#97f5cc] text-[#002115] font-bold uppercase">
-              ON ROUTE TO CUSTOMER
-            </span>
-          )}
-          {order.status === 3 && (
-            <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-200 text-slate-800 font-bold uppercase">
-              DELIVERED &amp; SETTLED
-            </span>
-          )}
-          <span className="font-mono font-bold text-sm text-slate-900">{order.id}</span>
-        </div>
-
-        {/* Packing Code Box (Status 1) */}
-        {order.status === 1 && (
-          <div className="p-2.5 rounded-lg bg-[#0047bf] text-white flex flex-col items-center justify-center text-center shadow-sm">
-            <span className="text-[10px] tracking-widest uppercase opacity-80 font-mono">Rider Pickup Pin</span>
-            <span className="text-xl tracking-wider font-extrabold font-mono">
-              PICKUP CODE: {order.id.replace(/\D/g, '').slice(-4) || 'BAG'}
-            </span>
-          </div>
-        )}
-
-        {/* Customer & Recipient Details */}
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-1">
-            <span className="font-bold text-xs sm:text-sm text-slate-900">
-              {order.isForSomeoneElse ? `For: ${order.recipientName}` : order.customerName}
-            </span>
-            <span className="text-[11px] font-mono text-slate-500">
-              {order.isForSomeoneElse ? `+91 ${order.recipientPhone}` : order.phone}
-            </span>
-          </div>
-          {order.isForSomeoneElse && (
-            <p className="text-[10px] text-amber-700 font-semibold mt-0.5">
-              Ordered by: {order.customerName || 'Account Holder'} ({order.phone})
-            </p>
-          )}
-          <div className="flex items-center gap-1 text-[11px] text-slate-600 mt-1">
-            <MapPin className="w-3.5 h-3.5 text-[#005d42] shrink-0" />
-            <span className="truncate">{order.address} • {order.distanceKm} km</span>
-          </div>
-        </div>
-
-        {/* Amount & Payment Status */}
-        <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1.5 border-t border-slate-100">
-          <span className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
-            order.paymentMethod === 'upi' ? 'bg-[#97f5cc] text-[#002115]' : 'bg-[#ffdcc3] text-[#2f1500]'
-          }`}>
-            {order.paymentMethod === 'upi' ? `UPI PAID • ₹${order.total}` : `COD CASH • ₹${order.total}`}
-          </span>
-          <span className="text-[11px] text-slate-500 font-medium">{order.items.length} Items</span>
-        </div>
-
-        {/* Interactive Packing Checklist (Status 0 & 1) */}
-        {(order.status === 0 || order.status === 1) && (
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
-            <div className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-500 mb-1">
-              Packing Checklist:
-            </div>
-            {order.items.map((it, idx) => {
-              const itemKey = `${order.id}-${idx}`;
-              const isPacked = Boolean(packedItems[order.id]?.[itemKey]);
-              return (
-                <label
-                  key={idx}
-                  className="flex items-start gap-2.5 cursor-pointer select-none py-1.5 px-2 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={isPacked}
-                    onChange={() => toggleItemPacked(order.id, itemKey)}
-                    className="mt-0.5 accent-[#005d42] w-4 h-4 rounded cursor-pointer"
-                  />
-                  <div className="leading-tight flex-1 min-w-0">
-                    <span className={`text-slate-800 font-medium ${isPacked ? 'line-through text-slate-400' : ''}`}>
-                      {it.productNameEn} ({it.variantLabel}) x{it.quantity}
-                    </span>
-                    {it.productNameTa && (
-                      <span className="block text-[10px] text-slate-500">{it.productNameTa}</span>
-                    )}
-                  </div>
-                  <span className="font-mono text-[11px] text-slate-600 shrink-0">₹{it.price * it.quantity}</span>
-                </label>
-              );
-            })}
-          </div>
-        )}
-
-        {/* COD banner for status 1 */}
-        {order.status === 1 && order.paymentMethod === 'cod' && (
-          <div className="px-2.5 py-1.5 rounded bg-[#ffdcc3] text-[#2f1500] flex items-center justify-between font-mono text-xs font-bold">
-            <span>COD CASH ORDER</span>
-            <span>COLLECT ₹{order.total}</span>
-          </div>
-        )}
-
-        {/* Quick Contact & Map Actions for Transit/Delivered/Active orders */}
-        <div className="grid grid-cols-3 gap-1.5 pt-1">
-          <a
-            href={`tel:${order.recipientPhone || order.phone}`}
-            className="min-h-[44px] py-2 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <Phone className="w-4 h-4 text-slate-700" />
-            <span>Call</span>
-          </a>
-          <a
-            href={`https://wa.me/${(order.recipientPhone || order.phone).replace(/\D/g, '')}?text=Your%20Sri%20Amman%20Supermarket%20order%20is%20on%20the%20way!`}
-            target="_blank"
-            rel="noreferrer"
-            className="min-h-[44px] py-2 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <MessageSquare className="w-4 h-4 text-emerald-600" />
-            <span>WhatsApp</span>
-          </a>
-          <a
-            href={
-              order.lat && order.lng
-                ? `https://www.google.com/maps/dir/?api=1&destination=${order.lat},${order.lng}`
-                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address + ', Madurai')}`
-            }
-            target="_blank"
-            rel="noreferrer"
-            className="min-h-[44px] py-2 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <MapPin className="w-4 h-4 text-[#005d42]" />
-            <span>Maps</span>
-          </a>
-        </div>
-
-        {/* Stage Progression Action Buttons */}
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
-          <button
-            onClick={() => triggerPrintSlip(order.id)}
-            className="min-h-[44px] py-2 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Re-Print Slip</span>
-          </button>
-
-          {order.status === 0 && (
-            <button
-              onClick={() => handleUpdateOrderStatus(order.id, 1)}
-              className="min-h-[44px] py-2 px-2.5 rounded-lg bg-[#047857] hover:bg-[#005d42] active:bg-[#004732] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-            >
-              <Check className="w-4 h-4" />
-              <span>Ready for Rider</span>
-            </button>
-          )}
-
-          {order.status === 1 && (
-            <button
-              onClick={() => handleUpdateOrderStatus(order.id, 2)}
-              className="min-h-[44px] py-2 px-2.5 rounded-lg bg-[#0047bf] hover:bg-[#003ea8] active:bg-[#002f80] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-            >
-              <Truck className="w-4 h-4" />
-              <span>Dispatch Order</span>
-            </button>
-          )}
-
-          {order.status === 2 && (
-            <button
-              onClick={() => handleUpdateOrderStatus(order.id, 3, 'paid')}
-              className="min-h-[44px] py-2 px-2.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-            >
-              <CheckCircle className="w-4 h-4" />
-              <span>Mark Delivered</span>
-            </button>
-          )}
-
-          {order.status === 3 && (
-            <div className="min-h-[44px] py-2 px-2 rounded-lg bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center justify-center gap-1.5 font-mono">
-              <Check className="w-4 h-4 text-emerald-600" />
-              <span>Order Complete</span>
-            </div>
-          )}
-        </div>
-      </article>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-[#faf8ff] text-[#131b2e] antialiased flex flex-col font-sans overflow-x-hidden">
@@ -888,243 +739,44 @@ export default function AdminPage() {
         onSearchChange={setBarcodeSearch}
       >
         <div className="w-full space-y-4 sm:space-y-6">
-          {/* Sub-Banner / Floor Terminal Status */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#005d42] animate-pulse shrink-0"></span>
-              <div>
-                <h1 className="font-bold text-sm text-slate-900 leading-tight">Fulfillment Floor Terminal • Madurai West</h1>
-                <p className="text-[11px] text-slate-500">விற்பனை மற்றும் விநியோக கட்டுப்பாட்டு மையம்</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#ffdcc3] text-[#2f1500] font-mono text-[11px] font-bold">
-                <Clock className="w-3.5 h-3.5" />
-                <span>SLA: &lt; 8 MINS</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#97f5cc] text-[#002115] font-mono text-[11px] font-bold">
-                <Truck className="w-3.5 h-3.5" />
-                <span>3KM GEOFENCE</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Global Order Search Bar on Mobile */}
-          <div className="block lg:hidden">
-            <div className="relative flex items-center">
-              <Barcode className="w-5 h-5 absolute left-3 text-slate-400" />
-              <input
-                type="text"
-                value={barcodeSearch}
-                onChange={(e) => setBarcodeSearch(e.target.value)}
-                placeholder="Search order ID, phone, or name..."
-                className="w-full h-11 pl-10 pr-4 text-base bg-white text-slate-900 rounded-xl border border-slate-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#005d42]"
-              />
-            </div>
-          </div>
+          {/* ==================================================================== */}
+          {/* ZONE 1: ADMIN DASHBOARD */}
+          {/* ==================================================================== */}
+          {mobileTab === 'dashboard' && (
+            <AdminDashboard
+              orders={orders}
+              lowStockCount={lowStockCount}
+              acceptingOrders={acceptingOrders}
+              onNavigateSection={(sec) => setMobileTab(sec as any)}
+              onSelectOrder={(order) => {
+                setInspectedOrderId(order.id);
+                setMobileTab('orders');
+              }}
+              onQuickPackOrder={(orderId) => handleUpdateOrderStatus(orderId, 1)}
+              onPrintOrder={(order) => triggerPrintSlip(order.id)}
+              onExportDaybook={handleExportDaybook}
+              onRefreshData={loadDashboardData}
+              onTestChime={playNewOrderChime}
+            />
+          )}
 
           {/* ==================================================================== */}
-          {/* ZONE A: LIVE ORDER DISPATCH BOARD */}
-          {/* Visible always on Desktop, or when mobileTab === 'orders' */}
+          {/* ZONE 2: ORDERS MANAGEMENT BOARD & DETAIL INSPECTOR */}
           {/* ==================================================================== */}
-          <div className={`${mobileTab === 'orders' ? 'block' : 'hidden lg:block'} space-y-4`}>
-            {/* KPI Cards on Mobile for Orders Tab */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 lg:hidden">
-              <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Today&apos;s Total</span>
-                <span className="font-extrabold text-lg text-[#005d42] font-mono">₹{kpis.rev}</span>
-                <span className="text-[10px] text-slate-500 block">{orders.length} orders</span>
-              </div>
-              <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">UPI Settled</span>
-                <span className="font-extrabold text-lg text-slate-900 font-mono">₹{kpis.upiRev}</span>
-                <span className="text-[10px] text-emerald-600 font-bold block">{kpis.upiCount} paid</span>
-              </div>
-              <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">COD Pending</span>
-                <span className="font-extrabold text-lg text-[#904d00] font-mono">₹{kpis.codRev}</span>
-                <span className="text-[10px] text-amber-700 font-bold block">{kpis.codCount} riders</span>
-              </div>
-              <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Active / Pack</span>
-                <span className="font-extrabold text-lg text-blue-700 font-mono">{activeOrdersCount}</span>
-                <span className="text-[10px] text-slate-500 block">&lt; 8 min avg</span>
-              </div>
-            </div>
-
-            {/* Dispatch Floor Header & Live Status */}
-            <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-2">
-                <Truck className="w-5 h-5 text-[#005d42]" />
-                <h2 className="font-bold text-base text-slate-900">Active Dispatch Floor</h2>
-                <span className="text-[11px] text-slate-500 hidden sm:inline">நேரடி விநியோக வரிசை</span>
-              </div>
-              <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5">
-                <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#005d42]" />
-                <span>REALTIME ACTIVE</span>
-              </div>
-            </div>
-
-            {/* Mobile Status Stage Filter Pills (Sticky horizontal bar on phone) */}
-            <div className="flex lg:hidden gap-2 overflow-x-auto no-scrollbar py-2 -mx-3.5 px-3.5 sticky top-[56px] z-20 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200/70">
-              <button
-                onClick={() => setMobileStage('all')}
-                className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 shadow-xs ${
-                  mobileStage === 'all'
-                    ? 'bg-[#005d42] text-white'
-                    : 'bg-white text-slate-700 border border-slate-200'
-                }`}
-              >
-                <span>All Orders</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10">
-                  {filteredOrders.length}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setMobileStage('new')}
-                className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 shadow-xs ${
-                  mobileStage === 'new'
-                    ? 'bg-[#fe932c] text-[#2f1500]'
-                    : 'bg-white text-slate-700 border border-slate-200'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-[#fe932c]"></span>
-                <span>New</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10">
-                  {ordersCol0.length}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setMobileStage('packing')}
-                className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 shadow-xs ${
-                  mobileStage === 'packing'
-                    ? 'bg-[#0047bf] text-white'
-                    : 'bg-white text-slate-700 border border-slate-200'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-[#0047bf]"></span>
-                <span>Packing</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10">
-                  {ordersCol1.length}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setMobileStage('out')}
-                className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 shadow-xs ${
-                  mobileStage === 'out'
-                    ? 'bg-[#047857] text-white'
-                    : 'bg-white text-slate-700 border border-slate-200'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-[#047857]"></span>
-                <span>On Route</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10">
-                  {ordersCol2.length}
-                </span>
-              </button>
-
-              <button
-                onClick={() => setMobileStage('delivered')}
-                className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 shadow-xs ${
-                  mobileStage === 'delivered'
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-white text-slate-700 border border-slate-200'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-slate-500"></span>
-                <span>Delivered</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10">
-                  {ordersCol3.length}
-                </span>
-              </button>
-            </div>
-
-            {/* Mobile Single-Column Order Stack (< 1024px) */}
-            <div className="grid grid-cols-1 gap-3 lg:hidden">
-              {mobileDisplayOrders.map((order) => renderOrderCard(order))}
-              {mobileDisplayOrders.length === 0 && (
-                <div className="text-center py-12 px-4 rounded-xl bg-white border border-slate-200 text-slate-400 font-mono text-xs">
-                  No orders currently in this status stage.
-                </div>
-              )}
-            </div>
-
-            {/* Desktop 4-Column Pipeline Grid (hidden on mobile, visible lg:grid) */}
-            <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4 items-start">
-              {/* COLUMN 1: NEW / AUTO-PRINTED */}
-              <div className="flex flex-col gap-3 rounded-xl bg-slate-100/70 p-3 border border-slate-200">
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#fe932c]"></span>
-                    <span className="font-bold text-xs text-slate-800 tracking-wide uppercase">NEW / AUTO-PRINTED</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded font-mono text-[11px] bg-[#ffdcc3] text-[#2f1500] font-bold">
-                    {ordersCol0.length}
-                  </span>
-                </div>
-                {ordersCol0.map((order) => renderOrderCard(order))}
-                {ordersCol0.length === 0 && (
-                  <div className="text-center py-8 text-xs text-slate-400 font-mono">No new orders waiting</div>
-                )}
-              </div>
-
-              {/* COLUMN 2: PACKED & WAITING */}
-              <div className="flex flex-col gap-3 rounded-xl bg-slate-100/70 p-3 border border-slate-200">
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0047bf]"></span>
-                    <span className="font-bold text-xs text-slate-800 tracking-wide uppercase">PACKED &amp; WAITING</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded font-mono text-[11px] bg-[#dbe1ff] text-[#00174b] font-bold">
-                    {ordersCol1.length}
-                  </span>
-                </div>
-                {ordersCol1.map((order) => renderOrderCard(order))}
-                {ordersCol1.length === 0 && (
-                  <div className="text-center py-8 text-xs text-slate-400 font-mono">No bags awaiting pickup</div>
-                )}
-              </div>
-
-              {/* COLUMN 3: OUT FOR DELIVERY */}
-              <div className="flex flex-col gap-3 rounded-xl bg-slate-100/70 p-3 border border-slate-200">
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#047857]"></span>
-                    <span className="font-bold text-xs text-slate-800 tracking-wide uppercase">OUT FOR DELIVERY</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded font-mono text-[11px] bg-[#97f5cc] text-[#002115] font-bold">
-                    {ordersCol2.length}
-                  </span>
-                </div>
-                {ordersCol2.map((order) => renderOrderCard(order))}
-                {ordersCol2.length === 0 && (
-                  <div className="text-center py-8 text-xs text-slate-400 font-mono">No riders currently on bike</div>
-                )}
-              </div>
-
-              {/* COLUMN 4: DELIVERED TODAY */}
-              <div className="flex flex-col gap-3 rounded-xl bg-slate-100/70 p-3 border border-slate-200">
-                <div className="flex items-center justify-between pb-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-                    <span className="font-bold text-xs text-slate-800 tracking-wide uppercase">DELIVERED TODAY</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded font-mono text-[11px] bg-slate-200 text-slate-800 font-bold">
-                    {ordersCol3.length} Done
-                  </span>
-                </div>
-                <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-                  {ordersCol3.map((order) => renderOrderCard(order))}
-                  {ordersCol3.length === 0 && (
-                    <div className="text-center py-8 text-xs text-slate-400 font-mono">No deliveries completed yet</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          {mobileTab === 'orders' && (
+            <AdminOrdersView
+              orders={orders}
+              onUpdateStatus={handleUpdateOrderStatus}
+              onAssignRider={handleAssignRider}
+              onCancelOrder={handleCancelOrder}
+              onPrintOrder={(order) => triggerPrintSlip(order.id)}
+              onRefresh={loadDashboardData}
+              packedItems={packedItems}
+              onTogglePackedItem={toggleItemPacked}
+              initialSelectedOrderId={inspectedOrderId}
+              onClearSelectedOrder={() => setInspectedOrderId(null)}
+            />
+          )}
 
           {/* ==================================================================== */}
           {/* ZONE B: LIVE STOCK SWITCHBOARD & GAYOO POS SYNC PANEL */}
@@ -1134,7 +786,7 @@ export default function AdminPage() {
             className={`${
               mobileTab === 'stock' || mobileTab === 'gayoo'
                 ? 'block'
-                : 'hidden lg:block'
+                : 'hidden'
             }`}
           >
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch pt-2">
