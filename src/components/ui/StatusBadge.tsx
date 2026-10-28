@@ -13,7 +13,7 @@ import {
   Clock,
 } from 'lucide-react';
 
-export type OrderStatusType = 0 | 1 | 2 | 3;
+export type OrderStatusType = 0 | 1 | 2 | 3 | 4 | 'new' | 'packing' | 'out_for_delivery' | 'delivered' | 'cancelled' | string;
 export type PaymentBadgeType = 'upi' | 'cod';
 export type StockBadgeType = 'in_stock' | 'low_buffer' | 'out_of_stock';
 
@@ -42,28 +42,38 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   let icon: React.ReactNode = null;
   let colorClasses = 'bg-slate-100 text-slate-800 border-slate-200';
 
-  // 1. Order Status Lifecycle (Statuses 0, 1, 2, 3)
+  // 1. Order Status Lifecycle (Statuses 0, 1, 2, 3, 4 and string aliases)
   if (status !== undefined) {
     switch (status) {
       case 0:
-        label = 'Auto-Printed Slip';
+      case 'new':
+        label = label || 'Auto-Printed Slip';
         icon = <Printer className="w-3.5 h-3.5" />;
         colorClasses = 'bg-[#FFDCC3] text-[#2F1500] border-[#FE932C]/30';
         break;
       case 1:
-        label = 'Bagged at Dock';
+      case 'packing':
+        label = label || 'Bagged at Dock';
         icon = <PackageCheck className="w-3.5 h-3.5" />;
-        colorClasses = 'bg-[#DBE1FF] text-[#00174B] border-[#0047BF]/30';
+        colorClasses = 'bg-[#DBE1FF] text-[#0047BF] border-[#0047BF]/30';
         break;
       case 2:
-        label = 'On Route to Customer';
+      case 'out_for_delivery':
+        label = label || 'On Route to Customer';
         icon = <Bike className="w-3.5 h-3.5" />;
         colorClasses = 'bg-[#97F5CC] text-[#002115] border-[#047857]/30';
         break;
       case 3:
-        label = 'Delivered & Settled';
+      case 'delivered':
+        label = label || 'Delivered & Settled';
         icon = <CheckCircle2 className="w-3.5 h-3.5" />;
         colorClasses = 'bg-slate-200 text-slate-800 border-slate-300';
+        break;
+      case 4:
+      case 'cancelled':
+        label = label || 'Void / Cancelled';
+        icon = <XCircle className="w-3.5 h-3.5" />;
+        colorClasses = 'bg-[#FFDAD6] text-[#BA1A1A] border-[#BA1A1A]/30';
         break;
     }
   }

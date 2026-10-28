@@ -248,7 +248,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono">
               At Dock / Ready
             </span>
-            <div className="w-8 h-8 rounded-xl bg-[#DBE1FF] text-[#00174B] flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-xl bg-[#DBE1FF] text-[#0047BF] flex items-center justify-center font-bold">
               <PackageCheck className="w-4 h-4 text-[#0047BF]" />
             </div>
           </div>

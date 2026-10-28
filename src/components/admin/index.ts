@@ -5,4 +5,12 @@ export * from './AdminOrdersView';
 export * from './AdminProductsView';
 export * from './AdminCategoriesView';
 export * from './AdminInventoryView';
-
+export * from './AdminLoginView';
+export * from './AdminCustomersView';
+export * from './AdminRidersView';
+export * from './AdminZonesSlotsView';
+export * from './AdminCouponsView';
+export * from './AdminReportsView';
+export * from './AdminBannersView';
+export * from './AdminSettingsView';
+export * from './AdminRolesView';

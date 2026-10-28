@@ -48,6 +48,15 @@ import {
   AdminProductsView,
   AdminCategoriesView,
   AdminInventoryView,
+  AdminLoginView,
+  AdminCustomersView,
+  AdminRidersView,
+  AdminZonesSlotsView,
+  AdminCouponsView,
+  AdminReportsView,
+  AdminBannersView,
+  AdminSettingsView,
+  AdminRolesView,
   AdminCategoryData,
 } from '@/components/admin';
 
@@ -161,7 +170,22 @@ export default function AdminPage() {
   const [barcodeSearch, setBarcodeSearch] = useState('');
 
   // Navigation & stage switcher state
-  const [mobileTab, setMobileTab] = useState<'dashboard' | 'orders' | 'products' | 'categories' | 'stock' | 'gayoo' | 'revenue'>('dashboard');
+  const [mobileTab, setMobileTab] = useState<
+    | 'dashboard'
+    | 'orders'
+    | 'products'
+    | 'categories'
+    | 'stock'
+    | 'gayoo'
+    | 'revenue'
+    | 'customers'
+    | 'riders'
+    | 'zones'
+    | 'coupons'
+    | 'banners'
+    | 'settings'
+    | 'roles'
+  >('dashboard');
   const [filterCategoryForProducts, setFilterCategoryForProducts] = useState<string | undefined>(undefined);
   const [inspectedOrderId, setInspectedOrderId] = useState<string | null>(null);
   const [mobileStage, setMobileStage] = useState<'all' | 'new' | 'packing' | 'out' | 'delivered'>('all');
@@ -195,17 +219,14 @@ export default function AdminPage() {
     }
   }, []);
 
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleVerifyPin = (enteredPin: string) => {
     const correctPin = process.env.NEXT_PUBLIC_ADMIN_PIN || '2026';
-    if (pinInput.trim() === correctPin) {
+    if (enteredPin.trim() === correctPin) {
       sessionStorage.setItem('sas_admin_unlocked', 'true');
       setUnlocked(true);
-      setPinError(false);
-    } else {
-      setPinError(true);
-      setPinInput('');
+      return true;
     }
+    return false;
   };
 
   // Fetch initial Admin Dashboard data
@@ -748,46 +769,9 @@ export default function AdminPage() {
     }
   }, [mobileStage, ordersCol0, ordersCol1, ordersCol2, ordersCol3, filteredOrders]);
 
-  // Lock Screen Overlay
+  // Lock Screen / Admin Login
   if (!unlocked) {
-    return (
-      <div className="fixed inset-0 bg-[#0F172A] z-50 flex items-center justify-center p-4 min-h-[100dvh]">
-        <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 flex flex-col items-center text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[#047857]/10 flex items-center justify-center text-[#047857] mb-3">
-            <Lock className="w-7 h-7" />
-          </div>
-          <h2 className="text-xl font-bold text-slate-900">Store Counter Lock</h2>
-          <p className="text-xs text-slate-500 mt-1 mb-5">
-            Sri Amman Supermarket • Admin PIN required
-          </p>
-
-          <form onSubmit={handleUnlock} className="w-full space-y-4">
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={8}
-              autoFocus
-              value={pinInput}
-              onChange={(e) => setPinInput(e.target.value)}
-              placeholder="Enter 4-digit PIN..."
-              className="w-full text-center text-xl sm:text-2xl tracking-widest font-mono py-3 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#047857] min-h-[48px]"
-            />
-            {pinError && (
-              <p className="text-xs text-rose-600 font-semibold">
-                Incorrect PIN. Default is 2026.
-              </p>
-            )}
-            <button
-              type="submit"
-              className="w-full min-h-[48px] py-3 bg-[#047857] hover:bg-[#035f44] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-base active:scale-[0.98]"
-            >
-              <Unlock className="w-4 h-4" />
-              Unlock Command Center
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+    return <AdminLoginView onUnlock={handleVerifyPin} />;
   }
 
 
@@ -1091,82 +1075,75 @@ export default function AdminPage() {
           )}
 
           {/* ==================================================================== */}
-          {/* ZONE C: REVENUE & DAILY SETTLEMENT VIEW */}
-          {/* Rendered when mobileTab === 'revenue', or at bottom of command center */}
+          {/* ZONE 7: FINANCIAL REPORTS & REVENUE DAYBOOK */}
           {/* ==================================================================== */}
-          <div
-            className={`${
-              mobileTab === 'revenue' ? 'block' : 'hidden'
-            } space-y-4`}
-          >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <IndianRupee className="w-5 h-5 text-[#005d42]" />
-                <h2 className="font-bold text-base text-slate-900">Daily Cash &amp; UPI Settlement</h2>
-              </div>
-              <button
-                onClick={handleExportDaybook}
-                className="min-h-[44px] px-3.5 py-1.5 rounded-lg bg-[#005d42] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export CSV</span>
-              </button>
-            </div>
+          {mobileTab === 'revenue' && <AdminReportsView orders={orders} />}
 
-            {/* 4 Metrics in responsive grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-xs font-mono uppercase text-slate-500 font-bold block">Total Online Revenue</span>
-                <span className="text-2xl font-extrabold text-[#005d42] font-mono block mt-1">₹{kpis.rev}</span>
-                <span className="text-[11px] text-slate-500">{orders.length} orders today</span>
-              </div>
-              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-xs font-mono uppercase text-slate-500 font-bold block">UPI Auto-Settled</span>
-                <span className="text-2xl font-extrabold text-slate-900 font-mono block mt-1">₹{kpis.upiRev}</span>
-                <span className="text-[11px] text-emerald-600 font-bold">{kpis.upiCount} orders online</span>
-              </div>
-              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-xs font-mono uppercase text-slate-500 font-bold block">COD Cash to Collect</span>
-                <span className="text-2xl font-extrabold text-[#904d00] font-mono block mt-1">₹{kpis.codRev}</span>
-                <span className="text-[11px] text-amber-700 font-bold">{kpis.codCount} riders collecting</span>
-              </div>
-              <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-                <span className="text-xs font-mono uppercase text-slate-500 font-bold block">Average Order Value</span>
-                <span className="text-2xl font-extrabold text-blue-700 font-mono block mt-1">
-                  ₹{orders.length ? Math.round(kpis.rev / orders.length) : 0}
-                </span>
-                <span className="text-[11px] text-slate-500">Express delivery</span>
-              </div>
-            </div>
+          {/* ==================================================================== */}
+          {/* ZONE 8: CUSTOMER DIRECTORY & PROFILES */}
+          {/* ==================================================================== */}
+          {mobileTab === 'customers' && (
+            <AdminCustomersView
+              orders={orders}
+              onSelectOrder={(orderId) => {
+                setInspectedOrderId(orderId);
+                setMobileTab('orders');
+              }}
+            />
+          )}
 
-            {/* Order Payment Ledger */}
-            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
-              <h3 className="font-bold text-sm text-slate-900">Order-Wise Payment Ledger</h3>
-              <div className="divide-y divide-slate-100">
-                {orders.map((o) => (
-                  <div key={o.id} className="py-2.5 flex items-center justify-between text-xs">
-                    <div>
-                      <span className="font-mono font-bold text-slate-900">{o.id}</span>
-                      <span className="text-slate-500 ml-2">{o.customerName}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
-                          o.paymentMethod === 'upi' ? 'bg-[#97f5cc] text-[#002115]' : 'bg-[#ffdcc3] text-[#2f1500]'
-                        }`}
-                      >
-                        {o.paymentMethod.toUpperCase()}
-                      </span>
-                      <span className="font-mono font-bold text-slate-900">₹{o.total}</span>
-                    </div>
-                  </div>
-                ))}
-                {orders.length === 0 && (
-                  <div className="py-6 text-center text-xs text-slate-400 font-mono">No transactions recorded yet today</div>
-                )}
-              </div>
-            </div>
-          </div>
+          {/* ==================================================================== */}
+          {/* ZONE 9: RIDER FLEET & LOGISTICS */}
+          {/* ==================================================================== */}
+          {mobileTab === 'riders' && (
+            <AdminRidersView
+              orders={orders}
+              onNavigateToOrders={() => setMobileTab('orders')}
+            />
+          )}
+
+          {/* ==================================================================== */}
+          {/* ZONE 10: DELIVERY GEOFENCED ZONES & TIME SLOTS */}
+          {/* ==================================================================== */}
+          {mobileTab === 'zones' && <AdminZonesSlotsView />}
+
+          {/* ==================================================================== */}
+          {/* ZONE 11: COUPONS & PROMOTIONAL OFFERS */}
+          {/* ==================================================================== */}
+          {mobileTab === 'coupons' && <AdminCouponsView />}
+
+          {/* ==================================================================== */}
+          {/* ZONE 12: BANNERS & CONTENT MERCHANDISING */}
+          {/* ==================================================================== */}
+          {mobileTab === 'banners' && <AdminBannersView />}
+
+          {/* ==================================================================== */}
+          {/* ZONE 13: STORE SETTINGS & KIOSK HARDWARE */}
+          {/* ==================================================================== */}
+          {mobileTab === 'settings' && (
+            <AdminSettingsView
+              acceptingOrders={acceptingOrders}
+              onToggleStore={handleToggleStore}
+              autoPrintEnabled={autoPrintEnabled}
+              onToggleAutoPrint={() => {
+                const next = !autoPrintEnabled;
+                setAutoPrintEnabled(next);
+                localStorage.setItem('sas_autoprint_enabled', String(next));
+              }}
+              soundEnabled={soundEnabled}
+              onToggleSound={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                localStorage.setItem('sas_sound_enabled', String(next));
+              }}
+              onTriggerTestPrint={() => orders[0] && triggerPrintSlip(orders[0].id)}
+            />
+          )}
+
+          {/* ==================================================================== */}
+          {/* ZONE 14: STAFF ROLES & SECURITY AUDIT LOG */}
+          {/* ==================================================================== */}
+          {mobileTab === 'roles' && <AdminRolesView />}
         </div>
       </AdminLayoutShell>
     </div>

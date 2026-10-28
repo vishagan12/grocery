@@ -25,6 +25,12 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
+  Users,
+  Bike,
+  MapPin,
+  Tag,
+  Image,
+  BarChart3,
 } from 'lucide-react';
 import { Avatar } from '../ui/Miscellaneous';
 
@@ -114,7 +120,34 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
       ],
     },
     {
-      group: 'Catalog & Inventory',
+      group: 'Customers & Fleet',
+      items: [
+        {
+          id: 'customers',
+          label: 'Customer Directory',
+          icon: <Users className="w-4 h-4 shrink-0" />,
+        },
+        {
+          id: 'riders',
+          label: 'Rider Fleet',
+          icon: <Bike className="w-4 h-4 shrink-0" />,
+        },
+        {
+          id: 'zones',
+          label: 'Zones & Time Slots',
+          icon: <MapPin className="w-4 h-4 shrink-0" />,
+        },
+        {
+          id: 'rider_portal',
+          label: 'Rider Mobile App',
+          icon: <Truck className="w-4 h-4 shrink-0" />,
+          external: true,
+          href: '/rider',
+        },
+      ],
+    },
+    {
+      group: 'Catalog & Merchandising',
       items: [
         {
           id: 'products',
@@ -133,32 +166,45 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
           badge: lowStockCount > 0 ? lowStockCount : undefined,
           badgeColor: 'bg-rose-500/20 text-rose-300',
         },
+        {
+          id: 'coupons',
+          label: 'Coupons & Offers',
+          icon: <Tag className="w-4 h-4 shrink-0" />,
+        },
+        {
+          id: 'banners',
+          label: 'Banners & Content',
+          icon: <Image className="w-4 h-4 shrink-0" />,
+        },
       ],
     },
     {
-      group: 'Bridge & Revenue',
+      group: 'Financials & Bridge',
       items: [
-        {
-          id: 'gayoo',
-          label: 'Gayoo POS Bridge',
-          icon: <Barcode className="w-4 h-4 shrink-0" />,
-        },
         {
           id: 'revenue',
           label: 'Revenue & Daybook',
           icon: <IndianRupee className="w-4 h-4 shrink-0" />,
         },
+        {
+          id: 'gayoo',
+          label: 'Gayoo POS Bridge',
+          icon: <Barcode className="w-4 h-4 shrink-0" />,
+        },
       ],
     },
     {
-      group: 'System & Logistics',
+      group: 'System & Roles',
       items: [
         {
-          id: 'rider_portal',
-          label: 'Rider Portal',
-          icon: <Truck className="w-4 h-4 shrink-0" />,
-          external: true,
-          href: '/rider',
+          id: 'settings',
+          label: 'Store Settings',
+          icon: <Settings className="w-4 h-4 shrink-0" />,
+        },
+        {
+          id: 'roles',
+          label: 'Staff Roles & Audit',
+          icon: <ShieldCheck className="w-4 h-4 shrink-0" />,
         },
       ],
     },
@@ -351,7 +397,7 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
       >
         <div className="flex flex-col">
           {/* Brand Header */}
-          <div className="p-4 bg-[#0F2B0A] border-b border-[#1E4D12] flex items-center justify-between">
+          <div className="p-4 bg-[#143B0D] border-b border-[#1E4D12] flex items-center justify-between">
             {!isCollapsed ? (
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-[#76CA3E] text-[#143B0D] flex items-center justify-center shrink-0 shadow-xs">
@@ -439,7 +485,7 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
         </div>
 
         {/* Footer Area: Collapse & Identity */}
-        <div className="p-3 bg-[#0F2B0A] border-t border-[#1E4D12] space-y-2">
+        <div className="p-3 bg-[#143B0D] border-t border-[#1E4D12] space-y-2">
           {!isCollapsed && (
             <div className="flex items-center justify-between px-2 py-1 text-xs text-slate-400">
               <div className="flex items-center gap-2">

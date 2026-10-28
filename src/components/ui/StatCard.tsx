@@ -9,6 +9,7 @@ export interface StatCardProps {
   icon: React.ReactNode;
   subtext?: string;
   subtitle?: string;
+  description?: string;
   badge?: React.ReactNode;
   trend?: {
     value: string;
@@ -25,13 +26,14 @@ export const StatCard: React.FC<StatCardProps> = ({
   icon,
   subtext,
   subtitle,
+  description,
   badge,
   trend,
   onClick,
   className = '',
 }) => {
   const cardLabel = label || title || '';
-  const cardSubtext = subtext || subtitle;
+  const cardSubtext = subtext || subtitle || description;
 
   return (
     <div

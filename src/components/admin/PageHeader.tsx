@@ -7,7 +7,7 @@ export interface PageHeaderProps {
   title: string;
   description?: string;
   subtitle?: string;
-  badge?: React.ReactNode;
+  badge?: React.ReactNode | { label: string; variant?: string };
   breadcrumbs?: BreadcrumbItem[];
   primaryAction?: React.ReactNode;
   secondaryActions?: React.ReactNode;
@@ -38,7 +38,17 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
               {title}
             </h1>
-            {badge && <div className="shrink-0">{badge}</div>}
+            {badge && (
+              <div className="shrink-0">
+                {React.isValidElement(badge) || typeof badge === 'string' || typeof badge === 'number' ? (
+                  badge
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F1F9EC] text-[#143B0D] border border-[#76CA3E]/40 font-mono">
+                    {(badge as any).label}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           {desc && (
             <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
