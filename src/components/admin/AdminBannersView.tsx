@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import {
-  Image,
+  Image as ImageIcon,
   Plus,
   Edit2,
   Trash2,
@@ -203,7 +203,7 @@ export const AdminBannersView: React.FC = () => {
         <StatCard
           label="Active Banners"
           value={`${banners.filter((b) => b.active).length} / ${banners.length}`}
-          icon={<Image className="w-5 h-5 text-[#143B0D]" />}
+          icon={<ImageIcon className="w-5 h-5 text-[#143B0D]" />}
           description="Live on storefront"
         />
         <StatCard

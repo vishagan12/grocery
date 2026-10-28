@@ -183,7 +183,6 @@ export const RiderAuthView: React.FC<RiderAuthViewProps> = ({
             type="button"
             onClick={onToggleLang}
             className="min-h-[44px] px-3 rounded-xl bg-white border border-[#E2E8F0] text-xs font-mono font-bold text-[#0F172A] hover:bg-[#F1F9EC] transition-colors"
-            aria-label="Toggle language"
           >
             {lang === 'en' ? 'தமிழ்' : 'English'}
           </button>
@@ -234,7 +233,7 @@ export const RiderAuthView: React.FC<RiderAuthViewProps> = ({
               className="text-xs font-bold uppercase tracking-wide text-[#475569] flex items-center justify-between"
             >
               <span>{lang === 'ta' ? 'மொபைல் எண்' : 'Mobile Number'}</span>
-              <span className="font-mono text-[10px] text-[#94A3B8]">10 Digits</span>
+              <span className="font-mono text-[10px] text-[#64748B]">10 Digits</span>
             </label>
             <div className="relative">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none text-[#475569]">
@@ -268,7 +267,7 @@ export const RiderAuthView: React.FC<RiderAuthViewProps> = ({
               className="text-xs font-bold uppercase tracking-wide text-[#475569] flex items-center justify-between"
             >
               <span>{lang === 'ta' ? 'ஷிப்ட் கடவுச்சொல்' : 'Shift Passcode (PIN)'}</span>
-              <span className="font-mono text-[10px] text-[#94A3B8]">Demo: 1234</span>
+              <span className="font-mono text-[10px] text-[#64748B]">Demo: 1234</span>
             </label>
             <div className="relative">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#143B0D]">
@@ -357,7 +356,7 @@ export const RiderAuthView: React.FC<RiderAuthViewProps> = ({
           <ShieldCheck className="w-3.5 h-3.5 text-[#047857]" />
           <span>Amman Store Verified Dispatch Protocol</span>
         </div>
-        <p className="text-[10px] text-[#94A3B8]">
+        <p className="text-[10px] text-[#64748B]">
           Helmet mandatory • Safe riding • Madurai dispatch helpline: +91 98421 00000
         </p>
       </footer>

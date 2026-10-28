@@ -29,7 +29,7 @@ import {
   Bike,
   MapPin,
   Tag,
-  Image,
+  Image as ImageIcon,
   BarChart3,
 } from 'lucide-react';
 import { Avatar } from '../ui/Miscellaneous';
@@ -174,7 +174,7 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
         {
           id: 'banners',
           label: 'Banners & Content',
-          icon: <Image className="w-4 h-4 shrink-0" />,
+          icon: <ImageIcon className="w-4 h-4 shrink-0" />,
         },
       ],
     },

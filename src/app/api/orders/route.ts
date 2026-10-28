@@ -6,6 +6,7 @@ import { sanitizeInput, withExponentialBackoff } from '@/lib/resilience';
 import { logger, enqueueDeadLetter } from '@/lib/logger';
 import { products } from '@/data/products';
 import { FREE_DELIVERY_THRESHOLD } from '@/lib/brand';
+import { applyOrderOverlay } from '@/lib/order-utils';
 
 interface OrderItemPayload {
   productId: string;
@@ -237,32 +238,42 @@ export async function POST(req: NextRequest) {
   const serverFinalTotal = Math.max(0, serverSubtotal - serverCouponDiscount + serverDeliveryFee);
 
   // 9. Generate Secure Order Identifiers & Secrets (IDOR Protection)
-  const orderId = `#SAS-${1000 + Math.floor(Math.random() * 9000)}`;
-  const orderSecret = crypto.randomBytes(16).toString('hex');
+  let orderId = `#SAS-${1000 + Math.floor(Math.random() * 9000)}`;
+  let orderSecret = crypto.randomUUID();
 
   // 10. Atomic Execution with Retry & Dead Letter Queue Fallback
   try {
     await withExponentialBackoff(
       async () => {
-        // Attempt Atomic RPC if defined in Supabase
+        // Attempt Atomic RPC defined in Supabase
+        const rpcItems = validatedItems.map((v) => ({
+          product_id: v.productId,
+          variant_label: v.variantLabel,
+          quantity: v.quantity,
+        }));
+
         const rpcResult = await supabase.rpc('place_order_atomic', {
           p_idempotency_key: idempotencyKey,
-          p_order_id: orderId,
+          p_customer_name: customerName ? sanitizeInput(customerName, 100) : null,
           p_phone: formattedPhone,
           p_address: sanitizedAddress,
-          p_subtotal: serverSubtotal,
-          p_discount: totalDiscount,
-          p_delivery_fee: serverDeliveryFee,
-          p_total: serverFinalTotal,
+          p_lat: lat,
+          p_lng: lng,
+          p_distance_km: serverDistanceKm,
           p_payment_method: paymentMethod,
-          p_payment_status: paymentMethod === 'upi' ? 'pending' : 'pending',
           p_delivery_slot: deliverySlot,
-          p_order_secret: orderSecret,
-          p_items: validatedItems,
+          p_coupon_code: appliedCoupon || null,
+          p_items: rpcItems,
           p_is_for_someone_else: !!isForSomeoneElse,
           p_recipient_name: sanitizedRecipientName,
           p_recipient_phone: formattedRecipientPhone,
         });
+
+        if (rpcResult.data && !rpcResult.error) {
+          if (rpcResult.data.order_id) orderId = rpcResult.data.order_id;
+          if (rpcResult.data.order_secret) orderSecret = rpcResult.data.order_secret;
+          return;
+        }
 
         // Fallback to direct relational insert if RPC is not present
         if (rpcResult.error) {
@@ -384,6 +395,10 @@ export async function GET(req: NextRequest) {
     let query = supabase.from('orders').select('*, order_items(*)');
 
     if (orderId && secret) {
+      const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(secret);
+      if (!isValidUuid) {
+        return NextResponse.json({ orders: [] }, { status: 200, headers: { 'x-request-id': requestId } });
+      }
       query = query.eq('id', orderId).eq('order_secret', secret);
     } else if (phone) {
       const cleanPhone = phone.replace(/\D/g, '').slice(-10);
@@ -405,7 +420,7 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { orders: data || [] },
+      { orders: (data || []).map(applyOrderOverlay) },
       { status: 200, headers: { 'x-request-id': requestId } }
     );
   } catch (err: unknown) {

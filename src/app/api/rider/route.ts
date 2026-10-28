@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { products as fallbackCatalog } from '@/data/products';
+import { parseDeliverySlot, formatDeliverySlot, applyOrderOverlay, setOrderOverlay, getOrderOverlay } from '@/lib/order-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +26,8 @@ export async function GET(req: NextRequest) {
         query = query.in('status', [0, 1]);
       } else if (tab === 'active') {
         query = query.eq('status', 2);
-        if (riderPhone) {
-          query = query.eq('assigned_rider_phone', riderPhone);
-        }
       } else if (tab === 'delivered') {
         query = query.eq('status', 3);
-        if (riderPhone) {
-          query = query.eq('assigned_rider_phone', riderPhone);
-        }
       } else {
         // default all active & ready
         query = query.in('status', [0, 1, 2, 3]);
@@ -46,34 +41,41 @@ export async function GET(req: NextRequest) {
       // Filter: If riderPhone provided, they see:
       // 1. Ready orders at counter (unassigned or assigned to them)
       // 2. Active or delivered orders specifically assigned to them
-      const filtered = (rawOrders || []).filter((o: any) => {
+      const rawWithOverlay = (rawOrders || []).map(applyOrderOverlay);
+      const filtered = rawWithOverlay.filter((o: any) => {
+        const { riderPhone: parsedPhone } = parseDeliverySlot(o.delivery_slot);
+        const assignedPhone = o.assigned_rider_phone || parsedPhone;
         if (!riderPhone) return true;
         if (o.status === 0 || o.status === 1) {
-          return !o.assigned_rider_phone || o.assigned_rider_phone === riderPhone;
+          return !assignedPhone || assignedPhone === riderPhone;
         }
-        return o.assigned_rider_phone === riderPhone;
+        return assignedPhone === riderPhone;
       });
 
-      const mappedOrders = filtered.map((o: any) => ({
-        id: o.id,
-        customerName: o.customer_name || 'Customer',
-        phone: o.phone || '',
-        address: o.address || '',
-        lat: o.lat || null,
-        lng: o.lng || null,
-        distanceKm: typeof o.distance_km === 'number' ? o.distance_km : 1.8,
-        total: Number(o.total || 0),
-        paymentMethod: o.payment_method || 'cod',
-        paymentStatus: o.payment_status || 'pending',
-        status: typeof o.status === 'number' ? o.status : 0,
-        isForSomeoneElse: Boolean(o.is_for_someone_else),
-        recipientName: o.recipient_name || undefined,
-        recipientPhone: o.recipient_phone || undefined,
-        assignedRiderName: o.assigned_rider_name || undefined,
-        assignedRiderPhone: o.assigned_rider_phone || undefined,
-        createdAt: o.created_at || new Date().toISOString(),
-        itemCount: Array.isArray(o.order_items) ? o.order_items.length : 1,
-      }));
+      const mappedOrders = filtered.map((o: any) => {
+        const { slot, riderName: parsedName, riderPhone: parsedPhone } = parseDeliverySlot(o.delivery_slot);
+        return {
+          id: o.id,
+          customerName: o.customer_name || 'Customer',
+          phone: o.phone || '',
+          address: o.address || '',
+          lat: o.lat || null,
+          lng: o.lng || null,
+          distanceKm: typeof o.distance_km === 'number' ? o.distance_km : 1.8,
+          total: Number(o.total || 0),
+          paymentMethod: o.payment_method || 'cod',
+          paymentStatus: o.payment_status || 'pending',
+          status: typeof o.status === 'number' ? o.status : 0,
+          deliverySlot: slot,
+          isForSomeoneElse: Boolean(o.is_for_someone_else),
+          recipientName: o.recipient_name || undefined,
+          recipientPhone: o.recipient_phone || undefined,
+          assignedRiderName: o.assigned_rider_name || parsedName || undefined,
+          assignedRiderPhone: o.assigned_rider_phone || parsedPhone || undefined,
+          createdAt: o.created_at || new Date().toISOString(),
+          itemCount: Array.isArray(o.order_items) ? o.order_items.length : 1,
+        };
+      });
 
       return NextResponse.json({
         orders: mappedOrders,
@@ -103,14 +105,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const orderRow = matchedOrders[0];
+    const orderRow = applyOrderOverlay(matchedOrders[0]);
+    const { slot, riderName: parsedName, riderPhone: parsedPhone } = parseDeliverySlot(orderRow.delivery_slot);
+    const assignedPhone = orderRow.assigned_rider_phone || parsedPhone;
+    const assignedName = orderRow.assigned_rider_name || parsedName;
 
     // Authorization check: If order is active (status 2) or delivered (status 3),
     // ensure it is assigned to this rider or unassigned
     if (
       riderPhone &&
-      orderRow.assigned_rider_phone &&
-      orderRow.assigned_rider_phone !== riderPhone &&
+      assignedPhone &&
+      assignedPhone !== riderPhone &&
       orderRow.status >= 2
     ) {
       return NextResponse.json(
@@ -153,12 +158,13 @@ export async function GET(req: NextRequest) {
         paymentMethod: orderRow.payment_method || 'cod',
         paymentStatus: orderRow.payment_status || 'pending',
         status: typeof orderRow.status === 'number' ? orderRow.status : 0,
+        deliverySlot: slot,
         createdAt: orderRow.created_at || new Date().toISOString(),
         isForSomeoneElse: Boolean(orderRow.is_for_someone_else),
         recipientName: orderRow.recipient_name || undefined,
         recipientPhone: orderRow.recipient_phone || undefined,
-        assignedRiderName: orderRow.assigned_rider_name || undefined,
-        assignedRiderPhone: orderRow.assigned_rider_phone || undefined,
+        assignedRiderName: assignedName || undefined,
+        assignedRiderPhone: assignedPhone || undefined,
         items,
       },
     });
@@ -180,7 +186,7 @@ export async function PATCH(req: NextRequest) {
     // Step 1: Fetch existing order to validate status transition
     const { data: existing, error: fetchErr } = await supabase
       .from('orders')
-      .select('id, status, assigned_rider_phone, payment_method, payment_status')
+      .select('id, status, delivery_slot, payment_method, payment_status')
       .eq('id', orderId)
       .single();
 
@@ -188,7 +194,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    const currentStatus = typeof existing.status === 'number' ? existing.status : 0;
+    const overlay = getOrderOverlay(orderId);
+    const currentStatus = typeof overlay?.status === 'number' ? overlay.status : (typeof existing.status === 'number' ? existing.status : 0);
+    const currentSlot = overlay?.deliverySlot || existing.delivery_slot;
+    const { riderPhone: existingRiderPhone, riderName: existingRiderName } = parseDeliverySlot(currentSlot);
+    const assignedPhone = overlay?.assignedRiderPhone || existingRiderPhone;
 
     // Step 2: Validate status lifecycle progression
     // 0/1 (Ready) -> 2 (On Route)
@@ -218,8 +228,8 @@ export async function PATCH(req: NextRequest) {
     // Step 3: Authorization check
     if (
       riderPhone &&
-      existing.assigned_rider_phone &&
-      existing.assigned_rider_phone !== riderPhone
+      assignedPhone &&
+      assignedPhone !== riderPhone
     ) {
       return NextResponse.json(
         { error: 'Unauthorized: This order is assigned to another delivery partner.' },
@@ -231,14 +241,27 @@ export async function PATCH(req: NextRequest) {
 
     // When status === 2 (On route / picked up), assign to this rider
     if (status === 2) {
-      if (riderName) updatePayload.assigned_rider_name = riderName;
-      if (riderPhone) updatePayload.assigned_rider_phone = riderPhone;
+      updatePayload.delivery_slot = formatDeliverySlot(
+        currentSlot,
+        riderName || existingRiderName,
+        riderPhone
+      );
     }
 
     // When status === 3 (Delivered), set payment_status to 'paid'
     if (status === 3) {
       updatePayload.payment_status = 'paid';
     }
+
+    setOrderOverlay(orderId, {
+      status,
+      ...(status === 2 ? {
+        deliverySlot: updatePayload.delivery_slot,
+        assignedRiderName: riderName || existingRiderName,
+        assignedRiderPhone: riderPhone,
+      } : {}),
+      ...(status === 3 ? { paymentStatus: 'paid' } : {})
+    });
 
     const { error } = await supabase
       .from('orders')

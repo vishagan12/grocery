@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { sanitizeInput } from '@/lib/resilience';
 import { products as fallbackCatalog, categories as fallbackCategories } from '@/data/products';
+import { parseDeliverySlot, formatDeliverySlot, applyOrderOverlay, setOrderOverlay } from '@/lib/order-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,7 +102,7 @@ export async function GET(req: NextRequest) {
       }));
     }
 
-    const orders = (rawOrders || []).map((o: any) => ({
+    const orders = (rawOrders || []).map(applyOrderOverlay).map((o: any) => ({
       id: o.id,
       customerName: o.customer_name || 'Valued Customer',
       phone: o.phone || '',
@@ -116,13 +117,13 @@ export async function GET(req: NextRequest) {
       paymentMethod: o.payment_method || 'cod',
       paymentStatus: o.payment_status || 'pending',
       status: typeof o.status === 'number' ? o.status : 0,
-      deliverySlot: o.delivery_slot || 'express',
+      deliverySlot: parseDeliverySlot(o.delivery_slot).slot,
       createdAt: o.created_at || new Date().toISOString(),
       isForSomeoneElse: Boolean(o.is_for_someone_else),
       recipientName: o.recipient_name || undefined,
       recipientPhone: o.recipient_phone || undefined,
-      assignedRiderName: o.assigned_rider_name || undefined,
-      assignedRiderPhone: o.assigned_rider_phone || undefined,
+      assignedRiderName: o.assigned_rider_name || parseDeliverySlot(o.delivery_slot).riderName || undefined,
+      assignedRiderPhone: o.assigned_rider_phone || parseDeliverySlot(o.delivery_slot).riderPhone || undefined,
       items: Array.isArray(o.order_items)
         ? o.order_items.map((item: any) => {
             const prod = catalog.find((p) => p.id === item.product_id);
@@ -171,6 +172,8 @@ export async function PATCH(req: NextRequest) {
       if (paymentStatus) {
         updateData.payment_status = paymentStatus;
       }
+
+      setOrderOverlay(orderId, { status, paymentStatus });
 
       const { error } = await supabase
         .from('orders')
@@ -296,11 +299,30 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
       }
 
+      // Fetch existing delivery_slot to preserve base preference (e.g. 'express')
+      const { data: existingOrder } = await supabase
+        .from('orders')
+        .select('delivery_slot')
+        .eq('id', orderId)
+        .single();
+
+      const newSlot = formatDeliverySlot(
+        existingOrder?.delivery_slot,
+        riderName ? sanitizeInput(riderName) : null,
+        riderPhone ? sanitizeInput(riderPhone) : null
+      );
+
       const updateData: Record<string, any> = {
         status: 1, // Ready at dock
+        delivery_slot: newSlot,
       };
-      if (riderName) updateData.assigned_rider_name = sanitizeInput(riderName);
-      if (riderPhone) updateData.assigned_rider_phone = sanitizeInput(riderPhone);
+
+      setOrderOverlay(orderId, {
+        status: 1,
+        deliverySlot: newSlot,
+        assignedRiderName: riderName ? sanitizeInput(riderName) : undefined,
+        assignedRiderPhone: riderPhone ? sanitizeInput(riderPhone) : undefined,
+      });
 
       const { error } = await supabase
         .from('orders')

@@ -15,8 +15,7 @@ export const viewport: Viewport = {
   themeColor: '#143B0D',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false, // Essential for one-hand delivery usage without accidental zoom
+  maximumScale: 5,
 };
 
 export default function RiderLayout({ children }: { children: React.ReactNode }) {
