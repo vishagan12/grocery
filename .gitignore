@@ -14,3 +14,11 @@ powershell.cmd
 .DS_Store
 *.log
 Thumbs.db
+
+# Database backups and dumps
+db-backups/
+db-backup/
+db backup/
+*.sql
+*.sql.gz
+*.dump
