@@ -9,17 +9,52 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const rawCode = (searchParams.get('code') || searchParams.get('id') || '').trim();
+    const riderPhone = (searchParams.get('riderPhone') || req.headers.get('x-rider-phone') || '').trim();
+    const riderName = (searchParams.get('riderName') || req.headers.get('x-rider-name') || '').trim();
+    const tab = searchParams.get('tab') || 'all'; // 'ready', 'active', 'delivered', 'all'
 
-    // If no code provided, fetch active pickup-ready orders (status 0 or 1)
+    // If no code provided, fetch orders list scoped to rider
     if (!rawCode) {
-      const { data: readyOrders, error: readyError } = await supabase
+      let query = supabase
         .from('orders')
         .select('*, order_items(*)')
-        .in('status', [0, 1, 2])
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(30);
 
-      const mappedReady = (readyOrders || []).map((o: any) => ({
+      if (tab === 'ready') {
+        query = query.in('status', [0, 1]);
+      } else if (tab === 'active') {
+        query = query.eq('status', 2);
+        if (riderPhone) {
+          query = query.eq('assigned_rider_phone', riderPhone);
+        }
+      } else if (tab === 'delivered') {
+        query = query.eq('status', 3);
+        if (riderPhone) {
+          query = query.eq('assigned_rider_phone', riderPhone);
+        }
+      } else {
+        // default all active & ready
+        query = query.in('status', [0, 1, 2, 3]);
+      }
+
+      const { data: rawOrders, error: readyError } = await query;
+      if (readyError) {
+        throw readyError;
+      }
+
+      // Filter: If riderPhone provided, they see:
+      // 1. Ready orders at counter (unassigned or assigned to them)
+      // 2. Active or delivered orders specifically assigned to them
+      const filtered = (rawOrders || []).filter((o: any) => {
+        if (!riderPhone) return true;
+        if (o.status === 0 || o.status === 1) {
+          return !o.assigned_rider_phone || o.assigned_rider_phone === riderPhone;
+        }
+        return o.assigned_rider_phone === riderPhone;
+      });
+
+      const mappedOrders = filtered.map((o: any) => ({
         id: o.id,
         customerName: o.customer_name || 'Customer',
         phone: o.phone || '',
@@ -34,10 +69,14 @@ export async function GET(req: NextRequest) {
         isForSomeoneElse: Boolean(o.is_for_someone_else),
         recipientName: o.recipient_name || undefined,
         recipientPhone: o.recipient_phone || undefined,
+        assignedRiderName: o.assigned_rider_name || undefined,
+        assignedRiderPhone: o.assigned_rider_phone || undefined,
+        createdAt: o.created_at || new Date().toISOString(),
+        itemCount: Array.isArray(o.order_items) ? o.order_items.length : 1,
       }));
 
       return NextResponse.json({
-        orders: mappedReady,
+        orders: mappedOrders,
       });
     }
 
@@ -65,6 +104,20 @@ export async function GET(req: NextRequest) {
     }
 
     const orderRow = matchedOrders[0];
+
+    // Authorization check: If order is active (status 2) or delivered (status 3),
+    // ensure it is assigned to this rider or unassigned
+    if (
+      riderPhone &&
+      orderRow.assigned_rider_phone &&
+      orderRow.assigned_rider_phone !== riderPhone &&
+      orderRow.status >= 2
+    ) {
+      return NextResponse.json(
+        { error: 'This order is assigned to another delivery partner.' },
+        { status: 403 }
+      );
+    }
 
     // Fetch catalog names for items
     const { data: catalogProducts } = await supabase
@@ -104,6 +157,8 @@ export async function GET(req: NextRequest) {
         isForSomeoneElse: Boolean(orderRow.is_for_someone_else),
         recipientName: orderRow.recipient_name || undefined,
         recipientPhone: orderRow.recipient_phone || undefined,
+        assignedRiderName: orderRow.assigned_rider_name || undefined,
+        assignedRiderPhone: orderRow.assigned_rider_phone || undefined,
         items,
       },
     });
@@ -116,13 +171,69 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { orderId, status, paymentCollectedMethod } = body;
+    const { orderId, status, paymentCollectedMethod, riderName, riderPhone } = body;
 
     if (!orderId || typeof status !== 'number') {
       return NextResponse.json({ error: 'orderId and numeric status required' }, { status: 400 });
     }
 
+    // Step 1: Fetch existing order to validate status transition
+    const { data: existing, error: fetchErr } = await supabase
+      .from('orders')
+      .select('id, status, assigned_rider_phone, payment_method, payment_status')
+      .eq('id', orderId)
+      .single();
+
+    if (fetchErr || !existing) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    const currentStatus = typeof existing.status === 'number' ? existing.status : 0;
+
+    // Step 2: Validate status lifecycle progression
+    // 0/1 (Ready) -> 2 (On Route)
+    // 2 (On Route) -> 3 (Delivered)
+    // 2 (On Route) -> 4 (Failed/Returned - if supported)
+    if (status === 2) {
+      if (currentStatus > 2) {
+        return NextResponse.json(
+          { error: 'Cannot transition delivered or settled order back to transit.' },
+          { status: 400 }
+        );
+      }
+    } else if (status === 3) {
+      if (currentStatus < 2) {
+        return NextResponse.json(
+          { error: 'Order must be picked up and on route before marking delivered.' },
+          { status: 400 }
+        );
+      }
+    } else if (status < currentStatus) {
+      return NextResponse.json(
+        { error: 'Status regression is not permitted.' },
+        { status: 400 }
+      );
+    }
+
+    // Step 3: Authorization check
+    if (
+      riderPhone &&
+      existing.assigned_rider_phone &&
+      existing.assigned_rider_phone !== riderPhone
+    ) {
+      return NextResponse.json(
+        { error: 'Unauthorized: This order is assigned to another delivery partner.' },
+        { status: 403 }
+      );
+    }
+
     const updatePayload: Record<string, any> = { status };
+
+    // When status === 2 (On route / picked up), assign to this rider
+    if (status === 2) {
+      if (riderName) updatePayload.assigned_rider_name = riderName;
+      if (riderPhone) updatePayload.assigned_rider_phone = riderPhone;
+    }
 
     // When status === 3 (Delivered), set payment_status to 'paid'
     if (status === 3) {
@@ -138,13 +249,15 @@ export async function PATCH(req: NextRequest) {
       throw error;
     }
 
-    // Write audit log
+    // Write audit log without customer PII
     try {
       await supabase.from('audit_logs').insert({
-        action: status === 2 ? 'RIDER_START_RIDE' : 'RIDER_DELIVERED',
+        action: status === 2 ? 'RIDER_START_RIDE' : status === 3 ? 'RIDER_DELIVERED' : 'RIDER_STATUS_UPDATE',
         details: {
           orderId,
-          status,
+          previousStatus: currentStatus,
+          newStatus: status,
+          riderPhone: riderPhone ? `+91****${riderPhone.slice(-4)}` : undefined,
           paymentCollectedMethod: paymentCollectedMethod || null,
           timestamp: new Date().toISOString(),
         },
@@ -152,7 +265,7 @@ export async function PATCH(req: NextRequest) {
       });
     } catch {}
 
-    logger.info('RIDER_ORDER_STATUS_UPDATED', `Rider updated order ${orderId} to status ${status}`, {
+    logger.info('RIDER_ORDER_STATUS_UPDATED', `Rider updated order ${orderId} from ${currentStatus} to ${status}`, {
       orderId,
       status,
       paymentCollectedMethod,
@@ -162,7 +275,7 @@ export async function PATCH(req: NextRequest) {
       success: true,
       orderId,
       status,
-      paymentStatus: updatePayload.payment_status || 'unchanged',
+      paymentStatus: updatePayload.payment_status || existing.payment_status,
     });
   } catch (err: any) {
     logger.error('RIDER_PATCH_FAILED', 'Failed to update rider order status', { error: err.message });
