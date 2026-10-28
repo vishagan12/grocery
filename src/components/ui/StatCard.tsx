@@ -3,10 +3,12 @@
 import React from 'react';
 
 export interface StatCardProps {
-  label: string;
+  label?: string;
+  title?: string;
   value: string | number;
   icon: React.ReactNode;
   subtext?: string;
+  subtitle?: string;
   badge?: React.ReactNode;
   trend?: {
     value: string;
@@ -18,14 +20,19 @@ export interface StatCardProps {
 
 export const StatCard: React.FC<StatCardProps> = ({
   label,
+  title,
   value,
   icon,
   subtext,
+  subtitle,
   badge,
   trend,
   onClick,
   className = '',
 }) => {
+  const cardLabel = label || title || '';
+  const cardSubtext = subtext || subtitle;
+
   return (
     <div
       onClick={onClick}
@@ -34,7 +41,7 @@ export const StatCard: React.FC<StatCardProps> = ({
       } ${className}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">{label}</span>
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider truncate">{cardLabel}</span>
         <div className="w-9 h-9 rounded-xl bg-[#F1F9EC] text-[#143B0D] flex items-center justify-center shrink-0">
           {icon}
         </div>
@@ -47,9 +54,9 @@ export const StatCard: React.FC<StatCardProps> = ({
         {badge && <div className="shrink-0">{badge}</div>}
       </div>
 
-      {(subtext || trend) && (
+      {(cardSubtext || trend) && (
         <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          {subtext && <span className="truncate">{subtext}</span>}
+          {cardSubtext && <span className="truncate">{cardSubtext}</span>}
           {trend && (
             <span className={`font-bold font-mono ${trend.isPositive ? 'text-emerald-700' : 'text-rose-700'}`}>
               {trend.isPositive ? '↑' : '↓'} {trend.value}

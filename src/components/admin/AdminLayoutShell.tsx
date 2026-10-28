@@ -23,6 +23,8 @@ import {
   ShieldCheck,
   User,
   LayoutDashboard,
+  Package,
+  FolderTree,
 } from 'lucide-react';
 import { Avatar } from '../ui/Miscellaneous';
 
@@ -95,7 +97,7 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
 
   const navGroups: AdminNavGroup[] = [
     {
-      group: 'Fulfillment & Stock',
+      group: 'Fulfillment & Orders',
       items: [
         {
           id: 'dashboard',
@@ -108,6 +110,21 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
           icon: <ClipboardList className="w-4 h-4 shrink-0" />,
           badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined,
           badgeColor: 'bg-[#FFDCC3] text-[#2F1500]',
+        },
+      ],
+    },
+    {
+      group: 'Catalog & Inventory',
+      items: [
+        {
+          id: 'products',
+          label: 'Products Catalog',
+          icon: <Package className="w-4 h-4 shrink-0" />,
+        },
+        {
+          id: 'categories',
+          label: 'Store Categories',
+          icon: <FolderTree className="w-4 h-4 shrink-0" />,
         },
         {
           id: 'stock',

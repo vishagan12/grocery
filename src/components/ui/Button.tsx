@@ -7,6 +7,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
+  isLoading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
 }
@@ -19,6 +20,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'md',
       loading = false,
+      isLoading,
       disabled = false,
       icon,
       iconPosition = 'left',
@@ -51,21 +53,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       icon: 'p-2 min-h-[44px] min-w-[44px] rounded-xl',
     };
 
-    const isDisabled = disabled || loading;
+    const isBusy = Boolean(loading || isLoading);
+    const isDisabled = disabled || isBusy;
 
     return (
       <button
         ref={ref}
         type={type}
         disabled={isDisabled}
-        aria-busy={loading}
+        aria-busy={isBusy}
         className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
         {...props}
       >
-        {loading && <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden="true" />}
-        {!loading && icon && iconPosition === 'left' && <span className="shrink-0">{icon}</span>}
+        {isBusy && <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden="true" />}
+        {!isBusy && icon && iconPosition === 'left' && <span className="shrink-0">{icon}</span>}
         {children && <span>{children}</span>}
-        {!loading && icon && iconPosition === 'right' && <span className="shrink-0">{icon}</span>}
+        {!isBusy && icon && iconPosition === 'right' && <span className="shrink-0">{icon}</span>}
       </button>
     );
   }

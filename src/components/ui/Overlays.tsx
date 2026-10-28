@@ -14,6 +14,7 @@ export interface ModalProps {
   description?: string;
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -23,8 +24,10 @@ export const Modal: React.FC<ModalProps> = ({
   description,
   children,
   maxWidth = 'md',
+  size,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const effectiveWidth = size || maxWidth;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -75,7 +78,7 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         aria-describedby={description ? 'modal-desc' : undefined}
-        className={`relative w-full ${widthMap[maxWidth]} rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-scale-up`}
+        className={`relative w-full ${widthMap[effectiveWidth]} rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-scale-up`}
       >
         {(title || description) && (
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -114,11 +117,16 @@ export interface ConfirmationDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message?: string;
+  description?: string;
   confirmLabel?: string;
+  confirmText?: string;
   cancelLabel?: string;
+  cancelText?: string;
   variant?: 'danger' | 'primary';
+  confirmVariant?: 'danger' | 'primary';
   loading?: boolean;
+  isLoading?: boolean;
 }
 
 export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
@@ -127,34 +135,45 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   onConfirm,
   title,
   message,
-  confirmLabel = 'Confirm Action',
+  description,
+  confirmLabel,
+  confirmText,
   cancelLabel = 'Cancel',
-  variant = 'danger',
+  cancelText,
+  variant,
+  confirmVariant,
   loading = false,
+  isLoading,
 }) => {
+  const isBusy = Boolean(loading || isLoading);
+  const textMessage = message || description || '';
+  const finalConfirmLabel = confirmText || confirmLabel || 'Confirm Action';
+  const finalCancelLabel = cancelText || cancelLabel || 'Cancel';
+  const finalVariant = confirmVariant || variant || 'danger';
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="sm">
       <div className="flex flex-col items-center text-center p-2">
         <div
           className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${
-            variant === 'danger' ? 'bg-[#FFDAD6] text-[#BA1A1A]' : 'bg-[#F1F9EC] text-[#143B0D]'
+            finalVariant === 'danger' ? 'bg-[#FFDAD6] text-[#BA1A1A]' : 'bg-[#F1F9EC] text-[#143B0D]'
           }`}
         >
           <AlertTriangle className="w-6 h-6" />
         </div>
         <h4 className="text-base font-bold text-slate-900 mb-1">{title}</h4>
-        <p className="text-xs text-slate-600 mb-6 leading-relaxed">{message}</p>
+        <p className="text-xs text-slate-600 mb-6 leading-relaxed">{textMessage}</p>
         <div className="flex items-center gap-2.5 w-full">
-          <Button variant="outline" className="flex-1" onClick={onClose} disabled={loading}>
-            {cancelLabel}
+          <Button variant="outline" className="flex-1" onClick={onClose} disabled={isBusy}>
+            {finalCancelLabel}
           </Button>
           <Button
-            variant={variant === 'danger' ? 'danger' : 'primary'}
+            variant={finalVariant === 'danger' ? 'danger' : 'primary'}
             className="flex-1"
             onClick={onConfirm}
-            loading={loading}
+            loading={isBusy}
           >
-            {confirmLabel}
+            {finalConfirmLabel}
           </Button>
         </div>
       </div>
@@ -171,6 +190,8 @@ export interface SideDrawerProps {
   title?: string;
   children: React.ReactNode;
   position?: 'left' | 'right';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export const SideDrawer: React.FC<SideDrawerProps> = ({
@@ -179,6 +200,8 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
   title,
   children,
   position = 'right',
+  maxWidth,
+  size,
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -193,6 +216,14 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
 
   if (!isOpen) return null;
 
+  const widthMap = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-2xl',
+    xl: 'max-w-3xl',
+  };
+  const effectiveWidth = size || maxWidth || 'md';
+
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
@@ -205,7 +236,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full max-w-md bg-white shadow-2xl z-10 flex flex-col h-full ${
+        className={`relative w-full ${widthMap[effectiveWidth]} bg-white shadow-2xl z-10 flex flex-col h-full ${
           position === 'left' ? 'mr-auto animate-slide-right' : 'ml-auto animate-slide-left'
         }`}
       >

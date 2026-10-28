@@ -6,22 +6,28 @@ import { Breadcrumbs, BreadcrumbItem } from '../ui/Miscellaneous';
 export interface PageHeaderProps {
   title: string;
   description?: string;
+  subtitle?: string;
   badge?: React.ReactNode;
   breadcrumbs?: BreadcrumbItem[];
   primaryAction?: React.ReactNode;
   secondaryActions?: React.ReactNode;
+  actions?: React.ReactNode;
   className?: string;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   description,
+  subtitle,
   badge,
   breadcrumbs,
   primaryAction,
   secondaryActions,
+  actions,
   className = '',
 }) => {
+  const desc = description || subtitle;
+
   return (
     <header className={`space-y-2 mb-6 ${className}`}>
       {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
@@ -34,18 +40,22 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             </h1>
             {badge && <div className="shrink-0">{badge}</div>}
           </div>
-          {description && (
+          {desc && (
             <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-              {description}
+              {desc}
             </p>
           )}
         </div>
 
-        {(primaryAction || secondaryActions) && (
-          <div className="flex items-center gap-2.5 shrink-0">
-            {secondaryActions}
-            {primaryAction}
-          </div>
+        {actions ? (
+          <div className="flex items-center gap-2.5 shrink-0">{actions}</div>
+        ) : (
+          (primaryAction || secondaryActions) && (
+            <div className="flex items-center gap-2.5 shrink-0">
+              {secondaryActions}
+              {primaryAction}
+            </div>
+          )
         )}
       </div>
     </header>

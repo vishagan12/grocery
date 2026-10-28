@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { sanitizeInput } from '@/lib/resilience';
-import { products as fallbackCatalog } from '@/data/products';
+import { products as fallbackCatalog, categories as fallbackCategories } from '@/data/products';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +28,22 @@ export async function GET(req: NextRequest) {
       .from('products')
       .select('*, product_variants(*)');
 
-    // 3. Fetch feature flags (e.g. accepting_orders)
+    // 3. Fetch categories
+    const { data: rawCategories } = await supabase
+      .from('categories')
+      .select('*');
+
+    let categories = fallbackCategories;
+    if (rawCategories && rawCategories.length > 0) {
+      categories = rawCategories.map((c: any) => ({
+        id: c.id,
+        nameEn: c.name_en,
+        nameTa: c.name_ta || '',
+        image: c.image || '',
+      }));
+    }
+
+    // 4. Fetch feature flags (e.g. accepting_orders)
     const { data: rawFlags } = await supabase
       .from('feature_flags')
       .select('key, enabled');
@@ -127,6 +142,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       orders,
       catalog,
+      categories,
       acceptingOrders: isAcceptingOrders,
     });
   } catch (err: any) {
@@ -335,7 +351,200 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ success: true, orderId, status: 4 });
     }
 
-    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+    // g) CREATE_PRODUCT
+    if (action === 'CREATE_PRODUCT') {
+      const { product } = body;
+      if (!product || !product.nameEn || !product.categoryId) {
+        return NextResponse.json({ error: 'nameEn and categoryId are required' }, { status: 400 });
+      }
+
+      const id = product.id ? sanitizeInput(product.id) : sanitizeInput(product.nameEn.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+      const nameEn = sanitizeInput(product.nameEn);
+      const nameTa = sanitizeInput(product.nameTa || '');
+      const categoryId = sanitizeInput(product.categoryId);
+      const image = product.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
+      const inStock = typeof product.inStock === 'boolean' ? product.inStock : true;
+
+      const variants = Array.isArray(product.variants) && product.variants.length > 0
+        ? product.variants.map((v: any, idx: number) => ({
+            id: v.id || `${id}-v${idx + 1}`,
+            product_id: id,
+            label: sanitizeInput(v.label || '1 pack'),
+            price: Math.max(0, Number(v.price) || 0),
+            mrp: Math.max(0, Number(v.mrp) || Number(v.price) || 0),
+            stock_qty: Math.max(0, Number(v.stock_qty) || 0),
+          }))
+        : [{
+            id: `${id}-v1`,
+            product_id: id,
+            label: 'Standard Pack',
+            price: 50,
+            mrp: 60,
+            stock_qty: 20,
+          }];
+
+      try {
+        await supabase.from('products').upsert({
+          id,
+          name_en: nameEn,
+          name_ta: nameTa,
+          category_id: categoryId,
+          image,
+          in_stock: inStock,
+        });
+
+        for (const v of variants) {
+          await supabase.from('product_variants').upsert(v);
+        }
+
+        await supabase.from('audit_logs').insert({
+          action: 'CREATE_PRODUCT',
+          details: { id, nameEn, categoryId },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (err: any) {
+        logger.warn('SUPABASE_PRODUCT_UPSERT_WARNING', err.message);
+      }
+
+      return NextResponse.json({
+        success: true,
+        product: {
+          id,
+          nameEn,
+          nameTa,
+          categoryId,
+          image,
+          inStock,
+          variants: variants.map((v: any) => ({
+            id: v.id,
+            label: v.label,
+            price: v.price,
+            mrp: v.mrp,
+            stock_qty: v.stock_qty,
+          })),
+        },
+      });
+    }
+
+    // h) UPDATE_PRODUCT
+    if (action === 'UPDATE_PRODUCT') {
+      const { product } = body;
+      if (!product || !product.id) {
+        return NextResponse.json({ error: 'product.id is required' }, { status: 400 });
+      }
+
+      const id = product.id;
+      const updateData: Record<string, any> = {};
+      if (product.nameEn) updateData.name_en = sanitizeInput(product.nameEn);
+      if (product.nameTa !== undefined) updateData.name_ta = sanitizeInput(product.nameTa);
+      if (product.categoryId) updateData.category_id = sanitizeInput(product.categoryId);
+      if (product.image) updateData.image = product.image;
+      if (typeof product.inStock === 'boolean') updateData.in_stock = product.inStock;
+
+      try {
+        await supabase.from('products').update(updateData).eq('id', id);
+
+        if (Array.isArray(product.variants)) {
+          for (const v of product.variants) {
+            if (v.id) {
+              await supabase.from('product_variants').upsert({
+                id: v.id,
+                product_id: id,
+                label: sanitizeInput(v.label || '1 pack'),
+                price: Math.max(0, Number(v.price) || 0),
+                mrp: Math.max(0, Number(v.mrp) || Number(v.price) || 0),
+                stock_qty: Math.max(0, Number(v.stock_qty) || 0),
+              });
+            }
+          }
+        }
+
+        await supabase.from('audit_logs').insert({
+          action: 'UPDATE_PRODUCT',
+          details: { id, updateData },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (err: any) {
+        logger.warn('SUPABASE_PRODUCT_UPDATE_WARNING', err.message);
+      }
+
+      return NextResponse.json({ success: true, product });
+    }
+
+    // i) DELETE_PRODUCT
+    if (action === 'DELETE_PRODUCT') {
+      const { productId } = body;
+      if (!productId) {
+        return NextResponse.json({ error: 'productId is required' }, { status: 400 });
+      }
+
+      try {
+        await supabase.from('product_variants').delete().eq('product_id', productId);
+        await supabase.from('products').delete().eq('id', productId);
+
+        await supabase.from('audit_logs').insert({
+          action: 'DELETE_PRODUCT',
+          details: { productId },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (err: any) {
+        logger.warn('SUPABASE_PRODUCT_DELETE_WARNING', err.message);
+      }
+
+      return NextResponse.json({ success: true, productId });
+    }
+
+    // j) CREATE_CATEGORY / UPDATE_CATEGORY / DELETE_CATEGORY
+    if (action === 'CREATE_CATEGORY' || action === 'UPDATE_CATEGORY') {
+      const { category } = body;
+      if (!category || !category.nameEn) {
+        return NextResponse.json({ error: 'category.nameEn is required' }, { status: 400 });
+      }
+
+      const id = category.id ? sanitizeInput(category.id) : sanitizeInput(category.nameEn.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+      const nameEn = sanitizeInput(category.nameEn);
+      const nameTa = sanitizeInput(category.nameTa || '');
+      const image = category.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80';
+
+      try {
+        await supabase.from('categories').upsert({ id, name_en: nameEn, name_ta: nameTa, image });
+      } catch (err: any) {
+        logger.warn('SUPABASE_CATEGORY_UPSERT_WARNING', err.message);
+      }
+
+      return NextResponse.json({ success: true, category: { id, nameEn, nameTa, image } });
+    }
+
+    if (action === 'DELETE_CATEGORY') {
+      const { categoryId } = body;
+      if (!categoryId) {
+        return NextResponse.json({ error: 'categoryId is required' }, { status: 400 });
+      }
+
+      try {
+        await supabase.from('categories').delete().eq('id', categoryId);
+      } catch (err: any) {
+        logger.warn('SUPABASE_CATEGORY_DELETE_WARNING', err.message);
+      }
+
+      return NextResponse.json({ success: true, categoryId });
+    }
+
+    // k) BULK_TOGGLE_STOCK
+    if (action === 'BULK_TOGGLE_STOCK') {
+      const { productIds, inStock } = body;
+      if (!Array.isArray(productIds) || typeof inStock !== 'boolean') {
+        return NextResponse.json({ error: 'productIds array and inStock boolean required' }, { status: 400 });
+      }
+
+      try {
+        await supabase.from('products').update({ in_stock: inStock }).in('id', productIds);
+      } catch (err: any) {
+        logger.warn('SUPABASE_BULK_TOGGLE_WARNING', err.message);
+      }
+
+      return NextResponse.json({ success: true, productIds, inStock });
+    }
   } catch (err: any) {
     logger.error('ADMIN_PATCH_FAILED', 'Failed to process admin action', { error: err.message });
     return NextResponse.json({ error: err.message || 'Operation failed' }, { status: 500 });

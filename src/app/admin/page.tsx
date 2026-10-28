@@ -42,7 +42,14 @@ import {
   Save,
 } from 'lucide-react';
 import { AdminLayoutShell } from '@/components/admin/AdminLayoutShell';
-import { AdminDashboard, AdminOrdersView } from '@/components/admin';
+import {
+  AdminDashboard,
+  AdminOrdersView,
+  AdminProductsView,
+  AdminCategoriesView,
+  AdminInventoryView,
+  AdminCategoryData,
+} from '@/components/admin';
 
 interface OrderItem {
   id: string;
@@ -141,6 +148,7 @@ export default function AdminPage() {
   // Core Data
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [catalog, setCatalog] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<AdminCategoryData[]>([]);
   const [acceptingOrders, setAcceptingOrders] = useState(true);
   const [loading, setLoading] = useState(true);
 
@@ -153,7 +161,8 @@ export default function AdminPage() {
   const [barcodeSearch, setBarcodeSearch] = useState('');
 
   // Navigation & stage switcher state
-  const [mobileTab, setMobileTab] = useState<'dashboard' | 'orders' | 'stock' | 'gayoo' | 'revenue'>('dashboard');
+  const [mobileTab, setMobileTab] = useState<'dashboard' | 'orders' | 'products' | 'categories' | 'stock' | 'gayoo' | 'revenue'>('dashboard');
+  const [filterCategoryForProducts, setFilterCategoryForProducts] = useState<string | undefined>(undefined);
   const [inspectedOrderId, setInspectedOrderId] = useState<string | null>(null);
   const [mobileStage, setMobileStage] = useState<'all' | 'new' | 'packing' | 'out' | 'delivered'>('all');
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -207,6 +216,9 @@ export default function AdminPage() {
         const data = await res.json();
         setOrders(data.orders || []);
         setCatalog(data.catalog || []);
+        if (data.categories) {
+          setCategories(data.categories);
+        }
         if (typeof data.acceptingOrders === 'boolean') {
           setAcceptingOrders(data.acceptingOrders);
         }
@@ -496,6 +508,170 @@ export default function AdminPage() {
     document.body.removeChild(link);
   };
 
+  // Export Amman Store Stock Inventory CSV
+  const handleExportStockCsv = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const headers = ['Product_ID', 'Name_EN', 'Name_TA', 'Category', 'Variant_ID', 'Variant_Label', 'Price', 'MRP', 'Stock_Qty', 'In_Stock'];
+    const rows: string[][] = [];
+    catalog.forEach((p) => {
+      p.variants.forEach((v) => {
+        rows.push([
+          p.id,
+          `"${p.nameEn.replace(/"/g, '""')}"`,
+          `"${(p.nameTa || '').replace(/"/g, '""')}"`,
+          p.categoryId,
+          v.id,
+          `"${v.label.replace(/"/g, '""')}"`,
+          String(v.price),
+          String(v.mrp),
+          String(v.stock_qty ?? 0),
+          p.inStock ? 'TRUE' : 'FALSE',
+        ]);
+      });
+    });
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `amman_stock_${today}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleInventoryStockStep = (productId: string, variantId: string, newStock: number) => {
+    handleUpdateVariant(productId, variantId, 'stock_qty', newStock);
+  };
+
+  const handleInventoryPriceChange = async (productId: string, variantId: string, newPrice: number, newMrp: number) => {
+    await handleUpdateVariant(productId, variantId, 'price', newPrice);
+    if (newMrp !== undefined) {
+      await handleUpdateVariant(productId, variantId, 'mrp', newMrp);
+    }
+  };
+
+  // Product CRUD
+  const handleCreateProduct = async (productData: any) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CREATE_PRODUCT', product: productData }),
+      });
+      if (res.ok) {
+        setCatalog((prev) => [productData, ...prev]);
+        setSyncToast(`Added product "${productData.nameEn}" successfully`);
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Create product failed:', err);
+    }
+  };
+
+  const handleUpdateProduct = async (productData: any) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'UPDATE_PRODUCT', product: productData }),
+      });
+      if (res.ok) {
+        setCatalog((prev) => prev.map((p) => (p.id === productData.id ? productData : p)));
+        setSyncToast(`Updated product "${productData.nameEn}"`);
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Update product failed:', err);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE_PRODUCT', productId }),
+      });
+      if (res.ok) {
+        setCatalog((prev) => prev.filter((p) => p.id !== productId));
+        setSyncToast('Product removed');
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Delete product failed:', err);
+    }
+  };
+
+  // Category CRUD
+  const handleCreateCategory = async (catData: any) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CREATE_CATEGORY', category: catData }),
+      });
+      if (res.ok) {
+        setCategories((prev) => [...prev, catData]);
+        setSyncToast(`Category "${catData.nameEn}" created`);
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Create category failed:', err);
+    }
+  };
+
+  const handleUpdateCategory = async (catData: any) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'UPDATE_CATEGORY', category: catData }),
+      });
+      if (res.ok) {
+        setCategories((prev) => prev.map((c) => (c.id === catData.id ? catData : c)));
+        setSyncToast(`Category "${catData.nameEn}" updated`);
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Update category failed:', err);
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE_CATEGORY', categoryId }),
+      });
+      if (res.ok) {
+        setCategories((prev) => prev.filter((c) => c.id !== categoryId));
+        setSyncToast('Category deleted');
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Delete category failed:', err);
+    }
+  };
+
+  const handleBulkToggleStock = async (productIds: string[], inStock: boolean) => {
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'BULK_TOGGLE_STOCK', productIds, inStock }),
+      });
+      if (res.ok) {
+        const idSet = new Set(productIds);
+        setCatalog((prev) => prev.map((p) => (idSet.has(p.id) ? { ...p, inStock } : p)));
+        setSyncToast(`Updated ${productIds.length} items to ${inStock ? 'Online' : 'Offline'}`);
+        setTimeout(() => setSyncToast(null), 4000);
+      }
+    } catch (err) {
+      console.warn('Bulk toggle stock failed:', err);
+    }
+  };
+
   // KPI calculations
   const kpis = useMemo(() => {
     let rev = 0;
@@ -779,456 +955,140 @@ export default function AdminPage() {
           )}
 
           {/* ==================================================================== */}
-          {/* ZONE B: LIVE STOCK SWITCHBOARD & GAYOO POS SYNC PANEL */}
+          {/* ZONE 3: PRODUCTS CATALOG (LIST, ADD, EDIT, DELETE, VARIANTS) */}
           {/* ==================================================================== */}
-          <div
-            id="inventory-section"
-            className={`${
-              mobileTab === 'stock' || mobileTab === 'gayoo'
-                ? 'block'
-                : 'hidden'
-            }`}
-          >
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch pt-2">
-              {/* LEFT PANEL: INSTANT STOCK & PRICE SWITCHBOARD */}
-              <div
-                className={`xl:col-span-8 flex-col gap-4 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm ${
-                  mobileTab === 'stock' || mobileTab === 'orders' ? 'flex' : 'hidden lg:flex'
-                }`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-100">
+          {mobileTab === 'products' && (
+            <AdminProductsView
+              products={catalog as any}
+              categories={categories}
+              initialFilterCategory={filterCategoryForProducts}
+              onUpdateProduct={handleUpdateProduct}
+              onCreateProduct={handleCreateProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onToggleProductStock={handleToggleInStock}
+              onBulkToggleStock={handleBulkToggleStock}
+              onRefresh={loadDashboardData}
+            />
+          )}
+
+          {/* ==================================================================== */}
+          {/* ZONE 4: STORE CATEGORIES (LIST, ADD, EDIT, DELETE, SAFE GUARD) */}
+          {/* ==================================================================== */}
+          {mobileTab === 'categories' && (
+            <AdminCategoriesView
+              categories={categories}
+              products={catalog as any}
+              onCreateCategory={handleCreateCategory}
+              onUpdateCategory={handleUpdateCategory}
+              onDeleteCategory={handleDeleteCategory}
+              onSelectCategory={(catId) => {
+                setFilterCategoryForProducts(catId);
+                setMobileTab('products');
+              }}
+              onRefresh={loadDashboardData}
+            />
+          )}
+
+          {/* ==================================================================== */}
+          {/* ZONE 5: INVENTORY & STOCK BUFFER SWITCHBOARD */}
+          {/* ==================================================================== */}
+          {mobileTab === 'stock' && (
+            <AdminInventoryView
+              products={catalog as any}
+              categories={categories}
+              onUpdateVariant={handleUpdateVariant}
+              onToggleProductStock={handleToggleInStock}
+              onExportStockCsv={handleExportStockCsv}
+              onRefresh={loadDashboardData}
+            />
+          )}
+
+          {/* ==================================================================== */}
+          {/* ZONE 6: GAYOO POS / ERP SYNC PANEL */}
+          {/* ==================================================================== */}
+          {mobileTab === 'gayoo' && (
+            <div className="max-w-2xl mx-auto p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#F1F9EC] text-[#143B0D] flex items-center justify-center">
+                    <Layers className="w-5 h-5 text-[#143B0D]" />
+                  </div>
                   <div>
-                    <h3 className="font-bold text-base text-slate-900">Instant Stock &amp; Price Switchboard</h3>
-                    <p className="text-[11px] text-slate-500">
-                      தானியங்கி கையிருப்பு மேலாண்மை • 5 அலகுகளுக்கு கீழ் இருந்தால் ஆன்லைனில் முடக்கப்படும்
-                    </p>
-                  </div>
-                  <span className="px-2.5 py-1 rounded font-mono text-[10px] bg-[#ffdad6] text-[#ba1a1a] font-bold uppercase">
-                    Auto Out-of-Stock Guard &lt; 5 Units
-                  </span>
-                </div>
-
-                {/* Mobile & Desktop Search & Filter Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search 1,000+ products in English, Tamil, or ID..."
-                      className="h-10 w-full pl-9 pr-3 text-sm bg-slate-50 text-slate-900 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#005d42]"
-                    />
-                  </div>
-
-                  {/* Mobile Quick Filter Chips */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-                    <button
-                      onClick={() => setStockQuickFilter('all')}
-                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
-                        stockQuickFilter === 'all'
-                          ? 'bg-[#005d42] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      All Items ({catalog.length})
-                    </button>
-                    <button
-                      onClick={() => setStockQuickFilter('low')}
-                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
-                        stockQuickFilter === 'low'
-                          ? 'bg-rose-600 text-white shadow-xs'
-                          : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
-                      }`}
-                    >
-                      Low Stock (&lt;5)
-                    </button>
-                    <button
-                      onClick={() => setStockQuickFilter('out')}
-                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
-                        stockQuickFilter === 'out'
-                          ? 'bg-slate-800 text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      Out of Stock
-                    </button>
+                    <h3 className="font-bold text-base text-slate-900">Gayoo POS / ERP Sync Bridge</h3>
+                    <p className="text-xs text-slate-500">கேயூ பில்லிங் மென்பொருள் ஒருங்கிணைப்பு</p>
                   </div>
                 </div>
+                <span className="px-2.5 py-1 rounded font-mono text-[10px] bg-[#F1F9EC] text-[#143B0D] font-bold uppercase tracking-wider">
+                  Live Bridge
+                </span>
+              </div>
 
-                {/* Category Horizontal Filter Pills */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-                  {[
-                    { id: 'All', label: 'All Categories' },
-                    { id: 'rice-grains', label: 'Rice & Grains' },
-                    { id: 'dals-pulses', label: 'Dals & Spices' },
-                    { id: 'oils-ghee', label: 'Oils & Ghee' },
-                    { id: 'dairy-eggs', label: 'Dairy & Milk' },
-                    { id: 'vegetables-fruits', label: 'Fruits & Veg' },
-                    { id: 'snacks-biscuits', label: 'Snacks' },
-                    { id: 'beverages', label: 'Beverages' },
-                    { id: 'household-pooja', label: 'Household & Pooja' },
-                  ].map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className={`min-h-[36px] px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-                        selectedCategory === cat.id
-                          ? 'bg-[#005d42] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
+              {/* Drag and Drop / Tap Zone */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".csv,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleCsvFileUpload(f);
+                }}
+              />
+
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) handleCsvFileUpload(f);
+                }}
+                className="min-h-[160px] p-6 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-[#76CA3E] active:bg-slate-100 flex flex-col items-center justify-center text-center cursor-pointer transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#F1F9EC] text-[#143B0D] flex items-center justify-center mb-2 shadow-xs">
+                  <Upload className="w-6 h-6" />
                 </div>
-
-                {/* MOBILE AISLE-WALK VIEW (< 768px): Thumb-Friendly Mobile Cards */}
-                <div className="block md:hidden space-y-3">
-                  {filteredCatalog.slice(0, 30).map((product) => {
-                    const firstVariant = product.variants[0] || { id: 'v1', label: '1 pack', price: 50, mrp: 60, stock_qty: 15 };
-                    const isLowStock = (firstVariant.stock_qty ?? 0) < 5;
-                    const isSaved = modifiedVariants[firstVariant.id];
-
-                    return (
-                      <div
-                        key={product.id}
-                        className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs space-y-3"
-                      >
-                        {/* Top Row: Thumbnail + Names + Online Toggle */}
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="flex items-center gap-3 min-w-0">
-                            {product.image ? (
-                              <img
-                                src={product.image}
-                                alt={product.nameEn}
-                                width={48}
-                                height={48}
-                                loading="lazy"
-                                className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
-                                <Package className="w-6 h-6" />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <h4 className="font-bold text-sm text-slate-900 truncate leading-tight">
-                                {product.nameEn}
-                              </h4>
-                              {product.nameTa && (
-                                <p className="text-[11px] text-slate-500 truncate leading-tight mt-0.5">
-                                  {product.nameTa}
-                                </p>
-                              )}
-                              <span className="inline-block mt-1 font-mono text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">
-                                {firstVariant.label}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Online Toggle */}
-                          <div className="flex flex-col items-end shrink-0">
-                            <span className="text-[10px] font-mono font-bold text-slate-500 mb-1">Online</span>
-                            <button
-                              onClick={() => handleToggleInStock(product.id, product.inStock)}
-                              className={`min-h-[44px] min-w-[52px] rounded-full flex items-center px-1 transition-colors shadow-inner ${
-                                product.inStock ? 'bg-[#97f5cc] justify-end' : 'bg-[#ffdad6] justify-start'
-                              }`}
-                              aria-label={`Toggle online status for ${product.nameEn}`}
-                            >
-                              <div className={`w-5 h-5 rounded-full ${product.inStock ? 'bg-[#005d42]' : 'bg-[#ba1a1a]'} shadow`}></div>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Alert Banner for Low Stock */}
-                        {isLowStock && (
-                          <div className="w-full py-1.5 px-3 rounded-lg bg-[#ffdad6] text-[#ba1a1a] text-[11px] font-mono font-bold flex items-center gap-1.5">
-                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                            <span>AUTO-DISABLED ONLINE (&lt;5 BUFFER • {firstVariant.stock_qty ?? 0} left)</span>
-                          </div>
-                        )}
-
-                        {/* Bottom Inline Edit Row: Price, MRP, Stock Qty with touch steppers */}
-                        <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-slate-100">
-                          {/* Price */}
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
-                              Price (₹)
-                            </label>
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              value={firstVariant.price}
-                              onChange={(e) =>
-                                handleUpdateVariant(product.id, firstVariant.id, 'price', parseFloat(e.target.value) || 0)
-                              }
-                              className="w-full h-10 px-2 font-mono text-base font-bold text-slate-900 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#005d42]"
-                            />
-                          </div>
-
-                          {/* MRP */}
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
-                              MRP (₹)
-                            </label>
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              value={firstVariant.mrp}
-                              onChange={(e) =>
-                                handleUpdateVariant(product.id, firstVariant.id, 'mrp', parseFloat(e.target.value) || 0)
-                              }
-                              className="w-full h-10 px-2 font-mono text-base text-slate-600 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#005d42]"
-                            />
-                          </div>
-
-                          {/* Stock Qty Stepper */}
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <label className="text-[10px] font-mono uppercase font-bold text-slate-500 block">
-                                Stock Qty
-                              </label>
-                              {isSaved && (
-                                <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
-                                  <Check className="w-3 h-3" /> Saved
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => {
-                                  const current = firstVariant.stock_qty ?? 0;
-                                  if (current > 0) {
-                                    handleUpdateVariant(product.id, firstVariant.id, 'stock_qty', current - 1);
-                                  }
-                                }}
-                                className="min-h-[40px] min-w-[36px] bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg flex items-center justify-center text-slate-700"
-                                aria-label="Decrease stock"
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-
-                              <input
-                                type="number"
-                                inputMode="numeric"
-                                value={firstVariant.stock_qty}
-                                onChange={(e) =>
-                                  handleUpdateVariant(product.id, firstVariant.id, 'stock_qty', parseInt(e.target.value, 10) || 0)
-                                }
-                                className={`w-full h-10 text-center font-mono text-base font-bold rounded-lg border ${
-                                  isLowStock
-                                    ? 'bg-[#ffdad6] text-[#ba1a1a] border-rose-300'
-                                    : 'bg-slate-50 text-[#005d42] border-slate-200'
-                                } focus:outline-none focus:ring-2 focus:ring-[#005d42]`}
-                              />
-
-                              <button
-                                onClick={() => {
-                                  const current = firstVariant.stock_qty ?? 0;
-                                  handleUpdateVariant(product.id, firstVariant.id, 'stock_qty', current + 1);
-                                }}
-                                className="min-h-[40px] min-w-[36px] bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-lg flex items-center justify-center text-slate-700"
-                                aria-label="Increase stock"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* DESKTOP VIEW (hidden md:block): Dense Data Table */}
-                <div className="hidden md:block w-full overflow-x-auto rounded-xl border border-slate-200">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-100 font-mono text-[11px] uppercase tracking-wider text-slate-600">
-                      <tr>
-                        <th className="py-2.5 px-3">Product Name / தமிழ் விவரம்</th>
-                        <th className="py-2.5 px-2">Pack Variant</th>
-                        <th className="py-2.5 px-2">Price (₹)</th>
-                        <th className="py-2.5 px-2">MRP (₹)</th>
-                        <th className="py-2.5 px-2">Stock (Qty)</th>
-                        <th className="py-2.5 px-3">Buffer Status</th>
-                        <th className="py-2.5 px-3 text-right">Online Toggle</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 bg-white">
-                      {filteredCatalog.slice(0, 30).map((product) => {
-                        const firstVariant = product.variants[0] || { id: 'v1', label: '1 pack', price: 50, mrp: 60, stock_qty: 15 };
-                        const isLowStock = (firstVariant.stock_qty ?? 0) < 5;
-
-                        return (
-                          <tr key={product.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="py-2 px-3">
-                              <div className="font-bold text-slate-900">{product.nameEn}</div>
-                              {product.nameTa && (
-                                <div className="text-[11px] text-slate-500">{product.nameTa}</div>
-                              )}
-                            </td>
-                            <td className="py-2 px-2 font-mono text-[11px] text-slate-700">
-                              {firstVariant.label}
-                            </td>
-                            <td className="py-2 px-2">
-                              <input
-                                type="number"
-                                value={firstVariant.price}
-                                onChange={(e) =>
-                                  handleUpdateVariant(product.id, firstVariant.id, 'price', parseFloat(e.target.value) || 0)
-                                }
-                                className="w-16 h-7 px-1.5 font-mono text-xs text-slate-900 bg-slate-100 rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#005d42]"
-                              />
-                            </td>
-                            <td className="py-2 px-2">
-                              <input
-                                type="number"
-                                value={firstVariant.mrp}
-                                onChange={(e) =>
-                                  handleUpdateVariant(product.id, firstVariant.id, 'mrp', parseFloat(e.target.value) || 0)
-                                }
-                                className="w-16 h-7 px-1.5 font-mono text-xs text-slate-500 bg-slate-100 rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#005d42]"
-                              />
-                            </td>
-                            <td className="py-2 px-2">
-                              <input
-                                type="number"
-                                value={firstVariant.stock_qty}
-                                onChange={(e) =>
-                                  handleUpdateVariant(product.id, firstVariant.id, 'stock_qty', parseInt(e.target.value, 10) || 0)
-                                }
-                                className={`w-16 h-7 px-1.5 font-mono text-xs font-bold rounded border ${
-                                  isLowStock
-                                    ? 'bg-[#ffdad6] text-[#ba1a1a] border-rose-300'
-                                    : 'bg-slate-100 text-[#005d42] border-slate-200'
-                                } focus:outline-none focus:ring-1 focus:ring-[#005d42]`}
-                              />
-                            </td>
-                            <td className="py-2 px-3">
-                              {isLowStock ? (
-                                <span className="px-2 py-0.5 rounded font-mono text-[9px] bg-[#ffdad6] text-[#ba1a1a] font-bold uppercase">
-                                  AUTO-DISABLED (&lt;5 BUFFER)
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded font-mono text-[9px] bg-[#97f5cc] text-[#002115] font-bold uppercase">
-                                  Active &amp; In Stock
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-right">
-                              <button
-                                onClick={() => handleToggleInStock(product.id, product.inStock)}
-                                className={`w-8 h-4 rounded-full inline-flex items-center px-0.5 transition-colors shadow-inner ${
-                                  product.inStock ? 'bg-[#97f5cc] justify-end' : 'bg-[#ffdad6] justify-start'
-                                }`}
-                              >
-                                <div className={`w-3 h-3 rounded-full ${product.inStock ? 'bg-[#005d42]' : 'bg-[#ba1a1a]'}`}></div>
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="flex items-center justify-between text-slate-500 font-mono text-[11px] pt-1">
-                  <span>Showing {Math.min(30, filteredCatalog.length)} of {catalog.length} items</span>
-                  <span className="text-[#005d42] font-bold">POS Master Sync V4.19</span>
+                <span className="font-bold text-sm text-slate-800">Tap or Drop Gayoo POS Stock CSV</span>
+                <span className="text-xs text-slate-500 mt-1">1-Click sync counter stock &amp; selling prices from phone or desktop</span>
+                <div className="mt-3 px-2.5 py-1 rounded bg-slate-200 text-slate-700 font-mono text-xs">
+                  Columns: Name/ID, Variant, Price, MRP, Stock
                 </div>
               </div>
 
-              {/* RIGHT PANEL: GAYOO POS / ERP SYNC */}
-              <div
-                id="gayoo-section"
-                className={`xl:col-span-4 flex-col justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm ${
-                  mobileTab === 'gayoo' || mobileTab === 'orders' ? 'flex' : 'hidden lg:flex'
-                }`}
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Layers className="w-5 h-5 text-[#005d42]" />
-                      <h3 className="font-bold text-base text-slate-900">Gayoo POS / ERP Sync</h3>
-                    </div>
-                    <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-[#97f5cc] text-[#002115] font-bold uppercase">
-                      Live Bridge
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500">
-                    கேயூ பில்லிங் மென்பொருள் ஒருங்கிணைப்பு
-                  </p>
-
-                  {/* Drag and Drop / Tap Zone */}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept=".csv,.txt"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) handleCsvFileUpload(f);
-                    }}
-                  />
-
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const f = e.dataTransfer.files?.[0];
-                      if (f) handleCsvFileUpload(f);
-                    }}
-                    className="min-h-[140px] p-5 sm:p-6 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 hover:border-[#005d42] active:bg-slate-100 flex flex-col items-center justify-center text-center cursor-pointer transition-colors"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-[#97f5cc] text-[#005d42] flex items-center justify-center mb-2 shadow-sm">
-                      <Upload className="w-6 h-6" />
-                    </div>
-                    <span className="font-bold text-xs sm:text-sm text-slate-800">
-                      Tap or Drop Gayoo POS Stock CSV
-                    </span>
-                    <span className="text-[11px] text-slate-500 mt-0.5">
-                      1-Click sync counter stock &amp; selling prices from phone/desktop
-                    </span>
-                    <div className="mt-2 px-2 py-1 rounded bg-slate-200 text-slate-700 font-mono text-[10px]">
-                      Columns: Name/ID, Variant, Price, MRP, Stock
-                    </div>
-                  </div>
-
-                  {/* Live Indicator Card */}
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                    <div className="flex items-center gap-2 font-mono text-xs font-semibold text-[#005d42]">
-                      <span className="w-2 h-2 rounded-full bg-[#005d42] animate-pulse"></span>
-                      <span>Last Synced with Counter Gayoo POS: Today</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-slate-600">
-                      <span>0 Conflicts</span>
-                      <span className="font-mono font-bold text-slate-900">{catalog.length} SKUs Monitored</span>
-                    </div>
-                    <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-[#005d42] h-full w-full"></div>
-                    </div>
-                  </div>
+              {/* Live Status Card */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center gap-2 font-mono text-xs font-semibold text-[#143B0D]">
+                  <span className="w-2 h-2 rounded-full bg-[#76CA3E] animate-pulse"></span>
+                  <span>Last Synced with Counter Gayoo POS: Today</span>
                 </div>
-
-                {/* Action Export Button */}
-                <div className="space-y-2 pt-2 border-t border-slate-100">
-                  <button
-                    onClick={handleExportDaybook}
-                    className="w-full min-h-[44px] h-11 px-3 rounded-xl bg-[#283044] hover:bg-[#1e2330] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Download Today&apos;s Online Bills (CSV)</span>
-                  </button>
-                  <p className="text-center font-mono text-[10px] text-slate-400">
-                    Formatted for Gayoo Tally XML &amp; Daybook Auto-Import
-                  </p>
+                <div className="flex items-center justify-between text-xs text-slate-600">
+                  <span>0 Conflicts</span>
+                  <span className="font-mono font-bold text-slate-900">{catalog.length} SKUs Monitored</span>
                 </div>
+                <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-[#76CA3E] h-full w-full"></div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <button
+                  onClick={handleExportDaybook}
+                  className="flex-1 min-h-[44px] h-11 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Today&apos;s Online Bills (CSV)</span>
+                </button>
+                <button
+                  onClick={handleExportStockCsv}
+                  className="min-h-[44px] h-11 px-4 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center justify-center gap-2 transition-colors"
+                >
+                  <FileText className="w-4 h-4 text-slate-500" />
+                  <span>Export Master Stock CSV</span>
+                </button>
               </div>
             </div>
-          </div>
+          )}
 
           {/* ==================================================================== */}
           {/* ZONE C: REVENUE & DAILY SETTLEMENT VIEW */}
