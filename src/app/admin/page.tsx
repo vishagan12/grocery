@@ -41,6 +41,7 @@ import {
   Minus,
   Save,
 } from 'lucide-react';
+import { AdminLayoutShell } from '@/components/admin/AdminLayoutShell';
 
 interface OrderItem {
   id: string;
@@ -849,482 +850,44 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ==================================================================== */}
-      {/* MOBILE COMPACT STICKY TOP APP BAR (< 1024px) */}
-      {/* ==================================================================== */}
-      <header className="sticky top-0 z-30 bg-[#064e3b] text-white px-4 py-3 shadow-md flex items-center justify-between gap-3 lg:hidden">
-        {/* Left: Hamburger Drawer Toggle */}
-        <button
-          onClick={() => setMobileDrawerOpen(true)}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-[#005d42] active:bg-[#004732] transition-colors -ml-1"
-          aria-label="Open Admin Menu"
-        >
-          <Menu className="w-6 h-6 text-white" />
-        </button>
-
-        {/* Center: Brand Title + Online Dot */}
-        <div className="flex items-center gap-2">
-          <Store className="w-5 h-5 text-[#97f5cc]" />
-          <span className="font-bold text-base tracking-tight">Sri Amman Admin</span>
-          <span
-            className={`w-2.5 h-2.5 rounded-full ${
-              acceptingOrders ? 'bg-[#97f5cc] animate-pulse' : 'bg-rose-500'
-            }`}
-            title={acceptingOrders ? 'Store Online' : 'Store Paused'}
-          />
-        </div>
-
-        {/* Right: Quick Active Orders Count Badge */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              if (soundEnabled) playNewOrderChime();
-            }}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[#97f5cc] hover:bg-[#005d42] active:bg-[#004732]"
-            aria-label="Sound Test"
-            title="Test Audio Chime"
-          >
-            <Volume2 className="w-5 h-5" />
-          </button>
-          <span className="bg-amber-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded-full font-mono">
-            {activeOrdersCount} Active
-          </span>
-        </div>
-      </header>
-
-      {/* ==================================================================== */}
-      {/* MOBILE SLIDE-OVER DRAWER OVERLAY (< 1024px) */}
-      {/* ==================================================================== */}
-      {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            onClick={() => setMobileDrawerOpen(false)}
-          />
-
-          {/* Drawer Content */}
-          <div className="relative w-4/5 max-w-xs bg-[#005d42] text-white h-full shadow-2xl flex flex-col justify-between p-4 overflow-y-auto">
-            <div>
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-[#00513a]">
-                <div className="flex items-center gap-2">
-                  <Store className="w-5 h-5 text-[#97f5cc]" />
-                  <div>
-                    <h3 className="font-bold text-sm leading-tight">Sri Amman Store</h3>
-                    <p className="text-[10px] text-[#7bd8b1]">Admin Control Hub</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-[#97f5cc] hover:bg-[#00513a]"
-                  aria-label="Close menu"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Hardware & Kiosk Controls */}
-              <div className="my-4 p-3 rounded-xl bg-[#00513a] space-y-3">
-                <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-[#7bd8b1] block">
-                  Hardware &amp; Kiosk
-                </span>
-
-                {/* Auto Print Toggle */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold">
-                    <Printer className="w-4 h-4 text-[#97f5cc]" />
-                    <span>80mm Auto-Print</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const next = !autoPrintEnabled;
-                      setAutoPrintEnabled(next);
-                      localStorage.setItem('sas_autoprint_enabled', String(next));
-                    }}
-                    className={`min-h-[44px] px-3 py-1.5 rounded-lg font-mono text-xs font-bold uppercase transition-colors ${
-                      autoPrintEnabled ? 'bg-[#97f5cc] text-[#005d42]' : 'bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    {autoPrintEnabled ? 'ON' : 'OFF'}
-                  </button>
-                </div>
-
-                {/* Sound Alerts Toggle */}
-                <div className="flex items-center justify-between pt-2 border-t border-[#005d42]">
-                  <div className="flex items-center gap-2 text-xs font-semibold">
-                    {soundEnabled ? <Volume2 className="w-4 h-4 text-[#97f5cc]" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
-                    <span>Chime Sounds</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const next = !soundEnabled;
-                      setSoundEnabled(next);
-                      localStorage.setItem('sas_sound_enabled', String(next));
-                    }}
-                    className={`min-h-[44px] px-3 py-1.5 rounded-lg font-mono text-xs font-bold uppercase transition-colors ${
-                      soundEnabled ? 'bg-[#97f5cc] text-[#005d42]' : 'bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    {soundEnabled ? 'ON' : 'OFF'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Navigation Quick Links inside drawer */}
-              <div className="space-y-1 text-xs">
-                <button
-                  onClick={() => {
-                    setMobileTab('orders');
-                    setMobileDrawerOpen(false);
-                  }}
-                  className={`w-full min-h-[44px] px-3 rounded-lg flex items-center justify-between ${
-                    mobileTab === 'orders' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#00513a]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <ClipboardList className="w-4 h-4" />
-                    <span>Live Dispatch Board</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-amber-500 text-slate-950 font-bold">
-                    {activeOrdersCount}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMobileTab('stock');
-                    setMobileDrawerOpen(false);
-                  }}
-                  className={`w-full min-h-[44px] px-3 rounded-lg flex items-center justify-between ${
-                    mobileTab === 'stock' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#00513a]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4" />
-                    <span>Inventory &amp; Buffer</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-[#ffdad6] text-[#ba1a1a] font-bold">
-                    {lowStockCount} Low
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMobileTab('gayoo');
-                    setMobileDrawerOpen(false);
-                  }}
-                  className={`w-full min-h-[44px] px-3 rounded-lg flex items-center justify-between ${
-                    mobileTab === 'gayoo' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#00513a]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Gayoo POS Bridge</span>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-[#97f5cc]" />
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMobileTab('revenue');
-                    setMobileDrawerOpen(false);
-                  }}
-                  className={`w-full min-h-[44px] px-3 rounded-lg flex items-center justify-between ${
-                    mobileTab === 'revenue' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#00513a]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <IndianRupee className="w-4 h-4" />
-                    <span>Daily Revenue &amp; Cash</span>
-                  </div>
-                  <span className="font-mono text-xs text-[#97f5cc] font-bold">₹{kpis.rev}</span>
-                </button>
-
-                <a
-                  href="/rider"
-                  target="_blank"
-                  className="w-full min-h-[44px] px-3 rounded-lg flex items-center justify-between text-[#7bd8b1] hover:bg-[#00513a]"
-                >
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4" />
-                    <span>Launch Rider Portal</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-
-              {/* Extra Tools: Language & Daybook */}
-              <div className="pt-4 border-t border-[#00513a] space-y-2">
-                <button
-                  onClick={() => setLang(lang === 'en' ? 'ta' : 'en')}
-                  className="w-full min-h-[44px] px-3 rounded-lg bg-[#00513a] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors"
-                >
-                  <Languages className="w-4 h-4 text-[#97f5cc]" />
-                  <span>Language: {lang === 'en' ? 'English (தமிழ்)' : 'தமிழ் (English)'}</span>
-                </button>
-
-                <button
-                  onClick={handleExportDaybook}
-                  className="w-full min-h-[44px] px-3 rounded-lg bg-[#047857] hover:bg-[#00513a] text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
-                >
-                  <Download className="w-4 h-4 text-[#97f5cc]" />
-                  <span>Export Daybook CSV</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Master Kill-Switch in Drawer */}
-            <div className="pt-4 border-t border-[#00513a]">
-              <div className="p-3 rounded-xl bg-[#00513a] flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-semibold text-white block">Online Orders</span>
-                  <span className={`text-[10px] font-mono font-bold ${acceptingOrders ? 'text-[#97f5cc]' : 'text-rose-400'}`}>
-                    {acceptingOrders ? 'ACCEPTING LIVE' : 'PAUSED'}
-                  </span>
-                </div>
-                <button
-                  onClick={handleToggleStore}
-                  className={`min-h-[44px] min-w-[56px] rounded-full flex items-center px-1 transition-colors shadow-inner ${
-                    acceptingOrders ? 'bg-[#97f5cc] justify-end' : 'bg-rose-500 justify-start'
-                  }`}
-                  aria-label="Toggle Online Orders"
-                >
-                  <div className="w-6 h-6 rounded-full bg-[#005d42] shadow"></div>
-                </button>
-              </div>
-            </div>
-          </div>
+      {/* Sync Toast Notification */}
+      {syncToast && (
+        <div className="fixed top-16 lg:top-20 right-4 lg:right-6 z-50 bg-[#143B0D] text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-[#76CA3E] flex items-center gap-2 max-w-sm">
+          <CheckCircle className="w-4 h-4 text-[#97F5CC] shrink-0" />
+          <span>{syncToast}</span>
         </div>
       )}
 
-      {/* ==================================================================== */}
-      {/* DESKTOP FIXED LEFT SIDEBAR (hidden on < 1024px) */}
-      {/* ==================================================================== */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-[260px] bg-[#005d42] text-white z-50 flex-col justify-between shadow-xl">
-        <div className="flex flex-col">
-          {/* Logo Header */}
-          <div className="p-3 bg-[#00513a]">
-            <div className="flex items-center gap-2 mb-1">
-              <Store className="w-5 h-5 text-[#97f5cc]" />
-              <span className="font-bold text-base tracking-tight leading-tight">Sri Amman</span>
-            </div>
-            <div className="text-[11px] text-[#7bd8b1]">ஸ்ரீ அம்மன் சூப்பர்மார்க்கெட்</div>
-            <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] text-[#7bd8b1] uppercase tracking-wider bg-[#005d42]/60 px-2 py-0.5 rounded font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#97f5cc] animate-pulse"></span>
-              Counter POS • Madurai
-            </div>
-          </div>
-
-          {/* Thermal Printer Kiosk Control */}
-          <div className="m-2 p-2.5 rounded bg-[#047857] text-white text-xs shadow-sm">
-            <div className="flex items-center justify-between pb-1.5">
-              <div className="flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${autoPrintEnabled ? 'bg-[#97f5cc] shadow-[0_0_6px_rgba(151,245,204,0.9)]' : 'bg-slate-400'}`}></span>
-                <span className="font-bold text-[11px] tracking-wide">80mm Auto-Print</span>
-              </div>
-              <button
-                onClick={() => {
-                  const next = !autoPrintEnabled;
-                  setAutoPrintEnabled(next);
-                  localStorage.setItem('sas_autoprint_enabled', String(next));
-                }}
-                className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase transition-colors ${
-                  autoPrintEnabled ? 'bg-[#005d42] text-[#97f5cc]' : 'bg-slate-700 text-slate-300'
-                }`}
-              >
-                {autoPrintEnabled ? 'KIOSK ON' : 'OFF'}
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between pt-1.5 border-t border-[#00513a] text-[#7bd8b1] text-[11px]">
-              <span className="flex items-center gap-1">
-                {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-                Sound Alerts
-              </span>
-              <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  localStorage.setItem('sas_sound_enabled', String(next));
-                }}
-                className={`w-7 h-4 rounded-full flex items-center px-0.5 transition-colors ${
-                  soundEnabled ? 'bg-[#97f5cc] justify-end' : 'bg-slate-600 justify-start'
-                }`}
-              >
-                <div className={`w-3 h-3 rounded-full ${soundEnabled ? 'bg-[#005d42]' : 'bg-slate-300'}`}></div>
-              </button>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex flex-col gap-1 px-2 mt-2 font-medium text-xs">
-            <button
-              onClick={() => setMobileTab('orders')}
-              className={`flex items-center justify-between px-3 py-2 rounded font-bold shadow-sm transition-colors text-left ${
-                mobileTab === 'orders' ? 'bg-[#047857] text-white' : 'text-[#7bd8b1] hover:bg-[#047857] hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4" />
-                <span>Live Dispatch Queue</span>
-              </div>
-              <span className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-[#fe932c] text-[#663500] font-bold">
-                {activeOrdersCount} Active
-              </span>
-            </button>
-
-            <a
-              href="#inventory-section"
-              onClick={() => setMobileTab('stock')}
-              className={`flex items-center justify-between px-3 py-2 rounded transition-colors ${
-                mobileTab === 'stock' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#047857] hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4" />
-                <span>Inventory &amp; Buffer</span>
-              </div>
-              <span className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-[#ffdad6] text-[#ba1a1a] font-bold">
-                {lowStockCount} Low
-              </span>
-            </a>
-
-            <a
-              href="#gayoo-section"
-              onClick={() => setMobileTab('gayoo')}
-              className={`flex items-center justify-between px-3 py-2 rounded transition-colors ${
-                mobileTab === 'gayoo' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#047857] hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4" />
-                <span>Gayoo POS Bridge</span>
-              </div>
-              <CheckCircle className="w-3.5 h-3.5 text-[#7bd8b1]" />
-            </a>
-
-            <button
-              onClick={() => setMobileTab('revenue')}
-              className={`flex items-center justify-between px-3 py-2 rounded transition-colors text-left ${
-                mobileTab === 'revenue' ? 'bg-[#047857] text-white font-bold' : 'text-[#7bd8b1] hover:bg-[#047857] hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <IndianRupee className="w-4 h-4" />
-                <span>Revenue &amp; Settlement</span>
-              </div>
-              <span className="font-mono text-[10px] text-[#97f5cc] font-bold">₹{kpis.rev}</span>
-            </button>
-
-            <a
-              href="/rider"
-              target="_blank"
-              className="flex items-center justify-between px-3 py-2 rounded text-[#7bd8b1] hover:bg-[#047857] hover:text-white transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4" />
-                <span>Launch Rider Portal</span>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </a>
-          </nav>
-        </div>
-
-        {/* Online Orders Accepting Switch */}
-        <div className="p-2">
-          <div className="p-2.5 rounded bg-[#00513a] shadow-sm flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-semibold text-white">Online Orders</span>
-              <span className={`text-[10px] font-mono font-bold ${acceptingOrders ? 'text-[#97f5cc]' : 'text-rose-400'}`}>
-                {acceptingOrders ? 'ACCEPTING LIVE' : 'PAUSED'}
-              </span>
-            </div>
-            <button
-              onClick={handleToggleStore}
-              className={`w-9 h-5 rounded-full flex items-center px-0.5 transition-colors shadow-inner ${
-                acceptingOrders ? 'bg-[#97f5cc] justify-end' : 'bg-rose-500 justify-start'
-              }`}
-            >
-              <div className="w-4 h-4 rounded-full bg-[#005d42] shadow"></div>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* ==================================================================== */}
-      {/* MAIN CONTENT WRAPPER (Desktop pl-[260px], Mobile w-full) */}
-      {/* ==================================================================== */}
-      <div className="w-full lg:pl-[260px] flex-1 flex flex-col">
-        {/* Desktop Sticky Header (hidden on mobile) */}
-        <header className="hidden lg:flex fixed top-0 left-[260px] right-0 h-16 bg-white/90 backdrop-blur-md z-40 border-b border-slate-200 items-center justify-between px-6 gap-4">
-          {/* Real-Time Revenue Ticker */}
-          <div className="flex items-center gap-3 overflow-x-auto py-1">
-            <div className="flex items-center gap-2 px-3 py-1 rounded bg-[#f2f3ff] border border-slate-200">
-              <span className="text-[10px] font-mono uppercase font-bold text-slate-500">Revenue</span>
-              <span className="font-bold text-sm text-[#005d42]">₹{kpis.rev}</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded bg-[#f2f3ff] border border-slate-200">
-              <span className="text-[10px] font-mono uppercase font-bold text-slate-500">UPI Paid</span>
-              <span className="font-bold text-sm text-slate-900">₹{kpis.upiRev}</span>
-              <span className="text-[10px] text-slate-500">({kpis.upiCount})</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded bg-[#f2f3ff] border border-slate-200">
-              <span className="text-[10px] font-mono uppercase font-bold text-slate-500">COD Collect</span>
-              <span className="font-bold text-sm text-[#904d00]">₹{kpis.codRev}</span>
-              <span className="text-[10px] text-slate-500">({kpis.codCount})</span>
-            </div>
-          </div>
-
-          {/* Quick Search & Actions */}
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex items-center">
-              <Barcode className="w-4 h-4 absolute left-2.5 text-slate-400" />
-              <input
-                type="text"
-                value={barcodeSearch}
-                onChange={(e) => setBarcodeSearch(e.target.value)}
-                placeholder="Scan barcode or #SAS-ID..."
-                className="h-8 w-56 pl-8 pr-3 text-xs bg-slate-100 text-slate-800 rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#005d42]"
-              />
-            </div>
-
-            <button
-              onClick={() => setLang(lang === 'en' ? 'ta' : 'en')}
-              className="h-8 px-2.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] flex items-center gap-1 transition-colors"
-            >
-              <Languages className="w-3.5 h-3.5" />
-              {lang === 'en' ? 'EN / தமிழ்' : 'தமிழ் / EN'}
-            </button>
-
-            <button
-              onClick={handleExportDaybook}
-              className="h-8 px-3 rounded bg-[#047857] hover:bg-[#005d42] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Daybook CSV
-            </button>
-
-            <button
-              onClick={loadDashboardData}
-              className="w-8 h-8 rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700"
-              title="Refresh Live Data"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-          </div>
-        </header>
-
-        {/* Sync Toast Notification */}
-        {syncToast && (
-          <div className="fixed top-16 lg:top-20 right-4 lg:right-6 z-50 bg-[#005d42] text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-[#97f5cc] flex items-center gap-2 max-w-sm">
-            <CheckCircle className="w-4 h-4 text-[#97f5cc] shrink-0" />
-            <span>{syncToast}</span>
-          </div>
-        )}
-
-        {/* Main Floor Container */}
-        <main className="w-full pt-4 lg:pt-20 px-3.5 sm:px-6 pb-28 lg:pb-12 space-y-4 sm:space-y-6">
+      {/* Main Responsive Admin Command Shell */}
+      <AdminLayoutShell
+        currentSection={mobileTab}
+        onSectionChange={(sec) => setMobileTab(sec as any)}
+        pendingOrdersCount={ordersCol0.length}
+        lowStockCount={lowStockCount}
+        acceptingOrders={acceptingOrders}
+        onToggleStore={handleToggleStore}
+        autoPrintEnabled={autoPrintEnabled}
+        onToggleAutoPrint={() => {
+          const next = !autoPrintEnabled;
+          setAutoPrintEnabled(next);
+          localStorage.setItem('sas_autoprint_enabled', String(next));
+        }}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => {
+          const next = !soundEnabled;
+          setSoundEnabled(next);
+          localStorage.setItem('sas_sound_enabled', String(next));
+        }}
+        lang={lang}
+        onToggleLang={() => setLang(lang === 'en' ? 'ta' : 'en')}
+        onLock={() => {
+          sessionStorage.removeItem('sas_admin_unlocked');
+          setUnlocked(false);
+        }}
+        searchQuery={barcodeSearch}
+        onSearchChange={setBarcodeSearch}
+      >
+        <div className="w-full space-y-4 sm:space-y-6">
           {/* Sub-Banner / Floor Terminal Status */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2.5">
@@ -2092,74 +1655,8 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-
-      {/* ==================================================================== */}
-      {/* MOBILE STICKY BOTTOM TAB SWITCHER (< 1024px) */}
-      {/* ==================================================================== */}
-      <nav
-        aria-label="Admin Navigation Tabs"
-        className="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-center justify-around lg:hidden shadow-lg"
-      >
-        {/* Tab 1: Orders */}
-        <button
-          onClick={() => setMobileTab('orders')}
-          className={`min-h-[44px] flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors relative ${
-            mobileTab === 'orders' ? 'text-[#005d42] font-bold' : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <div className="relative">
-            <ClipboardList className="w-5 h-5" />
-            {activeOrdersCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-amber-500 text-slate-950 font-extrabold text-[9px] px-1 rounded-full font-mono min-w-[16px] text-center">
-                {activeOrdersCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] tracking-tight mt-0.5">Orders</span>
-        </button>
-
-        {/* Tab 2: Stock */}
-        <button
-          onClick={() => setMobileTab('stock')}
-          className={`min-h-[44px] flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors relative ${
-            mobileTab === 'stock' ? 'text-[#005d42] font-bold' : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <div className="relative">
-            <Package className="w-5 h-5" />
-            {lowStockCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-rose-600 text-white font-extrabold text-[9px] px-1 rounded-full font-mono min-w-[16px] text-center">
-                {lowStockCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] tracking-tight mt-0.5">Stock</span>
-        </button>
-
-        {/* Tab 3: Gayoo Sync */}
-        <button
-          onClick={() => setMobileTab('gayoo')}
-          className={`min-h-[44px] flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors ${
-            mobileTab === 'gayoo' ? 'text-[#005d42] font-bold' : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <RefreshCw className="w-5 h-5" />
-          <span className="text-[10px] tracking-tight mt-0.5">Gayoo</span>
-        </button>
-
-        {/* Tab 4: Revenue */}
-        <button
-          onClick={() => setMobileTab('revenue')}
-          className={`min-h-[44px] flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-colors ${
-            mobileTab === 'revenue' ? 'text-[#005d42] font-bold' : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <IndianRupee className="w-5 h-5" />
-          <span className="text-[10px] tracking-tight mt-0.5">Revenue</span>
-        </button>
-      </nav>
+        </div>
+      </AdminLayoutShell>
     </div>
   );
 }
