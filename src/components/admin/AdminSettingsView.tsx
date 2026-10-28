@@ -270,10 +270,16 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {onTriggerTestPrint && (
-              <Button variant="outline" size="sm" onClick={onTriggerTestPrint} className="text-xs gap-1.5">
-                <Printer className="w-3.5 h-3.5" /> Test Print 80mm Slip
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onTriggerTestPrint}
+                icon={<Printer className="w-3.5 h-3.5 shrink-0" />}
+                className="text-xs whitespace-nowrap shrink-0 inline-flex flex-row items-center"
+              >
+                Test Print 80mm Slip
               </Button>
             )}
           </div>
@@ -355,8 +361,14 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
             </div>
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleTestChime} className="text-xs gap-1.5">
-            <Volume2 className="w-3.5 h-3.5" /> Play Sound Test
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleTestChime}
+            icon={<Volume2 className="w-3.5 h-3.5 shrink-0" />}
+            className="text-xs whitespace-nowrap shrink-0 inline-flex flex-row items-center"
+          >
+            Play Sound Test
           </Button>
         </div>
 

@@ -268,91 +268,88 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
             onClick={() => setMobileDrawerOpen(false)}
             aria-hidden="true"
           />
-          <aside className="relative w-72 max-w-[80vw] bg-[#143B0D] text-white h-full flex flex-col justify-between shadow-2xl z-10 p-4">
-            <div>
-              {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-[#1E4D12]">
-                <div className="flex items-center gap-2">
-                  <Store className="w-5 h-5 text-[#76CA3E]" />
-                  <div>
-                    <span className="font-extrabold text-sm block">Sri Amman</span>
-                    <span className="text-[10px] text-[#97F5CC] font-mono">Madurai Counter POS</span>
-                  </div>
+          <aside className="relative w-72 max-w-[80vw] bg-[#143B0D] text-white h-full max-h-screen flex flex-col justify-between shadow-2xl z-10 p-4">
+            <div className="flex items-center justify-between pb-4 border-b border-[#1E4D12] shrink-0">
+              <div className="flex items-center gap-2">
+                <Store className="w-5 h-5 text-[#76CA3E]" />
+                <div>
+                  <span className="font-extrabold text-sm block">Sri Amman</span>
+                  <span className="text-[10px] text-[#97F5CC] font-mono">Madurai Counter POS</span>
                 </div>
-                <button
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white"
-                  aria-label="Close menu"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
+              <button
+                onClick={() => setMobileDrawerOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-              {/* Navigation Links */}
-              <nav className="mt-4 space-y-6">
-                {navGroups.map((grp, gIdx) => (
-                  <div key={gIdx} className="space-y-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#97F5CC]/70 px-2 font-mono">
-                      {grp.group}
-                    </p>
-                    <div className="space-y-1">
-                      {grp.items.map((item) => {
-                        const isActive = currentSection === item.id;
-                        if (item.external) {
-                          return (
-                            <a
-                              key={item.id}
-                              href={item.href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-[#1E4D12] hover:text-white transition-colors"
-                            >
-                              <div className="flex items-center gap-2.5">
-                                {item.icon}
-                                <span>{item.label}</span>
-                              </div>
-                              <span className="text-[10px] text-[#97F5CC]">↗</span>
-                            </a>
-                          );
-                        }
-
+            {/* Navigation Links */}
+            <nav className="mt-4 space-y-6 flex-1 min-h-0 admin-sidebar-scroll pr-1">
+              {navGroups.map((grp, gIdx) => (
+                <div key={gIdx} className="space-y-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#97F5CC]/70 px-2 font-mono">
+                    {grp.group}
+                  </p>
+                  <div className="space-y-1">
+                    {grp.items.map((item) => {
+                      const isActive = currentSection === item.id;
+                      if (item.external) {
                         return (
-                          <button
+                          <a
                             key={item.id}
-                            onClick={() => {
-                              onSectionChange(item.id);
-                              setMobileDrawerOpen(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
-                              isActive
-                                ? 'bg-[#76CA3E] text-[#143B0D]'
-                                : 'text-slate-300 hover:bg-[#1E4D12] hover:text-white'
-                            }`}
+                            href={item.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:bg-[#1E4D12] hover:text-white transition-colors"
                           >
                             <div className="flex items-center gap-2.5">
                               {item.icon}
                               <span>{item.label}</span>
                             </div>
-                            {item.badge !== undefined && (
-                              <span
-                                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                                  isActive ? 'bg-[#143B0D] text-white' : item.badgeColor
-                                }`}
-                              >
-                                {item.badge}
-                              </span>
-                            )}
-                          </button>
+                            <span className="text-[10px] text-[#97F5CC]">↗</span>
+                          </a>
                         );
-                      })}
-                    </div>
+                      }
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            onSectionChange(item.id);
+                            setMobileDrawerOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                            isActive
+                              ? 'bg-[#76CA3E] text-[#143B0D]'
+                              : 'text-slate-300 hover:bg-[#1E4D12] hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            {item.icon}
+                            <span>{item.label}</span>
+                          </div>
+                          {item.badge !== undefined && (
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                                isActive ? 'bg-[#143B0D] text-white' : item.badgeColor
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
-              </nav>
-            </div>
+                </div>
+              ))}
+            </nav>
 
             {/* Bottom Drawer Actions */}
-            <div className="pt-4 border-t border-[#1E4D12] space-y-2">
+            <div className="pt-4 border-t border-[#1E4D12] space-y-2 shrink-0">
               <div className="p-2.5 rounded-xl bg-[#1E4D12] flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-white block">Online Orders</span>
@@ -391,101 +388,99 @@ export const AdminLayoutShell: React.FC<AdminLayoutShellProps> = ({
       {/* DESKTOP FIXED SIDEBAR (>= 1024px) */}
       {/* ==================================================================== */}
       <aside
-        className={`hidden lg:flex fixed left-0 top-0 h-full bg-[#143B0D] text-white z-50 flex-col justify-between shadow-xl transition-all duration-200 ${
+        className={`hidden lg:flex fixed left-0 top-0 h-screen max-h-screen bg-[#143B0D] text-white z-50 flex-col shadow-xl transition-all duration-200 select-none ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
-        <div className="flex flex-col">
-          {/* Brand Header */}
-          <div className="p-4 bg-[#143B0D] border-b border-[#1E4D12] flex items-center justify-between">
-            {!isCollapsed ? (
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[#76CA3E] text-[#143B0D] flex items-center justify-center shrink-0 shadow-xs">
-                  <Store className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <span className="font-extrabold text-sm text-white tracking-tight block truncate">
-                    Sri Amman
-                  </span>
-                  <span className="text-[10px] text-[#97F5CC] font-mono block truncate">
-                    Counter POS • Madurai
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="w-9 h-9 mx-auto rounded-xl bg-[#76CA3E] text-[#143B0D] flex items-center justify-center shadow-xs">
+        {/* Brand Header */}
+        <div className="p-4 bg-[#143B0D] border-b border-[#1E4D12] flex items-center justify-between shrink-0">
+          {!isCollapsed ? (
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-[#76CA3E] text-[#143B0D] flex items-center justify-center shrink-0 shadow-xs">
                 <Store className="w-5 h-5" />
               </div>
-            )}
-          </div>
+              <div className="min-w-0">
+                <span className="font-extrabold text-sm text-white tracking-tight block truncate">
+                  Sri Amman
+                </span>
+                <span className="text-[10px] text-[#97F5CC] font-mono block truncate">
+                  Counter POS • Madurai
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="w-9 h-9 mx-auto rounded-xl bg-[#76CA3E] text-[#143B0D] flex items-center justify-center shadow-xs">
+              <Store className="w-5 h-5" />
+            </div>
+          )}
+        </div>
 
-          {/* Navigation Links */}
-          <nav className="p-3 space-y-5 overflow-y-auto max-h-[calc(100vh-180px)]">
-            {navGroups.map((grp, gIdx) => (
-              <div key={gIdx} className="space-y-1">
-                {!isCollapsed && (
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#97F5CC]/60 px-3 font-mono">
-                    {grp.group}
-                  </p>
-                )}
-                <div className="space-y-0.5">
-                  {grp.items.map((item) => {
-                    const isActive = currentSection === item.id;
+        {/* Navigation Links with contained independent scrolling */}
+        <nav className="flex-1 min-h-0 admin-sidebar-scroll p-3 space-y-5">
+          {navGroups.map((grp, gIdx) => (
+            <div key={gIdx} className="space-y-1">
+              {!isCollapsed && (
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#97F5CC]/60 px-3 font-mono">
+                  {grp.group}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {grp.items.map((item) => {
+                  const isActive = currentSection === item.id;
 
-                    if (item.external) {
-                      return (
-                        <a
-                          key={item.id}
-                          href={item.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          title={isCollapsed ? item.label : undefined}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-[#1E4D12] hover:text-white transition-colors"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            {item.icon}
-                            {!isCollapsed && <span>{item.label}</span>}
-                          </div>
-                          {!isCollapsed && <span className="text-[10px] text-[#97F5CC]">↗</span>}
-                        </a>
-                      );
-                    }
-
+                  if (item.external) {
                     return (
-                      <button
+                      <a
                         key={item.id}
-                        onClick={() => onSectionChange(item.id)}
+                        href={item.href}
+                        target="_blank"
+                        rel="noreferrer"
                         title={isCollapsed ? item.label : undefined}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
-                          isActive
-                            ? 'bg-[#76CA3E] text-[#143B0D] shadow-xs'
-                            : 'text-slate-300 hover:bg-[#1E4D12] hover:text-white'
-                        }`}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-[#1E4D12] hover:text-white transition-colors"
                       >
                         <div className="flex items-center gap-2.5">
                           {item.icon}
                           {!isCollapsed && <span>{item.label}</span>}
                         </div>
-                        {!isCollapsed && item.badge !== undefined && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                              isActive ? 'bg-[#143B0D] text-white' : item.badgeColor
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
+                        {!isCollapsed && <span className="text-[10px] text-[#97F5CC]">↗</span>}
+                      </a>
                     );
-                  })}
-                </div>
+                  }
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => onSectionChange(item.id)}
+                      title={isCollapsed ? item.label : undefined}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                        isActive
+                          ? 'bg-[#76CA3E] text-[#143B0D] shadow-xs'
+                          : 'text-slate-300 hover:bg-[#1E4D12] hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {item.icon}
+                        {!isCollapsed && <span>{item.label}</span>}
+                      </div>
+                      {!isCollapsed && item.badge !== undefined && (
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                            isActive ? 'bg-[#143B0D] text-white' : item.badgeColor
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
-            ))}
-          </nav>
-        </div>
+            </div>
+          ))}
+        </nav>
 
         {/* Footer Area: Collapse & Identity */}
-        <div className="p-3 bg-[#143B0D] border-t border-[#1E4D12] space-y-2">
+        <div className="p-3 bg-[#143B0D] border-t border-[#1E4D12] space-y-2 shrink-0">
           {!isCollapsed && (
             <div className="flex items-center justify-between px-2 py-1 text-xs text-slate-400">
               <div className="flex items-center gap-2">

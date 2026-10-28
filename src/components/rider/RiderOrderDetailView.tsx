@@ -20,6 +20,7 @@ import {
   Package,
   ShieldCheck,
   Sparkles,
+  Banknote,
 } from 'lucide-react';
 import { RiderOrder, RiderOrderItem } from './RiderHomeView';
 import { RiderStatusStepper, SlideToConfirm, RiderStickyActionBar } from './ui/RiderPrimitives';
@@ -322,8 +323,20 @@ export const RiderOrderDetailView: React.FC<RiderOrderDetailViewProps> = ({
                     : 'bg-white text-[#0F172A] border-[#E2E8F0]'
                 }`}
               >
-                <Check className="w-4 h-4" />
-                <span>{cashCollected ? '✓ Cash Collected' : 'Mark Cash Done'}</span>
+                {cashCollected ? (
+                  <Check className="w-4 h-4 text-[#76CA3E]" />
+                ) : (
+                  <Banknote className="w-4 h-4 text-[#475569]" />
+                )}
+                <span>
+                  {cashCollected
+                    ? lang === 'ta'
+                      ? 'பணம் பெறப்பட்டது'
+                      : 'Cash Collected'
+                    : lang === 'ta'
+                    ? 'பணம் வசூலிக்கவும்'
+                    : 'Mark Cash Done'}
+                </span>
               </button>
 
               <button

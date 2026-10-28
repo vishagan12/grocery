@@ -30,7 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-150 select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#143B0D] focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100';
+      'inline-flex flex-row items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-150 select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#143B0D] focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100 whitespace-nowrap';
 
     const variantStyles = {
       // Apple green primary with Forest text for AA contrast compliance
@@ -66,9 +66,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isBusy && <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden="true" />}
-        {!isBusy && icon && iconPosition === 'left' && <span className="shrink-0">{icon}</span>}
-        {children && <span>{children}</span>}
-        {!isBusy && icon && iconPosition === 'right' && <span className="shrink-0">{icon}</span>}
+        {!isBusy && icon && iconPosition === 'left' && <span className="shrink-0 inline-flex items-center">{icon}</span>}
+        {children && <span className="inline-flex flex-row items-center gap-1.5 whitespace-nowrap">{children}</span>}
+        {!isBusy && icon && iconPosition === 'right' && <span className="shrink-0 inline-flex items-center">{icon}</span>}
       </button>
     );
   }
