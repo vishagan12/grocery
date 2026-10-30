@@ -32,6 +32,9 @@ Open the **SQL Editor** in your Supabase project dashboard and execute each migr
 | **4** | `supabase/migrations/20261028170400_revoke_and_enable_rls.sql` | Revokes broad privileges, enables RLS across all tables in `public`, defines customer/rider/admin access policies, and sets `security_invoker = true` on views. |
 | **5** | `supabase/migrations/20261028170500_secure_rpc_functions.sql` | Deploys `rider_update_order_status` and `admin_assign_rider` functions with strict authorization checks and concurrency row locking. |
 | **6** | `supabase/migrations/20261028170600_storage_security_policies.sql` | Provisions `product-images` storage bucket (5MB limit, image MIME types only) with public read and admin-only upload/delete policies. |
+| **7** | `supabase/migrations/20261029100000_grant_helper_functions_to_authenticated.sql` | Grants execute permission on helper functions (`is_admin()`, `is_rider()`, `app_role()`) to `authenticated` and `service_role` (and revokes from `anon`) after routine privileges were stripped in migration 20261028170400. |
+| **8** | `supabase/migrations/20261030100000_drop_legacy_open_policies.sql` | Drops legacy permissive policies on `addresses`, `order_items`, and `orders` that allowed unrestricted public access and defeated customer isolation. |
+| **9** | `supabase/migrations/20261030100100_add_orders_updated_at.sql` | Adds `updated_at timestamptz NOT NULL DEFAULT now()` to `public.orders` required by RPC functions `rider_update_order_status` and `admin_assign_rider`. |
 
 ---
 
@@ -56,12 +59,15 @@ Run `supabase/seed-staging-roles.sql` after substituting your placeholder values
 
 If you need to roll back the migrations, run the corresponding rollback scripts in **reverse order**:
 
-1. `supabase/rollbacks/20261028170600_rollback_storage_security_policies.sql`
-2. `supabase/rollbacks/20261028170500_rollback_secure_rpc_functions.sql`
-3. `supabase/rollbacks/20261028170400_rollback_revoke_and_enable_rls.sql`
-4. `supabase/rollbacks/20261028170300_rollback_audit_log_and_triggers.sql`
-5. `supabase/rollbacks/20261028170200_rollback_riders_and_link_auth.sql`
-6. `supabase/rollbacks/20261028170100_rollback_roles_and_helpers.sql`
+1. `supabase/rollbacks/20261030100100_rollback_add_orders_updated_at.sql`
+2. `supabase/rollbacks/20261030100000_rollback_drop_legacy_open_policies.sql`
+3. `supabase/rollbacks/20261029100000_rollback_grant_helper_functions_to_authenticated.sql`
+4. `supabase/rollbacks/20261028170600_rollback_storage_security_policies.sql`
+5. `supabase/rollbacks/20261028170500_rollback_secure_rpc_functions.sql`
+6. `supabase/rollbacks/20261028170400_rollback_revoke_and_enable_rls.sql`
+7. `supabase/rollbacks/20261028170300_rollback_audit_log_and_triggers.sql`
+8. `supabase/rollbacks/20261028170200_rollback_riders_and_link_auth.sql`
+9. `supabase/rollbacks/20261028170100_rollback_roles_and_helpers.sql`
 
 ---
 
