@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import {
   Store,
   Printer,
@@ -132,34 +133,40 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
     } catch {}
   };
 
-  // Handle PIN change
-  const handleChangePin = (e: React.FormEvent) => {
+  // Handle Admin Password update via Supabase Auth
+  const handleChangePin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const correctCurrent = process.env.NEXT_PUBLIC_ADMIN_PIN || '2026';
-    if (currentPin.trim() !== correctCurrent) {
-      setPinError('Current admin PIN is incorrect.');
-      return;
-    }
-    if (newPin.trim().length < 4) {
-      setPinError('New PIN must be at least 4 digits.');
+    if (newPin.trim().length < 6) {
+      setPinError('New password must be at least 6 characters.');
       return;
     }
     if (newPin.trim() !== confirmPin.trim()) {
-      setPinError('New PIN confirmation does not match.');
+      setPinError('New password confirmation does not match.');
       return;
     }
 
-    // Save custom PIN in session/local storage
-    localStorage.setItem('sas_custom_admin_pin', newPin.trim());
-    setPinSuccess(true);
-    setPinError('');
-    setTimeout(() => {
-      setPinSuccess(false);
-      setIsPinModalOpen(false);
-      setCurrentPin('');
-      setNewPin('');
-      setConfirmPin('');
-    }, 1500);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPin.trim(),
+      });
+
+      if (error) {
+        setPinError(error.message);
+        return;
+      }
+
+      setPinSuccess(true);
+      setPinError('');
+      setTimeout(() => {
+        setPinSuccess(false);
+        setIsPinModalOpen(false);
+        setCurrentPin('');
+        setNewPin('');
+        setConfirmPin('');
+      }, 1500);
+    } catch {
+      setPinError('Failed to update password.');
+    }
   };
 
   return (
@@ -446,11 +453,11 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
         </div>
       )}
 
-      {/* Change PIN Modal */}
+      {/* Change Password Modal */}
       <Modal
         isOpen={isPinModalOpen}
         onClose={() => setIsPinModalOpen(false)}
-        title="Update Counter Admin PIN"
+        title="Update Admin Account Password"
         size="sm"
       >
         <form onSubmit={handleChangePin} className="space-y-4">
@@ -463,39 +470,26 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
           {pinSuccess && (
             <div className="p-3 rounded-xl bg-[#F1F9EC] text-[#143B0D] text-xs font-bold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-[#047857] shrink-0" />
-              <span>Admin PIN updated successfully!</span>
+              <span>Admin password updated successfully!</span>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Current PIN *</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">New Password (min 6 chars) *</label>
             <Input
               type="password"
-              maxLength={8}
-              placeholder="Enter current PIN (Default: 2026)"
-              value={currentPin}
-              onChange={(e) => setCurrentPin(e.target.value)}
+              placeholder="Enter new password"
+              value={newPin}
+              onChange={(e) => setNewPin(e.target.value)}
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">New 4-Digit PIN *</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Confirm New Password *</label>
             <Input
               type="password"
-              maxLength={8}
-              placeholder="e.g. 5892"
-              value={newPin}
-              onChange={(e) => setNewPin(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Confirm New PIN *</label>
-            <Input
-              type="password"
-              maxLength={8}
-              placeholder="Repeat new PIN"
+              placeholder="Repeat new password"
               value={confirmPin}
               onChange={(e) => setConfirmPin(e.target.value)}
             />
@@ -506,7 +500,7 @@ export const AdminSettingsView: React.FC<AdminSettingsViewProps> = ({
               Cancel
             </Button>
             <Button variant="primary" type="submit">
-              Update PIN
+              Update Password
             </Button>
           </div>
         </form>

@@ -113,6 +113,8 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
 
   // Form state for add/edit
   const [formData, setFormData] = useState({
+    username: '',
+    password: '',
     name: '',
     phone: '',
     vehicle: 'Hero Splendor',
@@ -120,6 +122,7 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
     status: 'available' as 'available' | 'delivering' | 'offline',
   });
   const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fleet Overview Metrics
   const metrics = useMemo(() => {
@@ -151,6 +154,8 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
   const handleOpenAdd = () => {
     setEditingRider(null);
     setFormData({
+      username: '',
+      password: '',
       name: '',
       phone: '',
       vehicle: 'Hero Splendor',
@@ -164,6 +169,8 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
   const handleOpenEdit = (rider: RiderProfile) => {
     setEditingRider(rider);
     setFormData({
+      username: '',
+      password: '',
       name: rider.name,
       phone: rider.phone,
       vehicle: rider.vehicle,
@@ -174,7 +181,7 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
     setIsAddModalOpen(true);
   };
 
-  const handleSaveRider = (e: React.FormEvent) => {
+  const handleSaveRider = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
       setFormError('Please enter rider full name.');
@@ -201,9 +208,48 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
             : r
         )
       );
-    } else {
+      setIsAddModalOpen(false);
+      return;
+    }
+
+    // Creating rider requires valid username and password
+    const cleanUsername = formData.username.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,30}$/.test(cleanUsername)) {
+      setFormError('Username must be 3-30 characters with lowercase letters, numbers, and underscores only.');
+      return;
+    }
+
+    if (!formData.password || formData.password.length < 6) {
+      setFormError('Password must be at least 6 characters.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFormError('');
+
+    try {
+      const res = await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'CREATE_RIDER',
+          username: cleanUsername,
+          fullName: formData.name.trim(),
+          phone: cleanPhone,
+          password: formData.password,
+          vehicleInfo: `${formData.vehicle} (${formData.vehiclePlate.trim().toUpperCase() || 'TN-59-APPLIED'})`,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || 'Failed to create rider account.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const newRider: RiderProfile = {
-        id: `rider-${Date.now()}`,
+        id: data.rider?.id || `rider-${Date.now()}`,
         name: formData.name.trim(),
         phone: cleanPhone,
         vehicle: formData.vehicle,
@@ -215,19 +261,33 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
         joinedDate: new Date().toISOString().split('T')[0],
       };
       setRiders((prev) => [newRider, ...prev]);
+      setIsAddModalOpen(false);
+    } catch {
+      setFormError('Network error while creating rider account.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsAddModalOpen(false);
   };
 
-  const handleToggleStatus = (id: string) => {
+  const handleToggleStatus = async (id: string) => {
+    const target = riders.find((r) => r.id === id);
+    const nextStatus = target?.status === 'offline' ? 'available' : 'offline';
+
     setRiders((prev) =>
-      prev.map((r) => {
-        if (r.id !== id) return r;
-        const nextStatus = r.status === 'offline' ? 'available' : 'offline';
-        return { ...r, status: nextStatus };
-      })
+      prev.map((r) => (r.id === id ? { ...r, status: nextStatus } : r))
     );
+
+    try {
+      await fetch('/api/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'TOGGLE_RIDER_ACTIVE',
+          riderId: id,
+          isActive: nextStatus !== 'offline',
+        }),
+      });
+    } catch {}
   };
 
   const handleDeleteRider = () => {
@@ -586,6 +646,33 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
             </div>
           )}
 
+          {!editingRider && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Portal Username *
+                </label>
+                <Input
+                  placeholder="e.g. muthu_k"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Initial Password (min 6 chars) *
+                </label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Full Name (ஆள் பெயர்) *
@@ -594,7 +681,7 @@ export const AdminRidersView: React.FC<AdminRidersViewProps> = ({
               placeholder="e.g. Manikandan S."
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              autoFocus
+              autoFocus={Boolean(editingRider)}
             />
           </div>
 

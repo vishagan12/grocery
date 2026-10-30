@@ -4,15 +4,13 @@ import React, { useState } from 'react';
 import {
   Bike,
   Lock,
-  Phone,
+  User,
   Eye,
   EyeOff,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
   AlertCircle,
-  Truck,
-  Sparkles,
+  Loader2,
 } from 'lucide-react';
 
 export interface RiderSession {
@@ -30,80 +28,32 @@ export interface RiderAuthViewProps {
   onToggleLang?: () => void;
 }
 
-// Demo roster matching store records in Madurai
-export const REGISTERED_RIDERS: Array<{
-  id: string;
-  name: string;
-  phone: string;
-  vehicle: string;
-  pin: string;
-}> = [
-  {
-    id: 'rider-01',
-    name: 'Muthu Kumar',
-    phone: '9842198421',
-    vehicle: 'Hero Splendor (TN-59-AB-1234)',
-    pin: '1234',
-  },
-  {
-    id: 'rider-02',
-    name: 'Karthik Raja',
-    phone: '9789097890',
-    vehicle: 'TVS Jupiter (TN-58-XY-9876)',
-    pin: '1234',
-  },
-  {
-    id: 'rider-03',
-    name: 'Senthil Nathan',
-    phone: '9944099440',
-    vehicle: 'Honda Activa (TN-59-CZ-4321)',
-    pin: '1234',
-  },
-  {
-    id: 'rider-04',
-    name: 'Vigneshwaran P.',
-    phone: '9843398433',
-    vehicle: 'Bajaj Pulsar (TN-59-DE-5566)',
-    pin: '1234',
-  },
-];
-
 export const RiderAuthView: React.FC<RiderAuthViewProps> = ({
   onLoginSuccess,
   lang = 'en',
   onToggleLang,
 }) => {
-  const [phone, setPhone] = useState('');
-  const [pin, setPin] = useState('');
-  const [showPin, setShowPin] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleQuickSelectRider = (rider: typeof REGISTERED_RIDERS[0]) => {
-    setPhone(rider.phone);
-    setPin(rider.pin);
-    setErrorMessage(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
-    const cleanPin = pin.trim();
-
-    if (cleanPhone.length < 10) {
+    const cleanUsername = username.trim().toLowerCase();
+    if (!cleanUsername) {
       setErrorMessage(
-        lang === 'ta'
-          ? 'சரியான 10 இலக்க மொபைல் எண்ணை உள்ளிடவும்'
-          : 'Please enter a valid 10-digit mobile number'
+        lang === 'ta' ? 'பயனர் பெயரை உள்ளிடவும்' : 'Please enter your portal username'
       );
       return;
     }
 
-    if (!cleanPin) {
+    if (!password) {
       setErrorMessage(
-        lang === 'ta' ? 'ஷிப்ட் கடவுச்சொல்லை உள்ளிடவும்' : 'Please enter your shift passcode'
+        lang === 'ta' ? 'கடவுச்சொல்லை உள்ளிடவும்' : 'Please enter your password'
       );
       return;
     }
@@ -111,254 +61,202 @@ export const RiderAuthView: React.FC<RiderAuthViewProps> = ({
     setLoading(true);
 
     try {
-      // Find matching rider
-      const matched = REGISTERED_RIDERS.find(
-        (r) => r.phone.replace(/\D/g, '').slice(-10) === cleanPhone
-      );
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'rider-login',
+          username: cleanUsername,
+          password,
+        }),
+      });
 
-      // Verify credentials (default fallback PIN 1234 for demo)
-      const validPin = matched ? matched.pin : '1234';
+      const data = await res.json();
 
-      if (cleanPin !== validPin) {
+      if (!res.ok) {
         setErrorMessage(
-          lang === 'ta'
-            ? 'தவறான மொபைல் எண் அல்லது கடவுச்சொல்'
-            : 'Invalid mobile number or passcode'
+          data.error ||
+            (lang === 'ta'
+              ? 'தவறான பயனர் பெயர் அல்லது கடவுச்சொல்'
+              : 'Invalid username or password')
         );
         setLoading(false);
         return;
       }
 
-      // Successful authentication
       const session: RiderSession = {
-        id: matched ? matched.id : `rider-${cleanPhone.slice(-4)}`,
-        name: matched ? matched.name : 'Delivery Partner',
-        phone: cleanPhone,
-        vehicle: matched ? matched.vehicle : 'Two Wheeler',
+        id: data.rider?.id || `rider-${cleanUsername}`,
+        name: data.rider?.name || cleanUsername,
+        phone: data.rider?.phone || '',
+        vehicle: 'Two Wheeler',
         shiftStatus: 'active',
         loginTime: new Date().toISOString(),
       };
 
-      // Store in sessionStorage and localStorage for offline persistence
       try {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('sas_rider_session', JSON.stringify(session));
-          localStorage.setItem('sas_last_rider', JSON.stringify(session));
-        }
+        sessionStorage.setItem('sas_rider_session', JSON.stringify(session));
       } catch {}
 
-      // Slight intentional delay for smooth haptic perception
-      setTimeout(() => {
-        setLoading(false);
-        onLoginSuccess(session);
-      }, 350);
+      onLoginSuccess(session);
     } catch {
       setErrorMessage(
-        lang === 'ta' ? 'அங்கீகார பிழை ஏற்பட்டது' : 'Authentication failed. Please try again.'
+        lang === 'ta'
+          ? 'சர்வர் இணைப்பு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.'
+          : 'Unable to connect to server. Please try again.'
       );
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAF7] text-[#0F172A] flex flex-col justify-between max-w-md mx-auto px-4 py-6 font-sans">
-      {/* Top Header */}
-      <header className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-11 h-11 rounded-2xl bg-[#143B0D] flex items-center justify-center text-white shadow-sm">
-            <Bike className="w-6 h-6 text-[#76CA3E]" />
+    <div className="min-h-screen bg-[#F8FAF7] text-[#0F172A] flex flex-col justify-between p-4 max-w-md mx-auto font-sans antialiased">
+      {/* Top Bar with Language Switcher */}
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-[#143B0D] flex items-center justify-center text-white">
+            <Bike className="w-4 h-4 text-[#76CA3E]" />
           </div>
-          <div>
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-[#143B0D] block">
-              Sri Amman Supermarket
-            </span>
-            <h1 className="text-base font-black tracking-tight leading-none text-[#0F172A]">
-              {lang === 'ta' ? 'விநியோக ஷிப்ட் நுழைவு' : 'Rider Dispatch Portal'}
-            </h1>
-          </div>
+          <span className="font-extrabold text-xs tracking-tight">Sri Amman Dispatch</span>
         </div>
 
         {onToggleLang && (
           <button
-            type="button"
             onClick={onToggleLang}
-            className="min-h-[44px] px-3 rounded-xl bg-white border border-[#E2E8F0] text-xs font-mono font-bold text-[#0F172A] hover:bg-[#F1F9EC] transition-colors"
+            className="min-h-[36px] px-3 rounded-xl bg-white border border-[#E2E8F0] text-xs font-mono font-bold text-[#0F172A] hover:bg-[#F1F9EC]"
           >
             {lang === 'en' ? 'தமிழ்' : 'English'}
           </button>
         )}
-      </header>
+      </div>
 
-      {/* Main Login Card */}
-      <main className="my-auto py-6 space-y-5">
-        {/* Welcome Tagline */}
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F1F9EC] border border-[#76CA3E]/30 text-[#143B0D] text-[11px] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#76CA3E] animate-pulse" />
-            <span>Madurai Urban Delivery Hub</span>
+      {/* Main Authentication Form Card */}
+      <main className="bg-white rounded-3xl border border-[#E2E8F0] p-6 shadow-sm space-y-6 my-auto">
+        <div className="text-center space-y-1">
+          <div className="w-16 h-16 rounded-2xl bg-[#F1F9EC] mx-auto flex items-center justify-center text-[#143B0D] mb-2 border border-[#76CA3E]/30">
+            <Bike className="w-8 h-8 text-[#047857]" />
           </div>
-          <h2 className="text-2xl font-black text-[#0F172A] tracking-tight">
-            {lang === 'ta' ? 'ஷிப்ட் தொடங்கவும்' : 'Sign In to Shift'}
-          </h2>
-          <p className="text-xs text-[#475569] leading-relaxed">
+          <h1 className="text-xl font-black text-[#0F172A] tracking-tight">
+            {lang === 'ta' ? 'ரைடர் உள்நுழைவு' : 'Rider Duty Login'}
+          </h1>
+          <p className="text-xs text-[#475569]">
             {lang === 'ta'
-              ? 'உங்கள் மொபைல் எண் மற்றும் 4 இலக்க ஷிப்ட் கடவுச்சொல்லை உள்ளிடவும்.'
-              : 'Enter your registered rider mobile number and shift passcode.'}
+              ? 'மதுரை எக்ஸ்பிரஸ் டெலிவரி போர்ட்டல்'
+              : 'Sri Amman Supermarket • Madurai Urban Fleet'}
           </p>
         </div>
 
-        {/* Error Alert */}
+        {/* Error notification */}
         {errorMessage && (
           <div
             role="alert"
-            aria-live="polite"
-            className="p-3.5 rounded-2xl bg-[#FFDAD6] border border-[#BA1A1A]/30 text-[#410002] flex items-start gap-2.5 text-xs font-medium"
+            className="p-3.5 rounded-2xl bg-[#FFDAD6] border border-[#BA1A1A]/30 text-[#BA1A1A] text-xs font-bold flex items-center gap-2.5 animate-shake"
           >
-            <AlertCircle className="w-4 h-4 text-[#BA1A1A] shrink-0 mt-0.5" />
-            <div className="flex-1 leading-snug">
-              <span className="font-bold block">
-                {lang === 'ta' ? 'உள்நுழைவு பிழை' : 'Authentication Error'}
-              </span>
-              <span>{errorMessage}</span>
-            </div>
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#BA1A1A]" />
+            <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {/* Mobile Number Input */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Username Input */}
           <div className="space-y-1.5">
             <label
-              htmlFor="rider-phone"
-              className="text-xs font-bold uppercase tracking-wide text-[#475569] flex items-center justify-between"
+              htmlFor="rider-username"
+              className="block text-xs font-bold text-[#0F172A] flex items-center justify-between"
             >
-              <span>{lang === 'ta' ? 'மொபைல் எண்' : 'Mobile Number'}</span>
-              <span className="font-mono text-[10px] text-[#64748B]">10 Digits</span>
+              <span>{lang === 'ta' ? 'பயனர் பெயர்' : 'Rider Username'}</span>
+              <span className="text-[10px] text-[#475569] font-mono">Assigned by Store</span>
             </label>
             <div className="relative">
-              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none text-[#475569]">
-                <Phone className="w-4 h-4 text-[#143B0D]" />
-                <span className="text-xs font-mono font-bold border-r border-[#E2E8F0] pr-1.5">
-                  +91
-                </span>
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#475569]">
+                <User className="w-4 h-4" />
               </div>
               <input
-                id="rider-phone"
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={10}
-                required
-                value={phone}
+                id="rider-username"
+                type="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                placeholder={lang === 'ta' ? 'எ.கா. muthu_k' : 'e.g. muthu_k'}
+                value={username}
                 onChange={(e) => {
-                  setPhone(e.target.value.replace(/\D/g, ''));
-                  if (errorMessage) setErrorMessage(null);
+                  setUsername(e.target.value.toLowerCase());
+                  setErrorMessage(null);
                 }}
-                placeholder="98421 00000"
-                className="w-full h-14 pl-20 pr-4 rounded-2xl bg-white border-2 border-[#E2E8F0] focus:border-[#143B0D] focus:ring-2 focus:ring-[#76CA3E]/30 text-base font-mono font-bold text-[#0F172A] placeholder:text-[#94A3B8] transition-all outline-none"
+                disabled={loading}
+                className="w-full min-h-[48px] pl-10 pr-3 rounded-2xl bg-[#F8FAF7] border border-[#E2E8F0] text-sm font-mono text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#76CA3E] transition-all"
+                required
               />
             </div>
           </div>
 
-          {/* Shift PIN Input */}
+          {/* Password Input */}
           <div className="space-y-1.5">
             <label
-              htmlFor="rider-pin"
-              className="text-xs font-bold uppercase tracking-wide text-[#475569] flex items-center justify-between"
+              htmlFor="rider-password"
+              className="block text-xs font-bold text-[#0F172A] flex items-center justify-between"
             >
-              <span>{lang === 'ta' ? 'ஷிப்ட் கடவுச்சொல்' : 'Shift Passcode (PIN)'}</span>
-              <span className="font-mono text-[10px] text-[#64748B]">Demo: 1234</span>
+              <span>{lang === 'ta' ? 'கடவுச்சொல்' : 'Account Password'}</span>
             </label>
             <div className="relative">
-              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#143B0D]">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#475569]">
                 <Lock className="w-4 h-4" />
               </div>
               <input
-                id="rider-pin"
-                type={showPin ? 'text' : 'password'}
-                inputMode="numeric"
-                maxLength={6}
-                required
-                value={pin}
+                id="rider-password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
                 onChange={(e) => {
-                  setPin(e.target.value);
-                  if (errorMessage) setErrorMessage(null);
+                  setPassword(e.target.value);
+                  setErrorMessage(null);
                 }}
-                placeholder="••••"
-                className="w-full h-14 pl-11 pr-12 rounded-2xl bg-white border-2 border-[#E2E8F0] focus:border-[#143B0D] focus:ring-2 focus:ring-[#76CA3E]/30 text-lg font-mono font-bold text-[#0F172A] placeholder:text-[#94A3B8] tracking-widest transition-all outline-none"
+                disabled={loading}
+                className="w-full min-h-[48px] pl-10 pr-11 rounded-2xl bg-[#F8FAF7] border border-[#E2E8F0] text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#76CA3E] transition-all"
+                required
               />
               <button
                 type="button"
-                onClick={() => setShowPin(!showPin)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#475569] hover:text-[#0F172A]"
-                aria-label={showPin ? 'Hide passcode' : 'Show passcode'}
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#475569] hover:text-[#0F172A]"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit Duty Start Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-[52px] rounded-2xl bg-[#143B0D] hover:bg-[#1E4D12] active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-60"
+            className="w-full min-h-[50px] rounded-2xl bg-[#143B0D] hover:bg-[#1E4D12] text-white font-black text-sm flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50 mt-2"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-[#76CA3E]" />
+                <span>{lang === 'ta' ? 'சரிபார்க்கிறது...' : 'Starting Shift...'}</span>
+              </>
             ) : (
               <>
-                <span>{lang === 'ta' ? 'ஷிப்ட் தொடங்க' : 'Unlock & Start Shift'}</span>
+                <span>{lang === 'ta' ? 'ஷிப்ட் தொடங்க' : 'Sign In & Start Shift'}</span>
                 <ArrowRight className="w-4 h-4 text-[#76CA3E]" />
               </>
             )}
           </button>
         </form>
 
-        {/* Quick Demo Rider Selector */}
-        <div className="pt-2 border-t border-[#E2E8F0] space-y-2">
-          <div className="flex items-center justify-between text-[11px] text-[#475569] font-bold">
-            <span>{lang === 'ta' ? 'டெமோ ரைடர் தேர்வு (1-கிளிக்):' : 'Demo Rider Roster (1-Tap Fill):'}</span>
-            <span className="font-mono text-[10px] text-[#047857]">4 Active</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {REGISTERED_RIDERS.map((r) => {
-              const isSelected = phone === r.phone;
-              return (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => handleQuickSelectRider(r)}
-                  className={`p-2.5 rounded-xl text-left border transition-all ${
-                    isSelected
-                      ? 'bg-[#F1F9EC] border-[#76CA3E] ring-2 ring-[#76CA3E]/30'
-                      : 'bg-white border-[#E2E8F0] hover:bg-[#F8FAF7]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#0F172A] truncate">{r.name}</span>
-                    {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#047857] shrink-0" />}
-                  </div>
-                  <span className="block text-[10px] font-mono text-[#475569] mt-0.5">
-                    {r.vehicle.split(' ')[0]} • #{r.id.slice(-2)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="p-3 rounded-2xl bg-[#F8FAF7] border border-[#E2E8F0] text-center">
+          <p className="text-[11px] text-[#475569]">
+            {lang === 'ta'
+              ? 'புதிய ரைடர் கணக்குக்கு ஸ்டோர் மேலாளரை அணுகவும்.'
+              : 'Need a rider account or password reset? Contact Store Admin.'}
+          </p>
         </div>
       </main>
 
-      {/* Safety & Shift Footnote */}
-      <footer className="text-center pt-4 border-t border-[#E2E8F0] space-y-1">
-        <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-[#143B0D]">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#047857]" />
-          <span>Amman Store Verified Dispatch Protocol</span>
-        </div>
-        <p className="text-[10px] text-[#64748B]">
-          Helmet mandatory • Safe riding • Madurai dispatch helpline: +91 98421 00000
-        </p>
+      {/* Footer Branding */}
+      <footer className="text-center py-2 text-[10px] text-[#475569] space-y-0.5">
+        <p className="font-bold">Sri Amman Supermarket • 2026 Fleet Security</p>
+        <p>Verified with Supabase Auth &amp; Server-Side Session RLS</p>
       </footer>
     </div>
   );

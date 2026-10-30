@@ -149,10 +149,7 @@ function playNewOrderChime() {
 }
 
 export default function AdminPage() {
-  // Passcode Lock Screen
-  const [unlocked, setUnlocked] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState(false);
+
 
   // Core Data
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -205,12 +202,9 @@ export default function AdminPage() {
   const [syncToast, setSyncToast] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check Session Lock on Mount
+  // Check Session on Mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isUnlocked = sessionStorage.getItem('sas_admin_unlocked') === 'true';
-      if (isUnlocked) setUnlocked(true);
-
       const savedAutoPrint = localStorage.getItem('sas_autoprint_enabled');
       if (savedAutoPrint !== null) setAutoPrintEnabled(savedAutoPrint === 'true');
 
@@ -219,14 +213,17 @@ export default function AdminPage() {
     }
   }, []);
 
-  const handleVerifyPin = (enteredPin: string) => {
-    const correctPin = process.env.NEXT_PUBLIC_ADMIN_PIN || '2026';
-    if (enteredPin.trim() === correctPin) {
-      sessionStorage.setItem('sas_admin_unlocked', 'true');
-      setUnlocked(true);
-      return true;
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' }),
+      });
+      window.location.href = '/admin/login';
+    } catch {
+      window.location.href = '/admin/login';
     }
-    return false;
   };
 
   // Fetch initial Admin Dashboard data
@@ -252,17 +249,13 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (unlocked) {
-      loadDashboardData();
-    }
-  }, [unlocked]);
+    loadDashboardData();
+  }, []);
 
   const triggerPrintSlipRef = useRef<(orderId: string) => void>();
 
   // Realtime Supabase Subscription on 'orders'
   useEffect(() => {
-    if (!unlocked) return;
-
     const channel = supabase
       .channel('admin_realtime_orders')
       .on(
@@ -291,7 +284,7 @@ export default function AdminPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [unlocked, autoPrintEnabled, soundEnabled]);
+  }, [autoPrintEnabled, soundEnabled]);
 
   // Trigger 80mm Print
   const triggerPrintSlip = (orderId: string) => {
@@ -769,12 +762,6 @@ export default function AdminPage() {
     }
   }, [mobileStage, ordersCol0, ordersCol1, ordersCol2, ordersCol3, filteredOrders]);
 
-  // Lock Screen / Admin Login
-  if (!unlocked) {
-    return <AdminLoginView onUnlock={handleVerifyPin} />;
-  }
-
-
   return (
     <div className="min-h-screen bg-[#faf8ff] text-[#131b2e] antialiased flex flex-col font-sans overflow-x-hidden">
       {/* 80mm Hidden Print Container */}
@@ -891,10 +878,7 @@ export default function AdminPage() {
         }}
         lang={lang}
         onToggleLang={() => setLang(lang === 'en' ? 'ta' : 'en')}
-        onLock={() => {
-          sessionStorage.removeItem('sas_admin_unlocked');
-          setUnlocked(false);
-        }}
+        onLock={handleLogout}
         searchQuery={barcodeSearch}
         onSearchChange={setBarcodeSearch}
       >

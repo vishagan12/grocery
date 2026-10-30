@@ -44,7 +44,7 @@ export default function RiderPage() {
     setIsSyncing(true);
 
     try {
-      const res = await fetch(`/api/rider?riderPhone=${encodeURIComponent(session.phone)}`);
+      const res = await fetch('/api/rider');
       if (res.ok) {
         const data = await res.json();
         const fetched: RiderOrder[] = data.orders || [];
@@ -282,14 +282,19 @@ export default function RiderPage() {
   };
 
   // 8. Logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
+      await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' }),
+      });
       sessionStorage.removeItem('sas_rider_session');
     } catch {}
     setSession(null);
     setActiveOrder(null);
     setSelectedDetailOrder(null);
-    setCurrentTab('home');
+    window.location.href = '/rider/login';
   };
 
   // If unauthenticated, show Rider Login

@@ -384,9 +384,19 @@ export async function GET(req: NextRequest) {
   const secret = searchParams.get('secret')?.trim();
   const orderId = searchParams.get('orderId')?.trim();
 
-  if (!phone && !secret) {
+  // Rule 7: STOP THE PHONE-NUMBER ORDER LOOKUP
+  // Remove the GET /api/orders?phone= lookup of other people's data.
+  // Until Phase B2 (customer login) exists, make that route return 401 for unauthenticated callers.
+  if (phone && !secret) {
     return NextResponse.json(
-      { error: 'Unauthorized: Phone or orderSecret required for order query.' },
+      { error: 'Unauthorized: Phone lookup without authentication is disabled.' },
+      { status: 401, headers: { 'x-request-id': requestId } }
+    );
+  }
+
+  if (!secret) {
+    return NextResponse.json(
+      { error: 'Unauthorized: Authentication or order secret required.' },
       { status: 401, headers: { 'x-request-id': requestId } }
     );
   }
@@ -400,13 +410,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ orders: [] }, { status: 200, headers: { 'x-request-id': requestId } });
       }
       query = query.eq('id', orderId).eq('order_secret', secret);
-    } else if (phone) {
-      const cleanPhone = phone.replace(/\D/g, '').slice(-10);
-      query = query.eq('phone', `+91-${cleanPhone}`);
     } else {
       return NextResponse.json(
-        { error: 'Insufficient verification credentials' },
-        { status: 403, headers: { 'x-request-id': requestId } }
+        { error: 'Unauthorized: Invalid credentials' },
+        { status: 401, headers: { 'x-request-id': requestId } }
       );
     }
 

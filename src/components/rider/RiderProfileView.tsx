@@ -15,6 +15,9 @@ import {
   Award,
   ChevronRight,
   Shield,
+  KeyRound,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { RiderSession } from './RiderAuthView';
 
@@ -34,6 +37,57 @@ export const RiderProfileView: React.FC<RiderProfileViewProps> = ({
   onToggleLang,
 }) => {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      setPwError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwError('Password confirmation does not match.');
+      return;
+    }
+
+    setPwLoading(true);
+    setPwError(null);
+
+    try {
+      const res = await fetch('/api/rider', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'CHANGE_PASSWORD',
+          newPassword,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setPwError(data.error || 'Failed to update password.');
+        setPwLoading(false);
+        return;
+      }
+
+      setPwSuccess(true);
+      setTimeout(() => {
+        setPwSuccess(false);
+        setPasswordModalOpen(false);
+        setNewPassword('');
+        setConfirmPassword('');
+      }, 1500);
+    } catch {
+      setPwError('Network error while updating password.');
+    } finally {
+      setPwLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4 pb-28 font-sans max-w-md mx-auto">
@@ -192,6 +246,18 @@ export const RiderProfileView: React.FC<RiderProfileViewProps> = ({
         </a>
       </section>
 
+      {/* Change Password Trigger */}
+      <button
+        onClick={() => setPasswordModalOpen(true)}
+        className="w-full min-h-[48px] p-3 rounded-2xl bg-white border border-[#E2E8F0] hover:bg-[#F8FAF7] flex items-center justify-between text-xs font-bold text-[#0F172A] shadow-xs transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-[#0047BF]" />
+          <span>{lang === 'ta' ? 'கடவுச்சொல் மாற்றம்' : 'Change Account Password'}</span>
+        </div>
+        <span className="font-mono text-[10px] text-[#0047BF]">Update</span>
+      </button>
+
       {/* Logout Trigger (Touch Target >= 48px) */}
       <button
         onClick={() => setLogoutModalOpen(true)}
@@ -200,6 +266,84 @@ export const RiderProfileView: React.FC<RiderProfileViewProps> = ({
         <LogOut className="w-4 h-4" />
         <span>{lang === 'ta' ? 'ஷிப்ட் முடிக்க & வெளியேற' : 'End Shift & Log Out'}</span>
       </button>
+
+      {/* Change Password Modal */}
+      {passwordModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl">
+            <div className="text-center space-y-1">
+              <div className="w-10 h-10 rounded-xl bg-[#F1F9EC] mx-auto flex items-center justify-center text-[#143B0D]">
+                <KeyRound className="w-5 h-5 text-[#047857]" />
+              </div>
+              <h4 className="text-base font-black text-[#0F172A]">
+                {lang === 'ta' ? 'கடவுச்சொல் மாற்று' : 'Update Password'}
+              </h4>
+            </div>
+
+            {pwError && (
+              <div className="p-2.5 rounded-xl bg-[#FFDAD6] text-[#BA1A1A] text-xs font-bold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{pwError}</span>
+              </div>
+            )}
+
+            {pwSuccess && (
+              <div className="p-2.5 rounded-xl bg-[#F1F9EC] text-[#143B0D] text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#047857] shrink-0" />
+                <span>Password updated!</span>
+              </div>
+            )}
+
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-bold text-[#475569] mb-1">New Password (min 6 chars)</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[#F8FAF7] border border-[#E2E8F0] text-sm focus:outline-none focus:ring-2 focus:ring-[#76CA3E]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#475569] mb-1">Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[#F8FAF7] border border-[#E2E8F0] text-sm focus:outline-none focus:ring-2 focus:ring-[#76CA3E]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPasswordModalOpen(false);
+                    setPwError(null);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="min-h-[44px] rounded-xl bg-slate-100 text-slate-700 text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={pwLoading}
+                  className="min-h-[44px] rounded-xl bg-[#143B0D] text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-50"
+                >
+                  {pwLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Logout Confirmation Modal */}
       {logoutModalOpen && (
