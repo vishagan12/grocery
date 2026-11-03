@@ -20,5 +20,7 @@ db-backups/
 db-backup/
 db backup/
 *.sql
+!supabase/**/*.sql
+!supabase/*.sql
 *.sql.gz
 *.dump

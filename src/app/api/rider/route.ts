@@ -111,10 +111,21 @@ export async function GET(req: NextRequest) {
     const orderRow = applyOrderOverlay(matchedOrders[0]);
     const { slot } = parseDeliverySlot(orderRow.delivery_slot);
 
-    // Fetch catalog names for items
-    const { data: catalogProducts } = await sessionDb
-      .from('products')
-      .select('id, name_en, name_ta');
+    // Fetch catalog names only for items in this specific order (prevents full-table scan)
+    const productIds = Array.from(
+      new Set(
+        Array.isArray(orderRow.order_items)
+          ? orderRow.order_items.map((item: any) => item.product_id).filter(Boolean)
+          : []
+      )
+    );
+
+    const { data: catalogProducts } = productIds.length > 0
+      ? await sessionDb
+          .from('products')
+          .select('id, name_en, name_ta')
+          .in('id', productIds)
+      : { data: [] };
 
     const items = Array.isArray(orderRow.order_items)
       ? orderRow.order_items.map((item: any) => {

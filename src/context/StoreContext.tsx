@@ -478,6 +478,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           },
         });
       }
+
+      // Check live Supabase Auth session via cookies
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          const userPhone = user.phone || '';
+          const metaName = user.user_metadata?.full_name || '';
+          const metaDob = user.user_metadata?.dob || '';
+
+          dispatch({
+            type: 'SET_LOGIN',
+            phone: userPhone,
+            name: metaName || 'Customer',
+            dob: metaDob || '12 Dec 2006',
+            loggedIn: true,
+          });
+        }
+      }).catch(() => {});
     } catch (e) {
       // ignore
     }
@@ -594,9 +611,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     async function fetchLiveCatalog() {
       try {
+        // 1. Query Next.js Edge/ISR cached catalog endpoint
+        const res = await fetch('/api/catalog');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.catalog && Array.isArray(json.catalog) && json.catalog.length > 0 && isSubscribed) {
+            dispatch({ type: 'SET_CATALOG', products: json.catalog });
+            return;
+          }
+        }
+
+        // 2. Fallback to direct PostgREST catalog fetch if API route is unavailable
         const { data, error } = await supabase
           .from('products')
-          .select('*, product_variants(label, price, mrp, stock_qty)');
+          .select('id, name_en, name_ta, category_id, image, in_stock, product_variants(label, price, mrp, stock_qty)')
+          .limit(200);
 
         if (!error && data && data.length > 0 && isSubscribed) {
           const liveProducts: Product[] = data.map((row: any) => ({

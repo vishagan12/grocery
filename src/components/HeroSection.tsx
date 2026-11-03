@@ -67,9 +67,12 @@ export default function HeroSection() {
     },
   ];
 
-  // Auto-advance slide every 5 seconds (resets whenever activeSlide changes so user gets full 5s)
+  // Auto-advance slide every 5 seconds (resets whenever activeSlide changes; pauses when tab is hidden)
   React.useEffect(() => {
     const timer = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return;
+      }
       setActiveSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(timer);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
 import { supabase as defaultAnonSupabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
@@ -31,6 +32,17 @@ function isValidImageUrl(urlStr: string): boolean {
   }
 }
 
+// Revalidates public catalog ISR caches across edge & CDN
+function triggerCatalogRevalidation() {
+  try {
+    revalidatePath('/api/catalog');
+    revalidatePath('/');
+    revalidatePath('/products');
+  } catch (err: any) {
+    logger.warn('REVALIDATE_PATH_WARNING', err.message);
+  }
+}
+
 export async function GET(req: NextRequest) {
   // 1. Enforce admin role authentication
   const auth = await requireAdmin(req);
@@ -40,17 +52,24 @@ export async function GET(req: NextRequest) {
   const sessionDb = auth.supabase;
 
   try {
+    // Read pagination parameters from query string (default 100, max 200)
+    const page = Math.max(1, parseInt(req.nextUrl.searchParams.get('page') || '1', 10));
+    const limit = Math.min(200, Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || '100', 10)));
+    const offset = (page - 1) * limit;
+
     // 1. Fetch recent orders using admin session client (RLS applies)
     const { data: rawOrders, error: ordersError } = await sessionDb
       .from('orders')
       .select('*, order_items(*)')
       .order('created_at', { ascending: false })
-      .limit(100);
+      .range(offset, offset + limit - 1);
 
-    // 2. Fetch products and their variants
+    // 2. Fetch products and their variants with pagination
     const { data: rawProducts, error: productsError } = await sessionDb
       .from('products')
-      .select('*, product_variants(*)');
+      .select('id, name_en, name_ta, category_id, image, in_stock, search_aliases, product_variants(*)')
+      .order('id')
+      .range(offset, offset + limit - 1);
 
     // 3. Fetch categories
     const { data: rawCategories } = await sessionDb
@@ -337,6 +356,8 @@ export async function PATCH(req: NextRequest) {
         .update({ in_stock: inStock })
         .eq('id', productId);
 
+      triggerCatalogRevalidation();
+
       try {
         await sessionDb.from('audit_logs').insert({
           action: 'TOGGLE_PRODUCT_STOCK',
@@ -361,6 +382,8 @@ export async function PATCH(req: NextRequest) {
         .from('feature_flags')
         .upsert({ key: 'accepting_orders', enabled })
         .eq('key', 'accepting_orders');
+
+      triggerCatalogRevalidation();
 
       try {
         await sessionDb.from('audit_logs').insert({
@@ -529,6 +552,8 @@ export async function PATCH(req: NextRequest) {
             stock_qty: 20,
           }];
 
+      const searchAliases = product.searchAliases ? sanitizeInput(product.searchAliases) : '';
+
       try {
         await sessionDb.from('products').upsert({
           id,
@@ -537,11 +562,14 @@ export async function PATCH(req: NextRequest) {
           category_id: categoryId,
           image,
           in_stock: inStock,
+          search_aliases: searchAliases,
         });
 
         for (const v of variants) {
           await sessionDb.from('product_variants').upsert(v);
         }
+
+        triggerCatalogRevalidation();
 
         await sessionDb.from('audit_logs').insert({
           action: 'CREATE_PRODUCT',
@@ -561,6 +589,7 @@ export async function PATCH(req: NextRequest) {
           categoryId,
           image,
           inStock,
+          searchAliases,
           variants,
         },
       });
@@ -580,6 +609,7 @@ export async function PATCH(req: NextRequest) {
       if (product.nameEn) updateData.name_en = sanitizeInput(product.nameEn);
       if (product.nameTa !== undefined) updateData.name_ta = sanitizeInput(product.nameTa);
       if (product.categoryId) updateData.category_id = sanitizeInput(product.categoryId);
+      if (product.searchAliases !== undefined) updateData.search_aliases = sanitizeInput(product.searchAliases);
       if (product.image) {
         if (!isValidImageUrl(product.image)) {
           return NextResponse.json({ error: 'Invalid product image URL' }, { status: 400 });
@@ -610,6 +640,8 @@ export async function PATCH(req: NextRequest) {
           }
         }
 
+        triggerCatalogRevalidation();
+
         await sessionDb.from('audit_logs').insert({
           action: 'UPDATE_PRODUCT',
           details: { id, updateData },
@@ -634,6 +666,8 @@ export async function PATCH(req: NextRequest) {
       try {
         await sessionDb.from('product_variants').delete().eq('product_id', productId);
         await sessionDb.from('products').delete().eq('id', productId);
+
+        triggerCatalogRevalidation();
 
         await sessionDb.from('audit_logs').insert({
           action: 'DELETE_PRODUCT',

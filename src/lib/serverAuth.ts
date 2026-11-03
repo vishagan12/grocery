@@ -19,14 +19,11 @@ export function createServerSupabaseClient(req: NextRequest) {
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      get(name: string) {
-        return req.cookies.get(name)?.value;
+      getAll() {
+        return req.cookies.getAll();
       },
-      set() {
-        // Handled in response middleware / handlers if refreshing
-      },
-      remove() {
-        // Handled in response middleware / handlers if refreshing
+      setAll() {
+        // Read-only server client when instantiated purely for context
       },
     },
   });

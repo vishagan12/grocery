@@ -35,6 +35,9 @@ Open the **SQL Editor** in your Supabase project dashboard and execute each migr
 | **7** | `supabase/migrations/20261029100000_grant_helper_functions_to_authenticated.sql` | Grants execute permission on helper functions (`is_admin()`, `is_rider()`, `app_role()`) to `authenticated` and `service_role` (and revokes from `anon`) after routine privileges were stripped in migration 20261028170400. |
 | **8** | `supabase/migrations/20261030100000_drop_legacy_open_policies.sql` | Drops legacy permissive policies on `addresses`, `order_items`, and `orders` that allowed unrestricted public access and defeated customer isolation. |
 | **9** | `supabase/migrations/20261030100100_add_orders_updated_at.sql` | Adds `updated_at timestamptz NOT NULL DEFAULT now()` to `public.orders` required by RPC functions `rider_update_order_status` and `admin_assign_rider`. |
+| **10** | `supabase/migrations/20261030100200_search_and_performance_tuning.sql` | Adds `search_aliases` column, `normalize_search()` function, generated `search_doc` column, GIN trigram indexes, Tamil/Thanglish/English hybrid `search_products_fast()` RPC, and composite performance indexes for 200+ concurrent users. |
+| **11** | `supabase/migrations/20261031100000_fix_search_path_for_trgm_operators.sql` | Updates `search_products_fast` to `set search_path = public, extensions, pg_temp` so `pg_trgm` operators (`%`) resolve properly without error 42883, and drops ambiguous legacy two-argument overload `search_products_fast(text, integer)`. |
+| **12** | `supabase/migrations/20261102100000_make_search_products_fast_limit_first.sql` | Rewrites `search_products_fast()` with a limit-first pipeline: applies ORDER BY and LIMIT/OFFSET directly to matching product IDs before computing `min_price` and `variants` JSONB via a lateral join. Adds GIN trigram index on `lower(name_en)` and decouples search conditions into UNION branches to slash broad match query times from ~636ms to <50-150ms. |
 
 ---
 
@@ -46,7 +49,16 @@ Run `supabase/tests/rls-checks.sql` in the Supabase SQL Editor.
 - Validates IDOR prevention, data isolation, and status transition rules.
 - Automatically rolls back at the end, leaving no test junk in the database.
 
-### Step B: Seed Admin & Rider Roles
+### Step B: Run Search Engine & Performance Verification Suite
+Run `supabase/tests/search-checks.sql` in the Supabase SQL Editor.
+- Tests English, Typo/fuzzy matching, native Tamil script, and Thanglish aliases.
+- Verifies boundary bounds (1 char rejection, 100+ char safety, SQL injection immunity).
+- Automatically rolls back at the end.
+
+### Step C: Seed Thanglish Aliases (Optional / Admin)
+Run `supabase/seed-thanglish-aliases.sql` to populate precomputed Thanglish grocery keywords and spelling variants for all products.
+
+### Step D: Seed Admin & Rider Roles
 Run `supabase/seed-staging-roles.sql` after substituting your placeholder values:
 1. Create your admin user in **Supabase Dashboard &rarr; Authentication &rarr; Users**.
 2. Replace `'REPLACE_WITH_ADMIN_EMAIL'` with your admin's email.
@@ -59,15 +71,18 @@ Run `supabase/seed-staging-roles.sql` after substituting your placeholder values
 
 If you need to roll back the migrations, run the corresponding rollback scripts in **reverse order**:
 
-1. `supabase/rollbacks/20261030100100_rollback_add_orders_updated_at.sql`
-2. `supabase/rollbacks/20261030100000_rollback_drop_legacy_open_policies.sql`
-3. `supabase/rollbacks/20261029100000_rollback_grant_helper_functions_to_authenticated.sql`
-4. `supabase/rollbacks/20261028170600_rollback_storage_security_policies.sql`
-5. `supabase/rollbacks/20261028170500_rollback_secure_rpc_functions.sql`
-6. `supabase/rollbacks/20261028170400_rollback_revoke_and_enable_rls.sql`
-7. `supabase/rollbacks/20261028170300_rollback_audit_log_and_triggers.sql`
-8. `supabase/rollbacks/20261028170200_rollback_riders_and_link_auth.sql`
-9. `supabase/rollbacks/20261028170100_rollback_roles_and_helpers.sql`
+1. `supabase/rollbacks/20261102100000_rollback_make_search_products_fast_limit_first.sql`
+2. `supabase/rollbacks/20261031100000_rollback_fix_search_path_for_trgm_operators.sql`
+3. `supabase/rollbacks/20261030100200_rollback_search_and_performance_tuning.sql`
+4. `supabase/rollbacks/20261030100100_rollback_add_orders_updated_at.sql`
+5. `supabase/rollbacks/20261030100000_rollback_drop_legacy_open_policies.sql`
+6. `supabase/rollbacks/20261029100000_rollback_grant_helper_functions_to_authenticated.sql`
+7. `supabase/rollbacks/20261028170600_rollback_storage_security_policies.sql`
+8. `supabase/rollbacks/20261028170500_rollback_secure_rpc_functions.sql`
+9. `supabase/rollbacks/20261028170400_rollback_revoke_and_enable_rls.sql`
+10. `supabase/rollbacks/20261028170300_rollback_audit_log_and_triggers.sql`
+11. `supabase/rollbacks/20261028170200_rollback_riders_and_link_auth.sql`
+12. `supabase/rollbacks/20261028170100_rollback_roles_and_helpers.sql`
 
 ---
 

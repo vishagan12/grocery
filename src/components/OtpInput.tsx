@@ -7,9 +7,16 @@ interface OtpInputProps {
   onChange: (digits: string[]) => void;
   onComplete?: (code: string) => void;
   autoFocus?: boolean;
+  length?: number;
 }
 
-export default function OtpInput({ value, onChange, onComplete, autoFocus = true }: OtpInputProps) {
+export default function OtpInput({
+  value,
+  onChange,
+  onComplete,
+  autoFocus = true,
+  length = 6,
+}: OtpInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -34,12 +41,12 @@ export default function OtpInput({ value, onChange, onComplete, autoFocus = true
     onChange(newDigits);
 
     // Auto-advance to next input
-    if (index < 3 && inputRefs.current[index + 1]) {
+    if (index < length - 1 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1]?.focus();
     }
 
     const fullCode = newDigits.join('');
-    if (fullCode.length === 4 && onComplete) {
+    if (fullCode.length === length && onComplete) {
       onComplete(fullCode);
     }
   };
@@ -60,33 +67,33 @@ export default function OtpInput({ value, onChange, onComplete, autoFocus = true
       }
     } else if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 3) {
+    } else if (e.key === 'ArrowRight' && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4);
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
     if (!pastedData) return;
 
-    const newDigits = ['', '', '', ''];
+    const newDigits = Array(length).fill('');
     for (let i = 0; i < pastedData.length; i++) {
       newDigits[i] = pastedData[i];
     }
     onChange(newDigits);
 
-    const focusIndex = Math.min(pastedData.length, 3);
+    const focusIndex = Math.min(pastedData.length, length - 1);
     inputRefs.current[focusIndex]?.focus();
 
-    if (pastedData.length === 4 && onComplete) {
+    if (pastedData.length === length && onComplete) {
       onComplete(pastedData);
     }
   };
 
   return (
-    <div className="flex items-center justify-center gap-2.5 sm:gap-3.5 my-2">
-      {[0, 1, 2, 3].map((i) => (
+    <div className="flex items-center justify-center gap-2 sm:gap-2.5 my-2">
+      {Array.from({ length }).map((_, i) => (
         <input
           key={i}
           ref={(el) => {
@@ -101,7 +108,7 @@ export default function OtpInput({ value, onChange, onComplete, autoFocus = true
           onChange={(e) => handleChange(i, e)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}
-          className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-xl font-bold rounded-xl border-2 transition-all outline-none bg-white text-slate-900 shadow-2xs ${
+          className={`w-10 h-12 sm:w-11 sm:h-14 text-center text-lg sm:text-xl font-bold rounded-xl border-2 transition-all outline-none bg-white text-slate-900 shadow-2xs ${
             value[i]
               ? 'border-brand-forest ring-2 ring-apple/40 bg-brand-mint'
               : 'border-slate-300 focus:border-brand-forest focus:ring-4 focus:ring-apple/30'

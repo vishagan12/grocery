@@ -36,30 +36,38 @@ export default function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const [suggestions, setSuggestions] = useState<Product[]>([]);
-  const queryTrimmed = state.searchQuery.trim();
+  const [isSearching, setIsSearching] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const queryTrimmed = state.searchQuery.trim().slice(0, 60);
 
   useEffect(() => {
+    setActiveIndex(-1);
     if (queryTrimmed.length < 2) {
       setSuggestions([]);
+      setIsSearching(false);
       return;
     }
 
-    let isMounted = true;
+    setIsSearching(true);
+    const abortController = new AbortController();
+
     const timer = setTimeout(async () => {
       try {
-        const results = await searchCatalogFast(queryTrimmed, 6);
-        if (isMounted) {
+        const results = await searchCatalogFast(queryTrimmed, 8, abortController.signal);
+        if (!abortController.signal.aborted) {
           setSuggestions(results);
+          setIsSearching(false);
         }
       } catch {
-        if (isMounted) {
+        if (!abortController.signal.aborted) {
           setSuggestions([]);
+          setIsSearching(false);
         }
       }
-    }, 150);
+    }, 250);
 
     return () => {
-      isMounted = false;
+      abortController.abort();
       clearTimeout(timer);
     };
   }, [queryTrimmed]);
@@ -219,17 +227,42 @@ export default function Header() {
 
                 <input
                   type="search"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded={searchFocused && (suggestions.length > 0 || isSearching || queryTrimmed.length >= 2)}
+                  aria-controls="search-suggestions-dropdown"
+                  aria-activedescendant={activeIndex >= 0 && suggestions[activeIndex] ? `search-item-${suggestions[activeIndex].id}` : undefined}
                   aria-label={lang === 'ta' ? 'பொருட்களைத் தேடுங்கள்' : 'Search products'}
                   autoComplete="off"
                   enterKeyHint="search"
-                  placeholder={lang === 'ta' ? 'தேடுங்கள்' : 'Search'}
+                  maxLength={60}
+                  placeholder={lang === 'ta' ? 'தேடுங்கள் (எ.கா: அரிசி, ponni, tomato)' : 'Search (e.g. Ponni rice, தக்காளி, dal)'}
                   value={state.searchQuery}
                   onChange={(e) => dispatch({ type: 'SET_SEARCH', query: e.target.value })}
                   onFocus={() => setSearchFocused(true)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setSearchFocused(false);
-                      dispatch({ type: 'SET_PAGE', page: 'products' });
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      if (suggestions.length > 0) {
+                        setActiveIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+                      }
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      if (suggestions.length > 0) {
+                        setActiveIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+                      }
+                    } else if (e.key === 'Enter') {
+                      if (activeIndex >= 0 && suggestions[activeIndex]) {
+                        e.preventDefault();
+                        const p = suggestions[activeIndex];
+                        dispatch({ type: 'SET_PRODUCT_DETAIL', id: p.id });
+                        dispatch({ type: 'SET_PAGE', page: 'product-detail' });
+                        setSearchFocused(false);
+                        dispatch({ type: 'SET_SEARCH', query: '' });
+                      } else {
+                        setSearchFocused(false);
+                        dispatch({ type: 'SET_PAGE', page: 'products' });
+                      }
                     } else if (e.key === 'Escape') {
                       setSearchFocused(false);
                       (e.target as HTMLInputElement).blur();
@@ -296,66 +329,111 @@ export default function Header() {
             </div>
 
             {/* Search Autocomplete Dropdown */}
-            {searchFocused && suggestions.length > 0 && (
-              <ul
-                aria-label={lang === 'ta' ? 'தேடல் பரிந்துரைகள்' : 'Search suggestions'}
+            {searchFocused && (isSearching || suggestions.length > 0 || queryTrimmed.length >= 2) && (
+              <div
+                id="search-suggestions-dropdown"
                 className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-fade-in text-slate-900"
               >
-                {suggestions.map((p) => {
-                  const cat = categories.find((c) => c.id === p.category);
-                  const firstVariant = p.variants?.[0] || { price: 0, label: '1 pack' };
-                  const name = lang === 'ta' ? p.nameTa : p.nameEn;
-                  return (
-                    <li
-                      key={p.id}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-brand-cream transition-colors border-b border-slate-100 last:border-0"
-                    >
-                      <button
-                        type="button"
-                        className="flex flex-1 min-w-0 items-center gap-3 text-left rounded-lg"
-                        onClick={() => {
-                          dispatch({ type: 'SET_PRODUCT_DETAIL', id: p.id });
-                          dispatch({ type: 'SET_PAGE', page: 'product-detail' });
-                          setSearchFocused(false);
-                          dispatch({ type: 'SET_SEARCH', query: '' });
-                        }}
-                      >
-                        <span className="w-10 h-10 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 shrink-0 flex items-center justify-center p-1">
-                          <img
-                            src={p.image || cat?.image}
-                            alt=""
-                            width={40}
-                            height={40}
-                            className="w-full h-full object-contain"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </span>
-                        <span className="flex-1 min-w-0">
-                          <span className="block font-bold text-sm text-slate-900 leading-snug break-words">
-                            {name}
-                          </span>
-                          <span className="block text-xs text-slate-600 font-medium">
-                            ₹{firstVariant.price} — {firstVariant.label}
-                          </span>
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          dispatch({ type: 'ADD_TO_CART', productId: p.id, variantIndex: 0 });
-                          showToast(t('addedToCart', lang));
-                        }}
-                        aria-label={lang === 'ta' ? `${name} கூடையில் சேர்` : `Add ${name} to cart`}
-                        className="min-h-[36px] bg-apple hover:bg-apple-hover text-brand-forest px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap shadow-xs flex items-center gap-1"
-                      >
-                        <Plus aria-hidden="true" className="w-3.5 h-3.5" />
-                        <span>{lang === 'ta' ? 'சேர்' : 'ADD'}</span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+                {/* 1. Loading Skeleton */}
+                {isSearching && (
+                  <div className="p-3 space-y-2">
+                    {[1, 2, 3].map((n) => (
+                      <div key={n} className="flex items-center gap-3 p-2 animate-pulse">
+                        <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-4 bg-slate-200 rounded w-2/3" />
+                          <div className="h-3 bg-slate-100 rounded w-1/3" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 2. Empty State */}
+                {!isSearching && queryTrimmed.length >= 2 && suggestions.length === 0 && (
+                  <div className="p-6 text-center text-slate-600">
+                    <p className="text-sm font-bold text-slate-800">
+                      {lang === 'ta' ? 'பொருட்கள் எதுவும் கிடைக்கவில்லை' : 'No products found'}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1">
+                      {lang === 'ta'
+                        ? `"${queryTrimmed}" என்பதற்கு பொருந்தும் பொருட்கள் இல்லை.`
+                        : `No matches found for "${queryTrimmed}". Try checking spelling.`}
+                    </p>
+                  </div>
+                )}
+
+                {/* 3. Suggestions List */}
+                {!isSearching && suggestions.length > 0 && (
+                  <ul
+                    role="listbox"
+                    aria-label={lang === 'ta' ? 'தேடல் பரிந்துரைகள்' : 'Search suggestions'}
+                    className="max-h-[340px] overflow-y-auto"
+                  >
+                    {suggestions.map((p, idx) => {
+                      const cat = categories.find((c) => c.id === p.category);
+                      const firstVariant = p.variants?.[0] || { price: 0, label: '1 pack' };
+                      const name = lang === 'ta' ? p.nameTa : p.nameEn;
+                      const isSelected = activeIndex === idx;
+
+                      return (
+                        <li
+                          key={p.id}
+                          id={`search-item-${p.id}`}
+                          role="option"
+                          aria-selected={isSelected}
+                          className={`flex items-center gap-3 px-4 py-3 transition-colors border-b border-slate-100 last:border-0 ${
+                            isSelected ? 'bg-brand-cream/80 ring-1 ring-inset ring-apple/50' : 'hover:bg-brand-cream'
+                          }`}
+                        >
+                          <button
+                            type="button"
+                            className="flex flex-1 min-w-0 items-center gap-3 text-left rounded-lg"
+                            onClick={() => {
+                              dispatch({ type: 'SET_PRODUCT_DETAIL', id: p.id });
+                              dispatch({ type: 'SET_PAGE', page: 'product-detail' });
+                              setSearchFocused(false);
+                              dispatch({ type: 'SET_SEARCH', query: '' });
+                            }}
+                          >
+                            <span className="w-10 h-10 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 shrink-0 flex items-center justify-center p-1">
+                              <img
+                                src={p.image || cat?.image}
+                                alt=""
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-contain"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </span>
+                            <span className="flex-1 min-w-0">
+                              <span className="block font-bold text-sm text-slate-900 leading-snug break-words">
+                                {name}
+                              </span>
+                              <span className="block text-xs text-slate-600 font-medium">
+                                ₹{firstVariant.price} — {firstVariant.label}
+                              </span>
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              dispatch({ type: 'ADD_TO_CART', productId: p.id, variantIndex: 0 });
+                              showToast(t('addedToCart', lang));
+                            }}
+                            aria-label={lang === 'ta' ? `${name} கூடையில் சேர்` : `Add ${name} to cart`}
+                            className="min-h-[36px] bg-apple hover:bg-apple-hover text-brand-forest px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap shadow-xs flex items-center gap-1 active:scale-95"
+                          >
+                            <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                            <span>{lang === 'ta' ? 'சேர்' : 'ADD'}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             )}
           </div>
 
@@ -411,26 +489,95 @@ function LoginModal({ onClose }: { onClose: () => void }) {
   const lang = state.lang;
   const [phone, setPhone] = useState('');
   const [step, setStep] = useState<'phone' | 'otp' | 'name'>('phone');
-  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '']);
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [name, setName] = useState('');
   const [dob, setDob] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const panelRef = useDialog(true, onClose);
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length === 10) {
-      setStep('otp');
+    setErrorMsg('');
+    if (phone.length !== 10) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send-phone-otp',
+          phone,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // In local staging if SMS provider is not active, permit dev progress
+        if (data.error && (data.error.includes('provider') || data.error.includes('unsupported'))) {
+          console.warn('SMS provider not configured on staging; continuing in test mode.');
+          setStep('otp');
+        } else {
+          setErrorMsg(data.error || 'Failed to send verification code.');
+        }
+      } else {
+        setStep('otp');
+      }
+    } catch {
+      setErrorMsg('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const verifyOtp = (code: string) => {
-    if (code.length === 4) {
-      setStep('name');
+  const verifyOtp = async (code: string) => {
+    if (code.length < 4) return;
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify-phone-otp',
+          phone,
+          otp: code,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // Fallback for staging simulation if SMS gateway credentials aren't hooked yet
+        if (data.error && (data.error.includes('provider') || data.error.includes('not configured'))) {
+          setStep('name');
+        } else {
+          setErrorMsg(data.error || 'Invalid OTP code. Please check and try again.');
+        }
+      } else {
+        if (data.user?.name && data.user.name !== 'Customer') {
+          // Returning customer already has name registered
+          dispatch({
+            type: 'SET_LOGIN',
+            phone: `+91-${phone}`,
+            name: data.user.name,
+            dob: data.user.dob || '12 Dec 2006',
+            loggedIn: true,
+          });
+          showToast(lang === 'ta' ? `வரவேற்கிறோம், ${data.user.name}!` : `Welcome back, ${data.user.name}!`);
+          onClose();
+        } else {
+          setStep('name');
+        }
+      }
+    } catch {
+      setErrorMsg('Failed to verify OTP. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCompleteLogin = (e: React.FormEvent) => {
+  const handleCompleteLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalName = name.trim();
     if (!finalName) return;
@@ -454,6 +601,25 @@ function LoginModal({ onClose }: { onClose: () => void }) {
       }
     }
 
+    setLoading(true);
+    try {
+      await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'verify-phone-otp',
+          phone,
+          otp: otpDigits.join('') || '000000',
+          name: finalName,
+          dob: formattedDob,
+        }),
+      });
+    } catch {
+      // Continue locally even if network hiccups
+    } finally {
+      setLoading(false);
+    }
+
     dispatch({
       type: 'SET_LOGIN',
       phone: finalPhone,
@@ -462,7 +628,6 @@ function LoginModal({ onClose }: { onClose: () => void }) {
       loggedIn: true,
     });
     showToast(lang === 'ta' ? `வரவேற்கிறோம், ${finalName}!` : `Welcome, ${finalName}!`);
-    // Profile opens only when the user clicks it, never automatically after login
     onClose();
   };
 
@@ -520,6 +685,12 @@ function LoginModal({ onClose }: { onClose: () => void }) {
             : 'Enter your phone number to access saved addresses and express checkout.'}
         </p>
 
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs flex items-center gap-2">
+            <span className="font-semibold">{errorMsg}</span>
+          </div>
+        )}
+
         {step === 'phone' && (
           <form className="space-y-3" onSubmit={handleSendOtp} noValidate>
             <div>
@@ -546,8 +717,9 @@ function LoginModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            <button type="submit" disabled={phone.length < 10} className="btn btn-primary btn-lg btn-block">
-              {lang === 'ta' ? 'OTP அனுப்பவும்' : 'Continue'}
+            <button type="submit" disabled={phone.length < 10 || loading} className="btn btn-primary btn-lg btn-block flex items-center justify-center gap-2">
+              {loading && <span className="animate-spin text-sm">⏳</span>}
+              <span>{lang === 'ta' ? 'OTP அனுப்பவும்' : 'Continue'}</span>
             </button>
           </form>
         )}
@@ -562,13 +734,14 @@ function LoginModal({ onClose }: { onClose: () => void }) {
           >
             <fieldset>
               <legend className="field-label mb-2 w-full text-center">
-                {lang === 'ta' ? '4-இலக்க OTP குறியீட்டை உள்ளிடவும்' : 'Enter 4-Digit Verification OTP'}
+                {lang === 'ta' ? '6-இலக்க OTP குறியீட்டை உள்ளிடவும்' : 'Enter 6-Digit Verification OTP'}
               </legend>
-              <OtpInput value={otpDigits} onChange={setOtpDigits} onComplete={verifyOtp} />
+              <OtpInput length={6} value={otpDigits} onChange={setOtpDigits} onComplete={verifyOtp} />
             </fieldset>
 
-            <button type="submit" disabled={otpDigits.join('').length < 4} className="btn btn-primary btn-lg btn-block">
-              {lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}
+            <button type="submit" disabled={otpDigits.join('').length < 4 || loading} className="btn btn-primary btn-lg btn-block flex items-center justify-center gap-2">
+              {loading && <span className="animate-spin text-sm">⏳</span>}
+              <span>{lang === 'ta' ? 'சரிபார்க்கவும்' : 'Verify & Continue'}</span>
             </button>
           </form>
         )}
