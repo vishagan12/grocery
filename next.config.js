@@ -1,4 +1,23 @@
 /** @type {import('next').NextConfig} */
+
+// Content Security Policy directives:
+// Permits Supabase auth/storage/realtime, Google authentication & maps, Unsplash imagery, and inline styles for animations
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://challenges.cloudflare.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' blob: data: https://images.unsplash.com https://plus.unsplash.com https://*.supabase.co https://lh3.googleusercontent.com https://maps.googleapis.com https://maps.gstatic.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://maps.googleapis.com https://api.upstash.com https://challenges.cloudflare.com;
+  frame-src 'self' https://accounts.google.com https://challenges.cloudflare.com;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+  block-all-mixed-content;
+  upgrade-insecure-requests;
+`.replace(/\s{2,}/g, ' ').trim();
+
 const nextConfig = {
   compress: true,
   images: {
@@ -23,6 +42,10 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',

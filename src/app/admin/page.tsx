@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
   Store,
@@ -287,7 +287,7 @@ export default function AdminPage() {
   }, [autoPrintEnabled, soundEnabled]);
 
   // Trigger 80mm Print
-  const triggerPrintSlip = (orderId: string) => {
+  const triggerPrintSlip = useCallback((orderId: string) => {
     const target = orders.find((o) => o.id === orderId);
     if (!target) return;
     setPrintOrder(target);
@@ -300,7 +300,7 @@ export default function AdminPage() {
     setTimeout(() => {
       window.print();
     }, 320);
-  };
+  }, [orders, handleUpdateOrderStatus]);
   triggerPrintSlipRef.current = triggerPrintSlip;
 
   // Status transitions

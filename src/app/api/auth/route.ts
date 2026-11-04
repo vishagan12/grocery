@@ -1,11 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { riderUsernameToSyntheticEmail } from '@/lib/serverAuth';
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  createRateLimitResponse,
+  getClientIp,
+  verifyBotProtection,
+} from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
     const body = await req.json();
-    const { action, email, password, username, phone, otp, name, dob } = body;
+    const { action, email, password, username, phone, otp, name, dob, honeypot, formStartTime } = body;
+
+    // 0. Bot Protection for Login & OTP Actions
+    const botCheck = verifyBotProtection({
+      honeypot,
+      formStartTime,
+      minTimeMs: 400,
+    });
+    if (botCheck.isBot) {
+      return NextResponse.json(
+        { error: 'Automated request detected. Please try again.' },
+        { status: 400 }
+      );
+    }
 
     const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
@@ -31,6 +52,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 1. Customer: Send Phone OTP
+    // Rate limit: 3 per 10 min per phone AND 10 per hour per IP
     if (action === 'send-phone-otp') {
       const cleanPhone = (phone || '').replace(/\D/g, '');
       if (cleanPhone.length < 10) {
@@ -41,7 +63,19 @@ export async function POST(req: NextRequest) {
         ? `+${cleanPhone}` 
         : `+91${cleanPhone.slice(-10)}`;
 
-      const { data, error } = await supabase.auth.signInWithOtp({
+      // IP limit check
+      const rlIp = await checkRateLimit(RATE_LIMITS.OTP_SEND_IP, ip);
+      if (!rlIp.success) {
+        return createRateLimitResponse(rlIp.retryAfterSeconds, 'Too many OTP requests from this IP. Please wait.');
+      }
+
+      // Phone limit check
+      const rlPhone = await checkRateLimit(RATE_LIMITS.OTP_SEND_PHONE, formattedPhone);
+      if (!rlPhone.success) {
+        return createRateLimitResponse(rlPhone.retryAfterSeconds, 'Too many OTP requests for this phone number. Please wait.');
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
       });
 
@@ -53,6 +87,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Customer: Verify Phone OTP
+    // Rate limit: 5 per 10 min per phone
     if (action === 'verify-phone-otp') {
       const cleanPhone = (phone || '').replace(/\D/g, '');
       const cleanOtp = (otp || '').trim();
@@ -65,6 +100,11 @@ export async function POST(req: NextRequest) {
         ? `+${cleanPhone}` 
         : `+91${cleanPhone.slice(-10)}`;
 
+      const rlVerify = await checkRateLimit(RATE_LIMITS.OTP_VERIFY_PHONE, formattedPhone);
+      if (!rlVerify.success) {
+        return createRateLimitResponse(rlVerify.retryAfterSeconds, 'Too many OTP verification attempts. Please wait.');
+      }
+
       const { data, error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
         token: cleanOtp,
@@ -75,7 +115,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: error.message || 'Invalid or expired OTP' }, { status: 401 });
       }
 
-      // If name or dob was passed, update user metadata
+      // Update customer profile metadata if provided
       if (name || dob) {
         await supabase.auth.updateUser({
           data: {
@@ -100,9 +140,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Admin Login
+    // Rate limit: 5 attempts per 15 min per IP + username, then 15 min lockout
     if (action === 'admin-login') {
       if (!email || !password) {
         return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
+      }
+
+      const identifier = `${ip}:${email.trim().toLowerCase()}`;
+      const rlLogin = await checkRateLimit(RATE_LIMITS.LOGIN, identifier);
+      if (!rlLogin.success) {
+        return createRateLimitResponse(rlLogin.retryAfterSeconds, 'Too many login attempts. Account locked for 15 minutes.');
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -130,9 +177,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Rider Login
+    // Rate limit: 5 attempts per 15 min per IP + username, then 15 min lockout
     if (action === 'rider-login') {
       if (!username || !password) {
         return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
+      }
+
+      const identifier = `${ip}:${username.trim().toLowerCase()}`;
+      const rlLogin = await checkRateLimit(RATE_LIMITS.LOGIN, identifier);
+      if (!rlLogin.success) {
+        return createRateLimitResponse(rlLogin.retryAfterSeconds, 'Too many login attempts. Account locked for 15 minutes.');
       }
 
       const syntheticEmail = riderUsernameToSyntheticEmail(username);

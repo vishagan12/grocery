@@ -7,6 +7,12 @@ import { logger, enqueueDeadLetter } from '@/lib/logger';
 import { products } from '@/data/products';
 import { FREE_DELIVERY_THRESHOLD } from '@/lib/brand';
 import { applyOrderOverlay } from '@/lib/order-utils';
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  createRateLimitResponse,
+  getClientIp,
+} from '@/lib/rateLimit';
 
 interface OrderItemPayload {
   productId: string;
@@ -42,6 +48,16 @@ const MADURAI_LNG_MAX = 78.4;
 
 export async function POST(req: NextRequest) {
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
+
+  // Rate Limiting: 5 per minute per user/IP
+  const ip = getClientIp(req);
+  const authHeader = req.headers.get('authorization') || req.cookies.get('sb-access-token')?.value;
+  const userIdentifier = authHeader || ip;
+
+  const rlOrder = await checkRateLimit(RATE_LIMITS.PLACE_ORDER, userIdentifier);
+  if (!rlOrder.success) {
+    return createRateLimitResponse(rlOrder.retryAfterSeconds, 'Too many order requests. Please wait before retrying.');
+  }
 
   let body: PlaceOrderRequestBody;
   try {
