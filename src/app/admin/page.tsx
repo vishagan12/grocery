@@ -42,23 +42,24 @@ import {
   Save,
 } from 'lucide-react';
 import { AdminLayoutShell } from '@/components/admin/AdminLayoutShell';
-import {
-  AdminDashboard,
-  AdminOrdersView,
-  AdminProductsView,
-  AdminCategoriesView,
-  AdminInventoryView,
-  AdminLoginView,
-  AdminCustomersView,
-  AdminRidersView,
-  AdminZonesSlotsView,
-  AdminCouponsView,
-  AdminReportsView,
-  AdminBannersView,
-  AdminSettingsView,
-  AdminRolesView,
-  AdminCategoryData,
-} from '@/components/admin';
+import dynamic from 'next/dynamic';
+import { AdminCategoryData } from '@/components/admin';
+
+// Code-split heavy admin views to radically reduce first-load bundle size
+const AdminDashboard = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminDashboard })), { ssr: false });
+const AdminOrdersView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminOrdersView })), { ssr: false });
+const AdminProductsView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminProductsView })), { ssr: false });
+const AdminCategoriesView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminCategoriesView })), { ssr: false });
+const AdminInventoryView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminInventoryView })), { ssr: false });
+const AdminLoginView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminLoginView })), { ssr: false });
+const AdminCustomersView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminCustomersView })), { ssr: false });
+const AdminRidersView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminRidersView })), { ssr: false });
+const AdminZonesSlotsView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminZonesSlotsView })), { ssr: false });
+const AdminCouponsView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminCouponsView })), { ssr: false });
+const AdminReportsView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminReportsView })), { ssr: false });
+const AdminBannersView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminBannersView })), { ssr: false });
+const AdminSettingsView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminSettingsView })), { ssr: false });
+const AdminRolesView = dynamic(() => import('@/components/admin').then(m => ({ default: m.AdminRolesView })), { ssr: false });
 
 interface OrderItem {
   id: string;
