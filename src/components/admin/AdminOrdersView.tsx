@@ -98,6 +98,35 @@ export const AdminOrdersView: React.FC<AdminOrdersViewProps> = ({
   const [cancelReason, setCancelReason] = useState('Customer cancelled before dispatch');
   const [isCancelling, setIsCancelling] = useState(false);
 
+  // Optimistic Row Status Transitions & Error/Retry
+  const [rowStatusUpdates, setRowStatusUpdates] = useState<
+    Record<string, { loading?: boolean; error?: boolean; targetStatus: number; paymentStatus?: string }>
+  >({});
+  const [statusErrorMessage, setStatusErrorMessage] = useState<string | null>(null);
+
+  const handleOptimisticUpdateStatus = async (orderId: string, targetStatus: number, paymentStatus?: string) => {
+    setStatusErrorMessage(null);
+    setRowStatusUpdates((prev) => ({
+      ...prev,
+      [orderId]: { loading: true, error: false, targetStatus, paymentStatus },
+    }));
+
+    try {
+      await onUpdateStatus(orderId, targetStatus, paymentStatus);
+      setRowStatusUpdates((prev) => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+    } catch {
+      setStatusErrorMessage(`Failed to update status for order #${orderId}. Please retry.`);
+      setRowStatusUpdates((prev) => ({
+        ...prev,
+        [orderId]: { loading: false, error: true, targetStatus, paymentStatus },
+      }));
+    }
+  };
+
   // Status Tabs Definition with Counts
   const statusTabs = useMemo(() => {
     const c0 = orders.filter((o) => o.status === 0).length;

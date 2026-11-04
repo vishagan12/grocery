@@ -143,16 +143,27 @@ export const RiderOrderDetailView: React.FC<RiderOrderDetailViewProps> = ({
           aria-live="polite"
           className="p-3.5 rounded-2xl bg-[#FFDAD6] border border-[#BA1A1A]/30 text-[#410002] flex items-start justify-between text-xs font-medium"
         >
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-[#BA1A1A] shrink-0 mt-0.5" />
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#BA1A1A] shrink-0" />
             <span>{actionError}</span>
           </div>
-          <button
-            onClick={() => setActionError(null)}
-            className="text-[11px] font-bold text-[#BA1A1A] ml-2 shrink-0"
-          >
-            Dismiss
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (order.status < 2) handleStartPickup();
+                else handleConfirmDelivery();
+              }}
+              className="px-2.5 py-1 rounded-xl bg-[#BA1A1A] text-white text-[11px] font-bold hover:bg-[#93000A] transition-colors"
+            >
+              {lang === 'ta' ? 'மீண்டும்' : 'Retry'}
+            </button>
+            <button
+              onClick={() => setActionError(null)}
+              className="text-[11px] font-bold text-[#BA1A1A] ml-1 shrink-0"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 

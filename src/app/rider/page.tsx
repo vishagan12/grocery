@@ -199,7 +199,9 @@ export default function RiderPage() {
   const handleStartRide = async (orderId: string): Promise<boolean> => {
     if (!session) return false;
 
-    // Optimistic UI update
+    // Optimistic UI update with rollback support
+    const prevActive = activeOrder;
+    const prevDetail = selectedDetailOrder;
     setActiveOrder((prev) => (prev ? { ...prev, status: 2 } : null));
     if (selectedDetailOrder && selectedDetailOrder.id === orderId) {
       setSelectedDetailOrder((prev) => (prev ? { ...prev, status: 2 } : null));
@@ -226,6 +228,9 @@ export default function RiderPage() {
         fetchOrders();
         return true;
       }
+      // Rollback on server rejection
+      setActiveOrder(prevActive);
+      setSelectedDetailOrder(prevDetail);
       return false;
     } catch {
       queueOfflineAction({ orderId, status: 2 });
@@ -240,7 +245,9 @@ export default function RiderPage() {
   ): Promise<boolean> => {
     if (!session) return false;
 
-    // Optimistic UI update
+    // Optimistic UI update with rollback support
+    const prevActive = activeOrder;
+    const prevDetail = selectedDetailOrder;
     if (activeOrder && activeOrder.id === orderId) {
       setActiveOrder(null);
     }
@@ -274,6 +281,9 @@ export default function RiderPage() {
         fetchOrders();
         return true;
       }
+      // Rollback on server rejection
+      setActiveOrder(prevActive);
+      setSelectedDetailOrder(prevDetail);
       return false;
     } catch {
       queueOfflineAction(payload);

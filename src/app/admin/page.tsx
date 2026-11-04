@@ -289,12 +289,14 @@ export default function AdminPage() {
 
   // Status transitions
   const handleUpdateOrderStatus = useCallback(async (orderId: string, nextStatus: number, paymentStatus?: string) => {
-    try {
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus, paymentStatus: paymentStatus || o.paymentStatus } : o))
-      );
+    let previousOrder: AdminOrder | undefined;
+    setOrders((prev) => {
+      previousOrder = prev.find((o) => o.id === orderId);
+      return prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus, paymentStatus: paymentStatus || o.paymentStatus } : o));
+    });
 
-      await fetch('/api/admin', {
+    try {
+      const res = await fetch('/api/admin', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -304,8 +306,15 @@ export default function AdminPage() {
           paymentStatus,
         }),
       });
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}`);
+      }
     } catch (err) {
-      console.warn('Status update failed:', err);
+      console.warn('Status update failed, rolling back optimistic update:', err);
+      if (previousOrder) {
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? previousOrder! : o)));
+      }
+      throw err;
     }
   }, []);
 

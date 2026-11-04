@@ -15,6 +15,7 @@ export default function ProductCard({ product }: Props) {
   const { state, dispatch, getItemQuantity, isWishlisted, toggleWishlist, showToast } = useStore();
   const lang = state.lang;
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const [isThrottled, setIsThrottled] = useState(false);
 
   const activeVariantIndex = selectedVariant < product.variants.length ? selectedVariant : 0;
   const variant = product.variants[activeVariantIndex] || product.variants[0];
@@ -132,11 +133,15 @@ export default function ProductCard({ product }: Props) {
             {quantity === 0 ? (
               <button
                 type="button"
+                disabled={isThrottled}
                 onClick={() => {
+                  if (isThrottled) return;
+                  setIsThrottled(true);
+                  setTimeout(() => setIsThrottled(false), 300);
                   dispatch({ type: 'ADD_TO_CART', productId: product.id, variantIndex: activeVariantIndex });
                   showToast(t('addedToCart', lang));
                 }}
-                className="w-full border-2 border-brand-primary bg-brand-mint hover:bg-brand-primary text-brand-forest hover:text-white font-extrabold text-xs sm:text-sm px-2.5 min-h-[34px] sm:min-h-[40px] rounded-xl shadow-2xs transition-all flex items-center justify-center select-none active:scale-95 whitespace-nowrap"
+                className="w-full border-2 border-brand-primary bg-brand-mint hover:bg-brand-primary text-brand-forest hover:text-white font-extrabold text-xs sm:text-sm px-2.5 min-h-[34px] sm:min-h-[40px] rounded-xl shadow-2xs transition-all flex items-center justify-center select-none active:scale-95 whitespace-nowrap disabled:opacity-60"
               >
                 {lang === 'ta' ? 'சேர்' : 'ADD'}
               </button>
@@ -144,8 +149,14 @@ export default function ProductCard({ product }: Props) {
               <div className="w-full bg-brand-primary text-white font-bold min-h-[34px] sm:min-h-[40px] rounded-xl flex items-center justify-between px-1.5 sm:px-2 shadow-sm select-none">
                 <button
                   type="button"
-                  onClick={() => dispatch({ type: 'UPDATE_QUANTITY', productId: product.id, variantIndex: activeVariantIndex, quantity: quantity - 1 })}
-                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-transparent active:scale-90 select-none touch-manipulation focus:outline-none"
+                  disabled={isThrottled}
+                  onClick={() => {
+                    if (isThrottled) return;
+                    setIsThrottled(true);
+                    setTimeout(() => setIsThrottled(false), 300);
+                    dispatch({ type: 'UPDATE_QUANTITY', productId: product.id, variantIndex: activeVariantIndex, quantity: quantity - 1 });
+                  }}
+                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-transparent active:scale-90 select-none touch-manipulation focus:outline-none disabled:opacity-60"
                   aria-label="Decrease quantity"
                 >
                   <Minus className="w-4 h-4 text-white stroke-[2.5]" />
@@ -153,8 +164,14 @@ export default function ProductCard({ product }: Props) {
                 <span className="text-xs sm:text-sm font-black px-1 select-none tabular-nums text-white">{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => dispatch({ type: 'UPDATE_QUANTITY', productId: product.id, variantIndex: activeVariantIndex, quantity: quantity + 1 })}
-                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-transparent active:scale-90 select-none touch-manipulation focus:outline-none"
+                  disabled={isThrottled}
+                  onClick={() => {
+                    if (isThrottled) return;
+                    setIsThrottled(true);
+                    setTimeout(() => setIsThrottled(false), 300);
+                    dispatch({ type: 'UPDATE_QUANTITY', productId: product.id, variantIndex: activeVariantIndex, quantity: quantity + 1 });
+                  }}
+                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-transparent active:scale-90 select-none touch-manipulation focus:outline-none disabled:opacity-60"
                   aria-label="Increase quantity"
                 >
                   <Plus className="w-4 h-4 text-white stroke-[2.5]" />

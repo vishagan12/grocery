@@ -14,6 +14,7 @@ export default function ProductDetailPage() {
   const lang = state.lang;
   const product = products.find((p) => p.id === state.productDetailId);
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const [isThrottled, setIsThrottled] = useState(false);
 
   useEffect(() => {
     setSelectedVariant(0);
@@ -189,11 +190,15 @@ export default function ProductDetailPage() {
               <div>
                 {quantity === 0 ? (
                   <button
+                    disabled={isThrottled}
                     onClick={() => {
+                      if (isThrottled) return;
+                      setIsThrottled(true);
+                      setTimeout(() => setIsThrottled(false), 300);
                       dispatch({ type: 'ADD_TO_CART', productId: product.id, variantIndex: activeVariantIndex });
                       showToast(t('addedToCart', lang));
                     }}
-                    className="w-full bg-brand-primary hover:bg-brand-highlight text-white font-black text-base sm:text-lg py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98"
+                    className="w-full bg-brand-primary hover:bg-brand-highlight text-white font-black text-base sm:text-lg py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98 disabled:opacity-60"
                   >
                     <IconCart className="w-5 h-5 text-white" />
                     <span>{t('addToCart', lang)}</span>
@@ -205,15 +210,19 @@ export default function ProductDetailPage() {
                     </span>
                     <div className="flex items-center gap-5">
                       <button
-                        onClick={() =>
+                        disabled={isThrottled}
+                        onClick={() => {
+                          if (isThrottled) return;
+                          setIsThrottled(true);
+                          setTimeout(() => setIsThrottled(false), 300);
                           dispatch({
                             type: 'UPDATE_QUANTITY',
                             productId: product.id,
                             variantIndex: activeVariantIndex,
                             quantity: quantity - 1,
-                          })
-                        }
-                        className="text-white font-black text-2xl hover:scale-125 transition-transform"
+                          });
+                        }}
+                        className="text-white font-black text-2xl hover:scale-125 transition-transform disabled:opacity-60"
                       >
                         −
                       </button>
@@ -221,15 +230,19 @@ export default function ProductDetailPage() {
                         {quantity}
                       </span>
                       <button
-                        onClick={() =>
+                        disabled={isThrottled}
+                        onClick={() => {
+                          if (isThrottled) return;
+                          setIsThrottled(true);
+                          setTimeout(() => setIsThrottled(false), 300);
                           dispatch({
                             type: 'UPDATE_QUANTITY',
                             productId: product.id,
                             variantIndex: activeVariantIndex,
                             quantity: quantity + 1,
-                          })
-                        }
-                        className="text-white font-black text-2xl hover:scale-125 transition-transform"
+                          });
+                        }}
+                        className="text-white font-black text-2xl hover:scale-125 transition-transform disabled:opacity-60"
                       >
                         +
                       </button>
