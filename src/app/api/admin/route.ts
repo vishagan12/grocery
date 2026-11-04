@@ -58,30 +58,35 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(200, Math.max(1, parseInt(req.nextUrl.searchParams.get('limit') || '100', 10)));
     const offset = (page - 1) * limit;
 
-    // 1. Fetch recent orders using admin session client (RLS applies)
-    const { data: rawOrders, error: ordersError } = await sessionDb
-      .from('orders')
-      .select('*, order_items(*)')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    // 2. Fetch products and their variants with pagination
-    const { data: rawProducts, error: productsError } = await sessionDb
-      .from('products')
-      .select('id, name_en, name_ta, category_id, image, in_stock, search_aliases, product_variants(*)')
-      .order('id')
-      .range(offset, offset + limit - 1);
-
-    // 3. Fetch categories
-    const { data: rawCategories } = await sessionDb
-      .from('categories')
-      .select('*');
-
-    // 4. Fetch registered riders for the admin riders view
-    const { data: rawRiders } = await sessionDb
-      .from('riders')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Concurrently fetch orders, products+variants, categories, riders, and feature flags in parallel
+    const [
+      { data: rawOrders, error: ordersError },
+      { data: rawProducts, error: productsError },
+      { data: rawCategories },
+      { data: rawRiders },
+      { data: rawFlags },
+    ] = await Promise.all([
+      sessionDb
+        .from('orders')
+        .select('*, order_items(*)')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1),
+      sessionDb
+        .from('products')
+        .select('id, name_en, name_ta, category_id, image, in_stock, search_aliases, product_variants(*)')
+        .order('id')
+        .range(offset, offset + limit - 1),
+      sessionDb
+        .from('categories')
+        .select('*'),
+      sessionDb
+        .from('riders')
+        .select('*')
+        .order('created_at', { ascending: false }),
+      sessionDb
+        .from('feature_flags')
+        .select('key, enabled'),
+    ]);
 
     let categories = fallbackCategories;
     if (rawCategories && rawCategories.length > 0) {
@@ -92,11 +97,6 @@ export async function GET(req: NextRequest) {
         image: c.image || '',
       }));
     }
-
-    // 5. Fetch feature flags (e.g. accepting_orders)
-    const { data: rawFlags } = await sessionDb
-      .from('feature_flags')
-      .select('key, enabled');
 
     let isAcceptingOrders = true;
     if (rawFlags && Array.isArray(rawFlags)) {
@@ -571,8 +571,8 @@ export async function PATCH(req: NextRequest) {
           search_aliases: searchAliases,
         });
 
-        for (const v of variants) {
-          await sessionDb.from('product_variants').upsert(v);
+        if (variants.length > 0) {
+          await sessionDb.from('product_variants').upsert(variants);
         }
 
         triggerCatalogRevalidation();
@@ -627,22 +627,25 @@ export async function PATCH(req: NextRequest) {
       try {
         await sessionDb.from('products').update(updateData).eq('id', id);
 
-        if (Array.isArray(product.variants)) {
-          for (const v of product.variants) {
-            if (v.id) {
+        if (Array.isArray(product.variants) && product.variants.length > 0) {
+          const variantsToUpsert = product.variants
+            .filter((v: any) => v && v.id)
+            .map((v: any) => {
               const price = Math.max(0.01, Number(v.price) || 0);
               const mrp = Math.max(price, Number(v.mrp) || price);
               const stockQty = Math.max(0, parseInt(v.stock_qty, 10) || 0);
-
-              await sessionDb.from('product_variants').upsert({
+              return {
                 id: v.id,
                 product_id: id,
                 label: sanitizeInput(v.label || '1 pack'),
                 price,
                 mrp,
                 stock_qty: stockQty,
-              });
-            }
+              };
+            });
+
+          if (variantsToUpsert.length > 0) {
+            await sessionDb.from('product_variants').upsert(variantsToUpsert);
           }
         }
 

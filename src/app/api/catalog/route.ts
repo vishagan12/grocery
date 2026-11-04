@@ -13,22 +13,24 @@ export const revalidate = 180;
  */
 export async function GET() {
   try {
-    // 1. Fetch categories
-    const { data: rawCategories } = await supabase
-      .from('categories')
-      .select('id, name_en, name_ta, image')
-      .order('id');
-
-    // 2. Fetch in-stock and active products with embedded variants in a single join query
-    const { data: rawProducts, error: productsError } = await supabase
-      .from('products')
-      .select('id, name_en, name_ta, category_id, image, in_stock, product_variants(id, label, price, mrp, stock_qty)')
-      .order('id');
-
-    // 3. Fetch store operating feature flag
-    const { data: rawFlags } = await supabase
-      .from('feature_flags')
-      .select('key, enabled');
+    // Execute categories, products+variants join, and feature flags concurrently in parallel
+    const [
+      { data: rawCategories },
+      { data: rawProducts, error: productsError },
+      { data: rawFlags }
+    ] = await Promise.all([
+      supabase
+        .from('categories')
+        .select('id, name_en, name_ta, image')
+        .order('id'),
+      supabase
+        .from('products')
+        .select('id, name_en, name_ta, category_id, image, in_stock, product_variants(id, label, price, mrp, stock_qty)')
+        .order('id'),
+      supabase
+        .from('feature_flags')
+        .select('key, enabled'),
+    ]);
 
     let acceptingOrders = true;
     if (rawFlags && Array.isArray(rawFlags)) {
