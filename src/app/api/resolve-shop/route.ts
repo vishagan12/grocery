@@ -75,5 +75,7 @@ export async function GET() {
     shopUrl: SHOP_MAPS_URL,
   };
 
-  return NextResponse.json(cachedCoords);
+  const response = NextResponse.json(cachedCoords);
+  response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  return response;
 }

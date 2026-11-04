@@ -1,28 +1,39 @@
 import { supabase } from '@/lib/supabase';
 import { Product, products as fallbackProducts } from '@/data/products';
 
-// In-memory session LRU cache for the last 30 queries
-const SEARCH_CACHE_MAX = 30;
-const searchCache = new Map<string, Product[]>();
+// High-performance TTL cache for search queries (30 seconds TTL)
+const SEARCH_CACHE_MAX = 50;
+const SEARCH_CACHE_TTL_MS = 30 * 1000;
+
+interface CachedSearchEntry {
+  results: Product[];
+  expiresAt: number;
+}
+
+const searchCache = new Map<string, CachedSearchEntry>();
 
 function getCachedResults(cacheKey: string): Product[] | undefined {
-  if (searchCache.has(cacheKey)) {
-    // Re-insert to mark as recently used
-    const val = searchCache.get(cacheKey)!;
+  const entry = searchCache.get(cacheKey);
+  if (!entry) return undefined;
+  if (Date.now() > entry.expiresAt) {
     searchCache.delete(cacheKey);
-    searchCache.set(cacheKey, val);
-    return val;
+    return undefined;
   }
-  return undefined;
+  // Re-insert to mark as recently used
+  searchCache.delete(cacheKey);
+  searchCache.set(cacheKey, entry);
+  return entry.results;
 }
 
 function setCachedResults(cacheKey: string, results: Product[]): void {
   if (searchCache.size >= SEARCH_CACHE_MAX) {
-    // Evict oldest (first inserted key)
     const oldestKey = searchCache.keys().next().value;
     if (oldestKey) searchCache.delete(oldestKey);
   }
-  searchCache.set(cacheKey, results);
+  searchCache.set(cacheKey, {
+    results,
+    expiresAt: Date.now() + SEARCH_CACHE_TTL_MS,
+  });
 }
 
 /**
