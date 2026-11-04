@@ -9,6 +9,16 @@ import Toast from '@/components/Toast';
 import LocationModal from '@/components/LocationModal';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+          console.warn('Service Worker registration skipped:', err);
+        });
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen min-h-dvh flex flex-col bg-brand-cream text-slate-900 w-full relative">
       <a href="#main-content" className="skip-link">
