@@ -59,8 +59,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Valid 10-digit phone number is required' }, { status: 400 });
       }
 
-      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12 
-        ? `+${cleanPhone}` 
+      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12
+        ? `+${cleanPhone}`
         : `+91${cleanPhone.slice(-10)}`;
 
       // IP limit check
@@ -96,8 +96,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Phone and OTP code are required' }, { status: 400 });
       }
 
-      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12 
-        ? `+${cleanPhone}` 
+      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12
+        ? `+${cleanPhone}`
         : `+91${cleanPhone.slice(-10)}`;
 
       const rlVerify = await checkRateLimit(RATE_LIMITS.OTP_VERIFY_PHONE, formattedPhone);
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (error || !data.user) {
-        return NextResponse.json({ error: error.message || 'Invalid or expired OTP' }, { status: 401 });
+        return NextResponse.json({ error: error?.message || 'Invalid or expired OTP' }, { status: 401 });
       }
 
       // Update customer profile metadata if provided

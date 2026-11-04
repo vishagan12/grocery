@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabase } from '@/lib/supabase';
+import { createServerAdminClient } from '@/lib/serverAuth';
 import { calculateDistanceKm, DEFAULT_SHOP_COORDS } from '@/lib/geofence';
 import { sanitizeInput, withExponentialBackoff } from '@/lib/resilience';
 import { logger, enqueueDeadLetter } from '@/lib/logger';
@@ -261,14 +262,15 @@ export async function POST(req: NextRequest) {
   try {
     await withExponentialBackoff(
       async () => {
-        // Attempt Atomic RPC defined in Supabase
+        // Attempt Atomic RPC defined in Supabase via server-privileged client
+        const dbClient = process.env.SUPABASE_SERVICE_ROLE_KEY ? createServerAdminClient() : supabase;
         const rpcItems = validatedItems.map((v) => ({
           product_id: v.productId,
           variant_label: v.variantLabel,
           quantity: v.quantity,
         }));
 
-        const rpcResult = await supabase.rpc('place_order_atomic', {
+        const rpcResult = await dbClient.rpc('place_order_atomic', {
           p_idempotency_key: idempotencyKey,
           p_customer_name: customerName ? sanitizeInput(customerName, 100) : null,
           p_phone: formattedPhone,
