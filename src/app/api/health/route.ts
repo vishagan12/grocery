@@ -52,7 +52,8 @@ export async function GET(req: NextRequest) {
   const uptimeSeconds = process.uptime ? Math.floor(process.uptime()) : 0;
 
   const responsePayload = {
-    status: dbHealthy ? 'healthy' : 'degraded',
+    status: dbHealthy ? 'ok' : 'degraded',
+    database: dbHealthy ? 'connected' : 'unreachable',
     service: 'sri-amman-supermarket',
     timestamp: new Date().toISOString(),
     latencyMs,

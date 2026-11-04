@@ -38,6 +38,7 @@ Open the **SQL Editor** in your Supabase project dashboard and execute each migr
 | **10** | `supabase/migrations/20261030100200_search_and_performance_tuning.sql` | Adds `search_aliases` column, `normalize_search()` function, generated `search_doc` column, GIN trigram indexes, Tamil/Thanglish/English hybrid `search_products_fast()` RPC, and composite performance indexes for 200+ concurrent users. |
 | **11** | `supabase/migrations/20261031100000_fix_search_path_for_trgm_operators.sql` | Updates `search_products_fast` to `set search_path = public, extensions, pg_temp` so `pg_trgm` operators (`%`) resolve properly without error 42883, and drops ambiguous legacy two-argument overload `search_products_fast(text, integer)`. |
 | **12** | `supabase/migrations/20261102100000_make_search_products_fast_limit_first.sql` | Rewrites `search_products_fast()` with a limit-first pipeline: applies ORDER BY and LIMIT/OFFSET directly to matching product IDs before computing `min_price` and `variants` JSONB via a lateral join. Adds GIN trigram index on `lower(name_en)` and decouples search conditions into UNION branches to slash broad match query times from ~636ms to <50-150ms. |
+| **13** | `supabase/migrations/20261104110000_create_place_order_atomic.sql` | Creates server-side atomic order placement RPC (`public.place_order_atomic`) with strict row-level locking (`FOR UPDATE`), stock deduction guard against negative inventory, authoritative price/fee calculation, and idempotency key de-duplication. |
 
 ---
 
@@ -71,7 +72,8 @@ Run `supabase/seed-staging-roles.sql` after substituting your placeholder values
 
 If you need to roll back the migrations, run the corresponding rollback scripts in **reverse order**:
 
-1. `supabase/rollbacks/20261102100000_rollback_make_search_products_fast_limit_first.sql`
+1. `supabase/rollbacks/20261104110000_rollback_create_place_order_atomic.sql`
+2. `supabase/rollbacks/20261102100000_rollback_make_search_products_fast_limit_first.sql`
 2. `supabase/rollbacks/20261031100000_rollback_fix_search_path_for_trgm_operators.sql`
 3. `supabase/rollbacks/20261030100200_rollback_search_and_performance_tuning.sql`
 4. `supabase/rollbacks/20261030100100_rollback_add_orders_updated_at.sql`
@@ -88,3 +90,49 @@ If you need to roll back the migrations, run the corresponding rollback scripts 
 
 ## 5. Notes on Client App Impact
 Once these migrations are applied to a database, anonymous direct writes to `addresses` and `orders` from client browsers will be rejected by PostgreSQL RLS. The frontend and API routes must be updated in the next phase to authenticate with Supabase Auth session tokens.
+
+
+---
+
+## 6. Weekly Supabase Backups & Restore Procedure
+
+### Weekly Automated pg_dump Backups
+To protect against catastrophic data loss or accidental corruptions, maintain weekly database snapshots with automated 30-day retention.
+
+1. **Environment Variables**:
+   Provide the direct Supabase PostgreSQL connection string (Direct connection or Session pooler, e.g. from Supabase Settings -> Database):
+   ```bash
+   export DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+   ```
+
+2. **Run Backup Script**:
+   Using bash:
+   ```bash
+   ./scripts/db-backup.sh
+   ```
+   Or using cross-platform Node.js:
+   ```bash
+   node scripts/db-backup.js
+   ```
+   Backups are written to `./backups/supabase_backup_YYYYMMDD_HHMMSS.dump` using PostgreSQL custom compressed archive format (`-Fc`).
+
+3. **Automate via Cron Job (Weekly)**:
+   Add to server crontab (`crontab -e`):
+   ```cron
+   # Run every Sunday at 02:00 AM UTC
+   0 2 * * 0 cd /path/to/amman-grocery-demo && DATABASE_URL="..." ./scripts/db-backup.sh >> ./backups/cron.log 2>&1
+   ```
+
+### Restore Verification Test
+Always test backup restorability against a staging database or local Supabase/Docker instance:
+
+```bash
+# 1. Inspect archive contents
+pg_restore -l backups/supabase_backup_latest.dump | head -n 30
+
+# 2. Dry-run restore
+pg_restore --clean --if-exists --no-owner --no-privileges -d "$TEST_DATABASE_URL" backups/supabase_backup_latest.dump --schema=public --dry-run
+
+# 3. Perform actual restore into target test database
+pg_restore --clean --if-exists --no-owner --no-privileges -d "$TEST_DATABASE_URL" backups/supabase_backup_latest.dump
+```

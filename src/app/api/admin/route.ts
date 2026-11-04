@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import crypto from 'crypto';
+import { z } from 'zod';
 import { supabase as defaultAnonSupabase } from '@/lib/supabase';
-import { logger } from '@/lib/logger';
+import { logger, handleApiError } from '@/lib/logger';
 import { sanitizeInput } from '@/lib/resilience';
 import { products as fallbackCatalog, categories as fallbackCategories } from '@/data/products';
 import { parseDeliverySlot, formatDeliverySlot, applyOrderOverlay, setOrderOverlay } from '@/lib/order-utils';
@@ -223,12 +224,17 @@ export async function PATCH(req: NextRequest) {
   const sessionDb = auth.supabase;
 
   try {
-    const body = await req.json();
-    const { action } = body;
+    const rawBody = await req.json();
+    const AdminActionSchema = z.object({
+      action: z.string().min(1, 'Valid action is required'),
+    }).passthrough();
 
-    if (!action || typeof action !== 'string') {
+    const parsed = AdminActionSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json({ error: 'Valid action is required' }, { status: 400 });
     }
+    const body = parsed.data;
+    const { action } = body;
 
     // -------------------------------------------------------------------------
     // a) UPDATE_ORDER_STATUS

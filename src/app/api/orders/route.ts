@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
 import { createServerAdminClient } from '@/lib/serverAuth';
 import { calculateDistanceKm, DEFAULT_SHOP_COORDS } from '@/lib/geofence';
 import { sanitizeInput, withExponentialBackoff } from '@/lib/resilience';
-import { logger, enqueueDeadLetter } from '@/lib/logger';
+import { logger, enqueueDeadLetter, handleApiError } from '@/lib/logger';
 import { products } from '@/data/products';
 import { FREE_DELIVERY_THRESHOLD } from '@/lib/brand';
 import { applyOrderOverlay } from '@/lib/order-utils';
@@ -15,28 +16,30 @@ import {
   getClientIp,
 } from '@/lib/rateLimit';
 
-interface OrderItemPayload {
-  productId: string;
-  variantIndex?: number;
-  variantLabel?: string;
-  quantity: number;
-}
+const OrderItemSchema = z.object({
+  productId: z.string().min(1, 'Product ID is required'),
+  variantIndex: z.number().int().nonnegative().optional(),
+  variantLabel: z.string().optional(),
+  quantity: z.number().int().min(1, 'Quantity must be at least 1').max(20, 'Quantity cannot exceed 20'),
+});
 
-interface PlaceOrderRequestBody {
-  idempotencyKey: string;
-  customerName?: string;
-  phone: string;
-  address: string;
-  lat: number;
-  lng: number;
-  items: OrderItemPayload[];
-  paymentMethod?: 'cod' | 'upi';
-  deliverySlot?: string;
-  appliedCoupon?: string | null;
-  isForSomeoneElse?: boolean;
-  recipientName?: string;
-  recipientPhone?: string;
-}
+const PlaceOrderSchema = z.object({
+  idempotencyKey: z.string().min(10, 'Idempotency key too short').max(100, 'Idempotency key too long'),
+  customerName: z.string().max(100).optional(),
+  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+  address: z.string().min(5, 'Delivery address must be at least 5 characters').max(300),
+  lat: z.number().refine((val) => !isNaN(val), 'Invalid latitude'),
+  lng: z.number().refine((val) => !isNaN(val), 'Invalid longitude'),
+  items: z.array(OrderItemSchema).min(1, 'Order must contain at least one item'),
+  paymentMethod: z.enum(['cod', 'upi']).optional().default('cod'),
+  deliverySlot: z.string().max(50).optional().default('express'),
+  appliedCoupon: z.string().max(30).nullable().optional(),
+  isForSomeoneElse: z.boolean().optional().default(false),
+  recipientName: z.string().max(100).optional(),
+  recipientPhone: z.string().max(20).optional(),
+});
+
+type PlaceOrderRequestBody = z.infer<typeof PlaceOrderSchema>;
 
 // Indian 10-digit mobile number format
 const INDIAN_PHONE_REGEX = /^[6-9]\d{9}$/;
@@ -62,7 +65,16 @@ export async function POST(req: NextRequest) {
 
   let body: PlaceOrderRequestBody;
   try {
-    body = await req.json();
+    const rawBody = await req.json();
+    const parsed = PlaceOrderSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const issueMsg = parsed.error.issues[0]?.message || 'Invalid order payload format';
+      return NextResponse.json(
+        { error: issueMsg, issues: parsed.error.format() },
+        { status: 400, headers: { 'x-request-id': requestId } }
+      );
+    }
+    body = parsed.data;
   } catch {
     return NextResponse.json(
       { error: 'Invalid JSON payload' },

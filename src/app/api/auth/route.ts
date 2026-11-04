@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createServerClient } from '@supabase/ssr';
 import { riderUsernameToSyntheticEmail } from '@/lib/serverAuth';
 import {
@@ -8,11 +9,39 @@ import {
   getClientIp,
   verifyBotProtection,
 } from '@/lib/rateLimit';
+import { logger, handleApiError } from '@/lib/logger';
+
+const AuthActionSchema = z.object({
+  action: z.enum([
+    'login',
+    'rider-login',
+    'send-phone-otp',
+    'verify-phone-otp',
+    'google-login',
+    'logout',
+  ]),
+  email: z.string().email().optional(),
+  password: z.string().min(1).max(200).optional(),
+  username: z.string().min(1).max(100).optional(),
+  phone: z.string().max(20).optional(),
+  otp: z.string().max(10).optional(),
+  name: z.string().max(100).optional(),
+  dob: z.string().max(30).optional(),
+  honeypot: z.string().optional(),
+  formStartTime: z.number().optional(),
+  scope: z.enum(['global', 'local', 'others']).optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    const body = await req.json();
+    const rawBody = await req.json();
+    const parsed = AuthActionSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const issueMsg = parsed.error.issues[0]?.message || 'Invalid auth payload format';
+      return NextResponse.json({ error: issueMsg, issues: parsed.error.format() }, { status: 400 });
+    }
+    const body = parsed.data;
     const { action, email, password, username, phone, otp, name, dob, honeypot, formStartTime, scope } = body;
 
     // 0. Bot Protection for Login & OTP Actions

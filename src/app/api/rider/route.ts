@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
+import { z } from 'zod';
+import { logger, handleApiError } from '@/lib/logger';
 import { products as fallbackCatalog } from '@/data/products';
 import { parseDeliverySlot, applyOrderOverlay } from '@/lib/order-utils';
 import { requireRider } from '@/lib/serverAuth';
 
 export const dynamic = 'force-dynamic';
+
+const RiderPatchSchema = z.object({
+  action: z.enum(['CHANGE_PASSWORD', 'UPDATE_STATUS']).optional(),
+  orderId: z.string().min(1).optional(),
+  status: z.number().int().min(0).max(4).optional(),
+  paymentStatus: z.enum(['pending', 'paid', 'failed', 'cancelled']).optional(),
+  paymentCollectedMethod: z.string().max(50).optional(),
+  newPassword: z.string().min(6).max(100).optional(),
+});
 
 export async function GET(req: NextRequest) {
   // 1. Verify caller has authenticated rider role and active profile
@@ -182,7 +192,13 @@ export async function PATCH(req: NextRequest) {
   const { supabase: sessionDb, riderProfile } = auth;
 
   try {
-    const body = await req.json();
+    const rawBody = await req.json();
+    const parsed = RiderPatchSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      const issueMsg = parsed.error.issues[0]?.message || 'Invalid payload format';
+      return NextResponse.json({ error: issueMsg, issues: parsed.error.format() }, { status: 400 });
+    }
+    const body = parsed.data;
     const { action, orderId, status, paymentStatus, paymentCollectedMethod, newPassword } = body;
 
     // Self-service password change for rider
