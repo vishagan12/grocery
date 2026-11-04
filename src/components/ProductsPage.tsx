@@ -14,6 +14,7 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState<string>('all');
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [discountOnly, setDiscountOnly] = useState<boolean>(false);
+  const [visibleCount, setVisibleCount] = useState<number>(24);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const isDown = React.useRef(false);
   const startX = React.useRef(0);
@@ -424,11 +425,23 @@ export default function ProductsPage() {
               </div>
             ) : (
               /* Products Grid: 2 cols on mobile, 3 cols on tablet, 4 cols on desktop */
-              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-                {filtered.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                  {filtered.slice(0, visibleCount).map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+                {visibleCount < filtered.length && (
+                  <div className="mt-8 text-center">
+                    <button
+                      onClick={() => setVisibleCount((prev) => prev + 24)}
+                      className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl border border-brand-primary text-brand-primary bg-white hover:bg-brand-primary hover:text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                    >
+                      {lang === 'ta' ? 'மேலும் தயாரிப்புகளைக் காட்டு' : 'Load More Products'} ({filtered.length - visibleCount} remaining)
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
