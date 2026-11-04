@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (error) {
-        return NextResponse.json({ error: error.message || 'Failed to send OTP' }, { status: 400 });
+        return NextResponse.json({ error: error?.message || 'Failed to send OTP' }, { status: 400 });
       }
 
       return NextResponse.json({ success: true, message: 'OTP sent successfully' });
