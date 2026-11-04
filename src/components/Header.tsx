@@ -8,6 +8,7 @@ import { searchCatalogFast } from '@/lib/searchProducts';
 import { useDialog } from '@/hooks/useDialog';
 import {
   Search,
+  Clock,
   User,
   ChevronDown,
   Languages,
@@ -39,6 +40,38 @@ export default function Header() {
   const [isSearching, setIsSearching] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const queryTrimmed = state.searchQuery.trim().slice(0, 60);
+  const searchSeqRef = useRef(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('sas_recent_searches');
+      if (stored) {
+        setRecentSearches(JSON.parse(stored).slice(0, 5));
+      }
+    } catch {
+      // safe fallback in private/incognito mode
+    }
+  }, []);
+
+  const saveRecentSearch = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed || trimmed.length < 2) return;
+    try {
+      const updated = [trimmed, ...recentSearches.filter((s) => s.toLowerCase() !== trimmed.toLowerCase())].slice(0, 5);
+      setRecentSearches(updated);
+      localStorage.setItem('sas_recent_searches', JSON.stringify(updated));
+    } catch {
+      // safe fallback in private/incognito mode
+    }
+  };
+
+  const clearRecentSearches = () => {
+    try {
+      localStorage.removeItem('sas_recent_searches');
+      setRecentSearches([]);
+    } catch {}
+  };
 
   useEffect(() => {
     setActiveIndex(-1);
@@ -50,21 +83,22 @@ export default function Header() {
 
     setIsSearching(true);
     const abortController = new AbortController();
+    const currentSeq = ++searchSeqRef.current;
 
     const timer = setTimeout(async () => {
       try {
         const results = await searchCatalogFast(queryTrimmed, 8, abortController.signal);
-        if (!abortController.signal.aborted) {
+        if (!abortController.signal.aborted && currentSeq === searchSeqRef.current) {
           setSuggestions(results);
           setIsSearching(false);
         }
       } catch {
-        if (!abortController.signal.aborted) {
+        if (!abortController.signal.aborted && currentSeq === searchSeqRef.current) {
           setSuggestions([]);
           setIsSearching(false);
         }
       }
-    }, 250);
+    }, 200);
 
     return () => {
       abortController.abort();
@@ -260,6 +294,7 @@ export default function Header() {
                         setSearchFocused(false);
                         dispatch({ type: 'SET_SEARCH', query: '' });
                       } else {
+                        if (queryTrimmed) saveRecentSearch(queryTrimmed);
                         setSearchFocused(false);
                         dispatch({ type: 'SET_PAGE', page: 'products' });
                       }
@@ -329,7 +364,7 @@ export default function Header() {
             </div>
 
             {/* Search Autocomplete Dropdown */}
-            {searchFocused && (isSearching || suggestions.length > 0 || queryTrimmed.length >= 2) && (
+            {searchFocused && (isSearching || suggestions.length > 0 || queryTrimmed.length >= 2 || recentSearches.length > 0) && (
               <div
                 id="search-suggestions-dropdown"
                 className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-fade-in text-slate-900"
@@ -363,6 +398,41 @@ export default function Header() {
                   </div>
                 )}
 
+                                {/* Recent Searches */}
+                {!isSearching && queryTrimmed.length < 2 && recentSearches.length > 0 && (
+                  <div className="p-3">
+                    <div className="flex items-center justify-between px-2 pb-2 border-b border-slate-100">
+                      <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        {lang === 'ta' ? 'சமீபத்திய தேடல்கள்' : 'Recent Searches'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={clearRecentSearches}
+                        className="text-[11px] font-bold text-slate-400 hover:text-slate-600 cursor-pointer"
+                      >
+                        {lang === 'ta' ? 'அழி' : 'Clear'}
+                      </button>
+                    </div>
+                    <div className="pt-1.5 flex flex-wrap gap-1.5">
+                      {recentSearches.map((term) => (
+                        <button
+                          key={term}
+                          type="button"
+                          onClick={() => {
+                            dispatch({ type: 'SET_SEARCH', query: term });
+                            dispatch({ type: 'SET_PAGE', page: 'products' });
+                            setSearchFocused(false);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 flex items-center gap-1.5 transition-colors border border-slate-200/60"
+                        >
+                          <Clock className="w-3 h-3 text-slate-400" />
+                          <span>{term}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {/* 3. Suggestions List */}
                 {!isSearching && suggestions.length > 0 && (
                   <ul
@@ -390,6 +460,7 @@ export default function Header() {
                             type="button"
                             className="flex flex-1 min-w-0 items-center gap-3 text-left rounded-lg"
                             onClick={() => {
+                              if (queryTrimmed) saveRecentSearch(queryTrimmed);
                               dispatch({ type: 'SET_PRODUCT_DETAIL', id: p.id });
                               dispatch({ type: 'SET_PAGE', page: 'product-detail' });
                               setSearchFocused(false);

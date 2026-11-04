@@ -111,6 +111,20 @@ export default function ProductsPage() {
     setDiscountOnly(false);
   };
 
+  // Task 8: Auto-load next page on 80% scroll
+  React.useEffect(() => {
+    function handleAutoScrollLoad() {
+      if (typeof window === 'undefined') return;
+      const scrollPos = window.innerHeight + window.scrollY;
+      const threshold = document.documentElement.scrollHeight * 0.8;
+      if (scrollPos >= threshold && visibleCount < filtered.length) {
+        setVisibleCount((prev) => Math.min(prev + 24, filtered.length));
+      }
+    }
+    window.addEventListener('scroll', handleAutoScrollLoad, { passive: true });
+    return () => window.removeEventListener('scroll', handleAutoScrollLoad);
+  }, [visibleCount, filtered.length]);
+
   const hasActiveFilters =
     state.activeCategory !== 'all' ||
     state.searchQuery !== '' ||
