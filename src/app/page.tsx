@@ -6,13 +6,15 @@ import HeroSection from '@/components/HeroSection';
 import CategoryGrid from '@/components/CategoryGrid';
 import PromoBanners from '@/components/PromoBanners';
 import FeaturedProducts from '@/components/FeaturedProducts';
-import ProductsPage from '@/components/ProductsPage';
-import OrderAgainPage from '@/components/OrderAgainPage';
-import CheckoutPage from '@/components/CheckoutPage';
-import OrdersPage from '@/components/OrdersPage';
-import ProductDetailPage from '@/components/ProductDetailPage';
-import ProfilePage from '@/components/ProfilePage';
-import WishlistPage from '@/components/WishlistPage';
+import dynamic from 'next/dynamic';
+
+const ProductsPage = dynamic(() => import('@/components/ProductsPage'), { ssr: false });
+const OrderAgainPage = dynamic(() => import('@/components/OrderAgainPage'), { ssr: false });
+const CheckoutPage = dynamic(() => import('@/components/CheckoutPage'), { ssr: false });
+const OrdersPage = dynamic(() => import('@/components/OrdersPage'), { ssr: false });
+const ProductDetailPage = dynamic(() => import('@/components/ProductDetailPage'), { ssr: false });
+const ProfilePage = dynamic(() => import('@/components/ProfilePage'), { ssr: false });
+const WishlistPage = dynamic(() => import('@/components/WishlistPage'), { ssr: false });
 import AppShell from '@/components/AppShell';
 import { WhyChooseUs, CustomerReviews } from '@/components/HomeExtras';
 
