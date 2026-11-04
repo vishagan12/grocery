@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
     const body = await req.json();
-    const { action, email, password, username, phone, otp, name, dob, honeypot, formStartTime } = body;
+    const { action, email, password, username, phone, otp, name, dob, honeypot, formStartTime, scope } = body;
 
     // 0. Bot Protection for Login & OTP Actions
     const botCheck = verifyBotProtection({
@@ -51,7 +51,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // 1. Customer: Send Phone OTP
+    // 1. Customer: Google OAuth URL initiation
+    // Customers can sign in with Google now; Phone OTP remains available interchangeably
+    if (action === 'google-login') {
+      const origin = req.nextUrl.origin;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=/`,
+        },
+      });
+
+      if (error || !data.url) {
+        return NextResponse.json({ error: error?.message || 'Failed to initiate Google sign in' }, { status: 400 });
+      }
+
+      return NextResponse.json({ url: data.url });
+    }
+
+    // 2. Customer: Send Phone OTP
     // Rate limit: 3 per 10 min per phone AND 10 per hour per IP
     if (action === 'send-phone-otp') {
       const cleanPhone = (phone || '').replace(/\D/g, '');
@@ -59,8 +77,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Valid 10-digit phone number is required' }, { status: 400 });
       }
 
-      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12
-        ? `+${cleanPhone}`
+      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12 
+        ? `+${cleanPhone}` 
         : `+91${cleanPhone.slice(-10)}`;
 
       // IP limit check
@@ -86,7 +104,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: 'OTP sent successfully' });
     }
 
-    // 2. Customer: Verify Phone OTP
+    // 3. Customer: Verify Phone OTP
     // Rate limit: 5 per 10 min per phone
     if (action === 'verify-phone-otp') {
       const cleanPhone = (phone || '').replace(/\D/g, '');
@@ -96,8 +114,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Phone and OTP code are required' }, { status: 400 });
       }
 
-      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12
-        ? `+${cleanPhone}`
+      const formattedPhone = cleanPhone.startsWith('91') && cleanPhone.length === 12 
+        ? `+${cleanPhone}` 
         : `+91${cleanPhone.slice(-10)}`;
 
       const rlVerify = await checkRateLimit(RATE_LIMITS.OTP_VERIFY_PHONE, formattedPhone);
@@ -112,7 +130,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (error || !data.user) {
-        return NextResponse.json({ error: error?.message || 'Invalid or expired OTP' }, { status: 401 });
+        return NextResponse.json({ error: error.message || 'Invalid or expired OTP' }, { status: 401 });
       }
 
       // Update customer profile metadata if provided
@@ -139,7 +157,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Admin Login
+    // 4. Admin Login
     // Rate limit: 5 attempts per 15 min per IP + username, then 15 min lockout
     if (action === 'admin-login') {
       if (!email || !password) {
@@ -176,7 +194,7 @@ export async function POST(req: NextRequest) {
       return res;
     }
 
-    // 4. Rider Login
+    // 5. Rider Login
     // Rate limit: 5 attempts per 15 min per IP + username, then 15 min lockout
     if (action === 'rider-login') {
       if (!username || !password) {
@@ -237,9 +255,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Logout
+    // 6. Logout / Logout Everywhere
     if (action === 'logout') {
-      await supabase.auth.signOut();
+      if (scope === 'global' || scope === 'others') {
+        await supabase.auth.signOut({ scope: scope as 'global' | 'others' });
+      } else {
+        await supabase.auth.signOut();
+      }
       return res;
     }
 
