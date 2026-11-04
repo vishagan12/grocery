@@ -85,12 +85,12 @@ const memoryStorage = new Map<string, MemoryRecord>();
 if (typeof setInterval !== 'undefined') {
   setInterval(() => {
     const now = Date.now();
-    for (const [key, record] of memoryStorage.entries()) {
+    memoryStorage.forEach((record, key) => {
       record.timestamps = record.timestamps.filter((t) => now - t < 3600 * 1000);
       if (record.timestamps.length === 0) {
         memoryStorage.delete(key);
       }
-    }
+    });
   }, 5 * 60 * 1000).unref?.();
 }
 

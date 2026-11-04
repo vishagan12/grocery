@@ -286,25 +286,8 @@ export default function AdminPage() {
     };
   }, [autoPrintEnabled, soundEnabled]);
 
-  // Trigger 80mm Print
-  const triggerPrintSlip = useCallback((orderId: string) => {
-    const target = orders.find((o) => o.id === orderId);
-    if (!target) return;
-    setPrintOrder(target);
-
-    // If order was in status 0, advance to status 1 (Packing)
-    if (target.status === 0) {
-      handleUpdateOrderStatus(target.id, 1);
-    }
-
-    setTimeout(() => {
-      window.print();
-    }, 320);
-  }, [orders, handleUpdateOrderStatus]);
-  triggerPrintSlipRef.current = triggerPrintSlip;
-
   // Status transitions
-  const handleUpdateOrderStatus = async (orderId: string, nextStatus: number, paymentStatus?: string) => {
+  const handleUpdateOrderStatus = useCallback(async (orderId: string, nextStatus: number, paymentStatus?: string) => {
     try {
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus, paymentStatus: paymentStatus || o.paymentStatus } : o))
@@ -323,7 +306,24 @@ export default function AdminPage() {
     } catch (err) {
       console.warn('Status update failed:', err);
     }
-  };
+  }, []);
+
+  // Trigger 80mm Print
+  const triggerPrintSlip = useCallback((orderId: string) => {
+    const target = orders.find((o) => o.id === orderId);
+    if (!target) return;
+    setPrintOrder(target);
+
+    // If order was in status 0, advance to status 1 (Packing)
+    if (target.status === 0) {
+      handleUpdateOrderStatus(target.id, 1);
+    }
+
+    setTimeout(() => {
+      window.print();
+    }, 320);
+  }, [orders, handleUpdateOrderStatus]);
+  triggerPrintSlipRef.current = triggerPrintSlip;
 
   // Assign Rider
   const handleAssignRider = async (orderId: string, riderName: string, riderPhone: string) => {

@@ -233,7 +233,7 @@ export async function PATCH(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Valid action is required' }, { status: 400 });
     }
-    const body = parsed.data;
+    const body = rawBody as Record<string, any>;
     const { action } = body;
 
     // -------------------------------------------------------------------------

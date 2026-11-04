@@ -14,6 +14,7 @@ import { logger, handleApiError } from '@/lib/logger';
 const AuthActionSchema = z.object({
   action: z.enum([
     'login',
+    'admin-login',
     'rider-login',
     'send-phone-otp',
     'verify-phone-otp',
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (error || !data.user) {
-        return NextResponse.json({ error: error.message || 'Invalid or expired OTP' }, { status: 401 });
+        return NextResponse.json({ error: error?.message || 'Invalid or expired OTP' }, { status: 401 });
       }
 
       // Update customer profile metadata if provided
