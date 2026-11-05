@@ -658,26 +658,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
     fetchLiveCatalog();
 
-    const channel = supabase
-      .channel('live-orders')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'orders' },
-        (payload) => {
-          if (payload.new && payload.new.id && typeof payload.new.status === 'number') {
-            dispatch({
-              type: 'UPDATE_ORDER_STATUS_LIVE',
-              orderId: payload.new.id,
-              status: payload.new.status,
-            });
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       isSubscribed = false;
-      supabase.removeChannel(channel);
     };
   }, []);
 

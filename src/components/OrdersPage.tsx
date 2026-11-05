@@ -90,6 +90,51 @@ export default function OrdersPage() {
 
   const activeOrder = state.orders.find((o) => o.id === selectedOrderId) || state.orders[0];
 
+  // Task 11: Customer visibility-aware polling every 15s instead of persistent WebSocket
+  React.useEffect(() => {
+    if (!activeOrder || activeOrder.status >= 4) return;
+    let isMounted = true;
+
+    const pollOrderStatus = async () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      if (!isMounted) return;
+      try {
+        const { data } = await supabase
+          .from('orders')
+          .select('id, status')
+          .eq('id', activeOrder.id)
+          .single();
+
+        if (data && typeof data.status === 'number' && isMounted) {
+          if (data.status !== activeOrder.status) {
+            dispatch({
+              type: 'UPDATE_ORDER_STATUS_LIVE',
+              orderId: data.id,
+              status: data.status,
+            });
+          }
+        }
+      } catch {
+        // Quiet fallback on network hiccup
+      }
+    };
+
+    const interval = setInterval(pollOrderStatus, 15000);
+
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        pollOrderStatus();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [activeOrder, dispatch]);
+
   if (!activeOrder) {
     return (
       <section className="py-16 md:py-24 bg-brand-cream min-h-[80vh] flex flex-col items-center justify-center px-4 w-full box-border">

@@ -34,7 +34,11 @@ export function createServerSupabaseClient(req: NextRequest) {
  * Strictly server-only. Used solely where bypassing RLS is indispensable
  * (creating rider auth accounts, admin password resets, webhook replay logging).
  */
+let cachedAdminClient: any = null;
+
 export function createServerAdminClient() {
+  if (cachedAdminClient) return cachedAdminClient;
+
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseUrl = rawUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '');
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -43,12 +47,14 @@ export function createServerAdminClient() {
     throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured on the server');
   }
 
-  return createClient(supabaseUrl, serviceRoleKey, {
+  cachedAdminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
   });
+
+  return cachedAdminClient;
 }
 
 /**
