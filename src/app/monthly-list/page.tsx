@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
-import Home from '@/app/page';
+import StorefrontView from '@/components/StorefrontView';
 
 export default function MonthlyListRoute() {
   const { dispatch } = useStore();
@@ -11,5 +11,5 @@ export default function MonthlyListRoute() {
     dispatch({ type: 'SET_PAGE', page: 'monthly-list' });
   }, [dispatch]);
 
-  return <Home />;
+  return <StorefrontView initialPage="monthly-list" />;
 }

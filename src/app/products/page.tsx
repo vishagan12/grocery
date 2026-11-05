@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
-import Home from '@/app/page';
+import StorefrontView from '@/components/StorefrontView';
 
 export default function ProductsRoute() {
   const { dispatch } = useStore();
@@ -11,5 +11,5 @@ export default function ProductsRoute() {
     dispatch({ type: 'SET_PAGE', page: 'products' });
   }, [dispatch]);
 
-  return <Home />;
+  return <StorefrontView initialPage="products" />;
 }

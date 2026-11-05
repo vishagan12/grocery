@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useStore } from '@/context/StoreContext';
-import Home from '@/app/page';
+import StorefrontView from '@/components/StorefrontView';
 
 export default function CheckoutRoute() {
   const { dispatch } = useStore();
@@ -11,5 +11,5 @@ export default function CheckoutRoute() {
     dispatch({ type: 'SET_PAGE', page: 'checkout' });
   }, [dispatch]);
 
-  return <Home />;
+  return <StorefrontView initialPage="checkout" />;
 }
