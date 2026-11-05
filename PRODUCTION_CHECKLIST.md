@@ -99,3 +99,39 @@ Restore from the most recent weekly backup snapshot:
 ```bash
 pg_restore --clean --if-exists --no-owner --no-privileges -d "$DATABASE_URL" backups/supabase_backup_YYYYMMDD_HHMMSS.dump
 ```
+
+
+---
+
+## 5. Monitoring & Observability Setup (Sentry & UptimeRobot)
+
+### 5.1 Sentry Setup (Free Tier Error & Performance Tracking)
+1. **Create Sentry Account & Project**:
+   - Sign up at [sentry.io](https://sentry.io) (Developer Free Plan includes 5k errors and 10k transactions/month).
+   - Create a project with platform **Next.js**.
+2. **Add Environment Variables to Vercel / Hosting Provider**:
+   - `NEXT_PUBLIC_SENTRY_DSN`: Client-side DSN (`https://<key>@<org>.ingest.sentry.io/<project>`).
+   - `SENTRY_DSN`: Server-side DSN (same as client DSN).
+   - *(Optional for source map uploads)*: `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`.
+3. **Verified PII Scrubbing**:
+   - Pre-configured in `src/lib/sentrySanitizer.ts` and active across `sentry.client.config.ts`, `sentry.server.config.ts`, and `sentry.edge.config.ts`.
+   - Automatically scrubs:
+     - Phone numbers: `+91 XXXXX XXXXX`
+     - Auth tokens: `Bearer [REDACTED_TOKEN]`, `[REDACTED_JWT]`
+     - Emails: `[REDACTED_EMAIL]`
+     - Customer names: `[REDACTED_NAME]`
+     - IP Addresses: unset/stripped.
+
+### 5.2 UptimeRobot Setup (Free Tier Database & Webhook Ping)
+1. **Create Free UptimeRobot Account**:
+   - Sign up at [uptimerobot.com](https://uptimerobot.com) (Free tier includes 50 monitors at 5-minute intervals).
+2. **Configure New Monitor**:
+   - **Monitor Type**: `HTTP(s)`
+   - **Friendly Name**: `Sri Amman Supermarket API Health`
+   - **URL**: `https://<production-domain>/api/health` (e.g. `https://sriammansupermarket.in/api/health`)
+   - **Monitoring Interval**: `5 minutes`
+   - **HTTP Method**: `GET`
+   - **Expected Status**: `200 OK`
+   - **Alert Contacts**: Add store dev/ops email or SMS.
+3. **Endpoint Validation**:
+   - Querying `/api/health` executes an indexed probe query (`products.select('id').limit(1)`) returning database latency (`latencyMs < 50ms`) and 200 OK.

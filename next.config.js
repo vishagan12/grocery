@@ -8,7 +8,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' blob: data: https://images.unsplash.com https://plus.unsplash.com https://*.supabase.co https://lh3.googleusercontent.com https://maps.googleapis.com https://maps.gstatic.com;
   font-src 'self' data: https://fonts.gstatic.com;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://maps.googleapis.com https://api.upstash.com https://challenges.cloudflare.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://maps.googleapis.com https://api.upstash.com https://challenges.cloudflare.com https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io;
   frame-src 'self' https://accounts.google.com https://challenges.cloudflare.com;
   object-src 'none';
   base-uri 'self';
@@ -79,4 +79,13 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+const { withSentryConfig } = require('@sentry/nextjs/config');
+
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+});

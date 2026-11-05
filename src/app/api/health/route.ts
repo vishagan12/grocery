@@ -19,28 +19,20 @@ export async function GET(req: NextRequest) {
       setTimeout(() => reject(new Error('Database health check timeout (>1500ms)')), 1500)
     );
 
+    // Fast primary ping on indexed products table
     const checkPromise = supabase
-      .from('feature_flags')
-      .select('key, enabled')
-      .limit(4);
+      .from('products')
+      .select('id')
+      .limit(1);
 
-    const { data, error } = (await Promise.race([checkPromise, timeoutPromise])) as any;
+    const { error } = (await Promise.race([checkPromise, timeoutPromise])) as any;
 
     latencyMs = Date.now() - startTime;
 
-    if (!error && Array.isArray(data)) {
+    if (!error) {
       dbHealthy = true;
-      for (const row of data) {
-        if (row && row.key) {
-          featureFlags[row.key] = Boolean(row.enabled);
-        }
-      }
     } else {
-      // Fallback check on products table if feature_flags table is not yet migrated
-      const fallbackCheck = await supabase.from('products').select('id').limit(1);
-      if (!fallbackCheck.error) {
-        dbHealthy = true;
-      }
+      logger.warn('HEALTH_CHECK_DB_ERROR', error.message || String(error), { latencyMs }, requestId);
     }
   } catch (err: unknown) {
     latencyMs = Date.now() - startTime;
