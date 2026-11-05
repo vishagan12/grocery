@@ -12,7 +12,9 @@ let cachedCoords: ShopCoords | null = null;
 
 export async function GET() {
   if (cachedCoords) {
-    return NextResponse.json(cachedCoords);
+    const res = NextResponse.json(cachedCoords);
+    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return res;
   }
 
   const envLat = process.env.NEXT_PUBLIC_SHOP_LAT;

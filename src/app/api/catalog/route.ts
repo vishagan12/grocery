@@ -5,6 +5,11 @@ import { products as fallbackCatalog, categories as fallbackCategories } from '@
 // Next.js ISR: Revalidate cached public catalog every 180 seconds (3 minutes)
 export const revalidate = 180;
 
+let catalogMemoryCache: { body: any; expiry: number } | null = null;
+function invalidateCatalogMemoryCache() {
+  catalogMemoryCache = null;
+}
+
 /**
  * Public Catalog Cache Route
  * Serves products, variants, categories, and store operational status.
@@ -12,6 +17,12 @@ export const revalidate = 180;
  * Completely devoid of any user-specific or private customer data.
  */
 export async function GET() {
+  if (catalogMemoryCache && Date.now() < catalogMemoryCache.expiry) {
+    const res = NextResponse.json(catalogMemoryCache.body);
+    res.headers.set('Cache-Control', 'public, s-maxage=180, stale-while-revalidate=600');
+    return res;
+  }
+
   try {
     // Execute categories, products+variants join, and feature flags concurrently in parallel
     const [
@@ -70,12 +81,17 @@ export async function GET() {
       }));
     }
 
-    const response = NextResponse.json({
+    const responseBody = {
       catalog,
       categories,
       acceptingOrders,
       timestamp: new Date().toISOString(),
-    });
+    };
+    catalogMemoryCache = {
+      body: responseBody,
+      expiry: Date.now() + 60 * 1000, // 60s memory cache
+    };
+    const response = NextResponse.json(responseBody);
 
     // HTTP Cache-Control header for Edge CDN & Browser Caching
     response.headers.set(
