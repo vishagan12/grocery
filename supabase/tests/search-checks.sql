@@ -33,16 +33,18 @@
 --   EXPLAIN ANALYZE SELECT * FROM public.search_products_fast('அரிசி', 20, 0);
 --
 -- INSTRUCTIONS: Run this entire script in Supabase SQL Editor.
---               Results table shows PASS/FAIL for every test.
---               Ends with ROLLBACK so no test artifacts remain in the database.
+--               Results table shows PASS/FAIL for every test plus summary.
 -- =====================================================================
 
-BEGIN;
+-- Ensure extensions and public are accessible
+SET search_path = public, extensions, pg_temp;
 
 -- ---------------------------------------------------------------------
--- 0. TEMPORARY TEST RESULTS TABLE & LOGGING HELPER
+-- 0. DEDICATED SCHEMA & TEST RESULTS TABLE (No TEMP table connection loss)
 -- ---------------------------------------------------------------------
-CREATE TEMP TABLE test_results (
+CREATE SCHEMA IF NOT EXISTS zz_search_test;
+
+CREATE TABLE IF NOT EXISTS zz_search_test.test_results (
   test_no int PRIMARY KEY,
   test_name text NOT NULL,
   expected text NOT NULL,
@@ -50,7 +52,10 @@ CREATE TEMP TABLE test_results (
   passed boolean NOT NULL
 );
 
-CREATE OR REPLACE FUNCTION pg_temp.log_result(
+-- Truncate at start of each run for idempotency
+TRUNCATE TABLE zz_search_test.test_results;
+
+CREATE OR REPLACE FUNCTION zz_search_test.log_result(
   p_test_no int,
   p_test_name text,
   p_expected text,
@@ -58,65 +63,75 @@ CREATE OR REPLACE FUNCTION pg_temp.log_result(
   p_passed boolean
 ) RETURNS void
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, zz_search_test, pg_temp
 AS $$
 BEGIN
-  INSERT INTO test_results (test_no, test_name, expected, actual, passed)
+  INSERT INTO zz_search_test.test_results (test_no, test_name, expected, actual, passed)
   VALUES (p_test_no, p_test_name, p_expected, p_actual, p_passed)
   ON CONFLICT (test_no) DO UPDATE
     SET test_name = EXCLUDED.test_name,
-        expected = EXCLUDED.expected,
-        actual = EXCLUDED.actual,
-        passed = EXCLUDED.passed;
+        expected  = EXCLUDED.expected,
+        actual    = EXCLUDED.actual,
+        passed    = EXCLUDED.passed;
 END;
 $$;
 
 -- ---------------------------------------------------------------------
--- 1. SEED FAKE TEST CATEGORY & PRODUCTS (CLEANUP VIA TRANSACTION ROLLBACK)
+-- 1. SEED FAKE TEST CATEGORY & PRODUCTS (Idempotent seed data)
 -- ---------------------------------------------------------------------
-INSERT INTO public.categories (id, name_en, name_ta, image)
-VALUES ('test_search_cat', 'Test Search Category', 'சோதனை பிரிவு', 'https://example.com/test.jpg')
-ON CONFLICT (id) DO NOTHING;
+DO $$
+BEGIN
+  INSERT INTO public.categories (id, name_en, name_ta, image)
+  VALUES ('test_search_cat', 'Test Search Category', 'சோதனை பிரிவு', 'https://example.com/test.jpg')
+  ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.products (id, name_en, name_ta, category_id, image, in_stock, search_aliases)
-VALUES
-  (
-    'test_prod_rice',
-    'Ponni Boiled Rice',
-    'பொன்னி புழுங்கல் அரிசி',
-    'test_search_cat',
-    'https://example.com/rice.jpg',
-    true,
-    'ponni poni boiled rice rrice arisi arrisi puzhungal'
-  ),
-  (
-    'test_prod_tomato',
-    'Fresh Country Tomatoes',
-    'நாட்டு தக்காளி',
-    'test_search_cat',
-    'https://example.com/tomato.jpg',
-    true,
-    'country tomatoes thakkali takkali thakali thakkaali tomato'
-  ),
-  (
-    'test_prod_toor_dal',
-    'Premium Toor Dal',
-    'துவரம் பருப்பு',
-    'test_search_cat',
-    'https://example.com/dhal.jpg',
-    true,
-    'toor dal dhal paruppu parupu thuvaram lentils'
-  )
-ON CONFLICT (id) DO UPDATE
-  SET name_en = EXCLUDED.name_en,
-      name_ta = EXCLUDED.name_ta,
-      search_aliases = EXCLUDED.search_aliases;
+  INSERT INTO public.products (id, name_en, name_ta, category_id, image, in_stock, search_aliases)
+  VALUES
+    (
+      'test_prod_rice',
+      'Ponni Boiled Rice',
+      'பொன்னி புழுங்கல் அரிசி',
+      'test_search_cat',
+      'https://example.com/rice.jpg',
+      true,
+      'ponni poni boiled rice rrice arisi arrisi puzhungal'
+    ),
+    (
+      'test_prod_tomato',
+      'Fresh Country Tomatoes',
+      'நாட்டு தக்காளி',
+      'test_search_cat',
+      'https://example.com/tomato.jpg',
+      true,
+      'country tomatoes thakkali takkali thakali thakkaali tomato'
+    ),
+    (
+      'test_prod_toor_dal',
+      'Premium Toor Dal',
+      'துவரம் பருப்பு',
+      'test_search_cat',
+      'https://example.com/dhal.jpg',
+      true,
+      'toor dal dhal paruppu parupu thuvaram lentils'
+    )
+  ON CONFLICT (id) DO UPDATE
+    SET name_en = EXCLUDED.name_en,
+        name_ta = EXCLUDED.name_ta,
+        search_aliases = EXCLUDED.search_aliases;
 
-INSERT INTO public.product_variants (id, product_id, label, price, mrp, stock_qty)
-VALUES
-  (gen_random_uuid(), 'test_prod_rice', '5 kg Bag', 320.00, 350.00, 50),
-  (gen_random_uuid(), 'test_prod_tomato', '1 kg', 40.00, 50.00, 30),
-  (gen_random_uuid(), 'test_prod_toor_dal', '1 kg', 160.00, 180.00, 40)
-ON CONFLICT DO NOTHING;
+  -- Remove prior test variants to prevent duplicate rows on re-runs
+  DELETE FROM public.product_variants
+  WHERE product_id IN ('test_prod_rice', 'test_prod_tomato', 'test_prod_toor_dal');
+
+  INSERT INTO public.product_variants (id, product_id, label, price, mrp, stock_qty)
+  VALUES
+    (gen_random_uuid(), 'test_prod_rice', '5 kg Bag', 320.00, 350.00, 50),
+    (gen_random_uuid(), 'test_prod_tomato', '1 kg', 40.00, 50.00, 30),
+    (gen_random_uuid(), 'test_prod_toor_dal', '1 kg', 160.00, 180.00, 40);
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Error seeding search test products: %', SQLERRM;
+END $$;
 
 -- ---------------------------------------------------------------------
 -- TEST 1: English Full & Phrase Search ("rice", "ponni rice")
@@ -126,16 +141,26 @@ DECLARE
   v_count int;
   v_first_id text;
 BEGIN
-  SELECT count(*), min(id) INTO v_count, v_first_id
-  FROM public.search_products_fast('ponni rice');
+  BEGIN
+    SELECT count(*), min(id) INTO v_count, v_first_id
+    FROM public.search_products_fast('ponni rice');
 
-  PERFORM pg_temp.log_result(
-    1,
-    'Search: English phrase ("ponni rice")',
-    'Finds test rice product as top result',
-    'Found ' || v_count || ' products, top id: ' || COALESCE(v_first_id, 'none'),
-    (v_count > 0 AND v_first_id = 'test_prod_rice')
-  );
+    PERFORM zz_search_test.log_result(
+      1,
+      'Search: English phrase ("ponni rice")',
+      'Finds test rice product as top result',
+      'Found ' || v_count || ' products, top id: ' || COALESCE(v_first_id, 'none'),
+      (v_count > 0 AND v_first_id = 'test_prod_rice')
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      1,
+      'Search: English phrase ("ponni rice")',
+      'Finds test rice product as top result',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -146,16 +171,26 @@ DECLARE
   v_count int;
   v_found boolean;
 BEGIN
-  SELECT count(*), bool_or(id = 'test_prod_rice') INTO v_count, v_found
-  FROM public.search_products_fast('ponnie rise');
+  BEGIN
+    SELECT count(*), bool_or(id = 'test_prod_rice') INTO v_count, v_found
+    FROM public.search_products_fast('ponnie rise');
 
-  PERFORM pg_temp.log_result(
-    2,
-    'Search: Typo / Trigram tolerance ("ponnie rise")',
-    'Tolerates minor typos and matches Ponni Rice',
-    'Found ' || v_count || ' matches, matched test rice: ' || COALESCE(v_found::text, 'false'),
-    (COALESCE(v_found, false) = true)
-  );
+    PERFORM zz_search_test.log_result(
+      2,
+      'Search: Typo / Trigram tolerance ("ponnie rise")',
+      'Tolerates minor typos and matches Ponni Rice',
+      'Found ' || v_count || ' matches, matched test rice: ' || COALESCE(v_found::text, 'false'),
+      (COALESCE(v_found, false) = true)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      2,
+      'Search: Typo / Trigram tolerance ("ponnie rise")',
+      'Tolerates minor typos and matches Ponni Rice',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -166,16 +201,26 @@ DECLARE
   v_count_full int;
   v_count_part int;
 BEGIN
-  SELECT count(*) INTO v_count_full FROM public.search_products_fast('அரிசி');
-  SELECT count(*) INTO v_count_part FROM public.search_products_fast('அரி');
+  BEGIN
+    SELECT count(*) INTO v_count_full FROM public.search_products_fast('அரிசி');
+    SELECT count(*) INTO v_count_part FROM public.search_products_fast('அரி');
 
-  PERFORM pg_temp.log_result(
-    3,
-    'Search: Native Tamil script ("அரிசி" and partial "அரி")',
-    'Matches Tamil products correctly via ILIKE path',
-    'Full term: ' || v_count_full || ' matches, Partial term: ' || v_count_part || ' matches',
-    (v_count_full > 0 AND v_count_part > 0)
-  );
+    PERFORM zz_search_test.log_result(
+      3,
+      'Search: Native Tamil script ("அரிசி" and partial "அரி")',
+      'Matches Tamil products correctly via ILIKE path',
+      'Full term: ' || v_count_full || ' matches, Partial term: ' || v_count_part || ' matches',
+      (v_count_full > 0 AND v_count_part > 0)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      3,
+      'Search: Native Tamil script ("அரிசி" and partial "அரி")',
+      'Matches Tamil products correctly via ILIKE path',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -188,18 +233,28 @@ DECLARE
   v_thakkali_count int;
   v_paruppu_count int;
 BEGIN
-  SELECT count(*) INTO v_arisi_count FROM public.search_products_fast('arisi');
-  SELECT count(*) INTO v_arrisi_count FROM public.search_products_fast('arrisi');
-  SELECT count(*) INTO v_thakkali_count FROM public.search_products_fast('thakkali');
-  SELECT count(*) INTO v_paruppu_count FROM public.search_products_fast('paruppu');
+  BEGIN
+    SELECT count(*) INTO v_arisi_count FROM public.search_products_fast('arisi');
+    SELECT count(*) INTO v_arrisi_count FROM public.search_products_fast('arrisi');
+    SELECT count(*) INTO v_thakkali_count FROM public.search_products_fast('thakkali');
+    SELECT count(*) INTO v_paruppu_count FROM public.search_products_fast('paruppu');
 
-  PERFORM pg_temp.log_result(
-    4,
-    'Search: Thanglish variants ("arisi", "arrisi", "thakkali", "paruppu")',
-    'All Thanglish spellings resolve to respective products',
-    'arisi: ' || v_arisi_count || ', arrisi: ' || v_arrisi_count || ', thakkali: ' || v_thakkali_count || ', paruppu: ' || v_paruppu_count,
-    (v_arisi_count > 0 AND v_arrisi_count > 0 AND v_thakkali_count > 0 AND v_paruppu_count > 0)
-  );
+    PERFORM zz_search_test.log_result(
+      4,
+      'Search: Thanglish variants ("arisi", "arrisi", "thakkali", "paruppu")',
+      'All Thanglish spellings resolve to respective products',
+      'arisi: ' || v_arisi_count || ', arrisi: ' || v_arrisi_count || ', thakkali: ' || v_thakkali_count || ', paruppu: ' || v_paruppu_count,
+      (v_arisi_count > 0 AND v_arrisi_count > 0 AND v_thakkali_count > 0 AND v_paruppu_count > 0)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      4,
+      'Search: Thanglish variants ("arisi", "arrisi", "thakkali", "paruppu")',
+      'All Thanglish spellings resolve to respective products',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -210,16 +265,26 @@ DECLARE
   v_count int;
   v_found boolean;
 BEGIN
-  SELECT count(*), bool_or(id = 'test_prod_rice') INTO v_count, v_found
-  FROM public.search_products_fast('PoNnI RiCe');
+  BEGIN
+    SELECT count(*), bool_or(id = 'test_prod_rice') INTO v_count, v_found
+    FROM public.search_products_fast('PoNnI RiCe');
 
-  PERFORM pg_temp.log_result(
-    5,
-    'Search: Mixed case ("PoNnI RiCe")',
-    'Case-insensitive matching succeeds',
-    'Found ' || v_count || ' matches, matched test rice: ' || COALESCE(v_found::text, 'false'),
-    (COALESCE(v_found, false) = true)
-  );
+    PERFORM zz_search_test.log_result(
+      5,
+      'Search: Mixed case ("PoNnI RiCe")',
+      'Case-insensitive matching succeeds',
+      'Found ' || v_count || ' matches, matched test rice: ' || COALESCE(v_found::text, 'false'),
+      (COALESCE(v_found, false) = true)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      5,
+      'Search: Mixed case ("PoNnI RiCe")',
+      'Case-insensitive matching succeeds',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -229,16 +294,26 @@ DO $$
 DECLARE
   v_count int;
 BEGIN
-  SELECT count(*) INTO v_count
-  FROM public.search_products_fast('   ponni     rice   ');
+  BEGIN
+    SELECT count(*) INTO v_count
+    FROM public.search_products_fast('   ponni     rice   ');
 
-  PERFORM pg_temp.log_result(
-    6,
-    'Search: Extra whitespace resilience',
-    'Trims and collapses arbitrary spaces',
-    'Found ' || v_count || ' matches',
-    (v_count > 0)
-  );
+    PERFORM zz_search_test.log_result(
+      6,
+      'Search: Extra whitespace resilience',
+      'Trims and collapses arbitrary spaces',
+      'Found ' || v_count || ' matches',
+      (v_count > 0)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      6,
+      'Search: Extra whitespace resilience',
+      'Trims and collapses arbitrary spaces',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -248,15 +323,25 @@ DO $$
 DECLARE
   v_count int;
 BEGIN
-  SELECT count(*) INTO v_count FROM public.search_products_fast('r');
+  BEGIN
+    SELECT count(*) INTO v_count FROM public.search_products_fast('r');
 
-  PERFORM pg_temp.log_result(
-    7,
-    'Search: 1-character query rejection (< 2 characters)',
-    '0 rows returned',
-    v_count || ' rows returned',
-    (v_count = 0)
-  );
+    PERFORM zz_search_test.log_result(
+      7,
+      'Search: 1-character query rejection (< 2 characters)',
+      '0 rows returned',
+      v_count || ' rows returned',
+      (v_count = 0)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      7,
+      'Search: 1-character query rejection (< 2 characters)',
+      '0 rows returned',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -267,16 +352,26 @@ DECLARE
   v_long_query text;
   v_count int;
 BEGIN
-  v_long_query := repeat('ponni rice fresh supermarket organic ', 5); -- 185 chars
-  SELECT count(*) INTO v_count FROM public.search_products_fast(v_long_query);
+  BEGIN
+    v_long_query := repeat('ponni rice fresh supermarket organic ', 5); -- 185 chars
+    SELECT count(*) INTO v_count FROM public.search_products_fast(v_long_query);
 
-  PERFORM pg_temp.log_result(
-    8,
-    'Search: 100+ character query safety',
-    'Executes safely without runtime error',
-    'Handled ' || length(v_long_query) || ' characters, returned ' || v_count || ' rows',
-    true
-  );
+    PERFORM zz_search_test.log_result(
+      8,
+      'Search: 100+ character query safety',
+      'Executes safely without runtime error',
+      'Handled ' || length(v_long_query) || ' characters, returned ' || v_count || ' rows',
+      true
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      8,
+      'Search: 100+ character query safety',
+      'Executes safely without runtime error',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -287,18 +382,28 @@ DECLARE
   v_count_sqli int;
   v_count_spec int;
 BEGIN
-  -- SQL Injection attempts
-  SELECT count(*) INTO v_count_sqli FROM public.search_products_fast(''' OR ''1''=''1''; DROP TABLE products; --');
-  -- Wildcards & escape sequences
-  SELECT count(*) INTO v_count_spec FROM public.search_products_fast('%_\\');
+  BEGIN
+    -- SQL Injection attempts
+    SELECT count(*) INTO v_count_sqli FROM public.search_products_fast(''' OR ''1''=''1''; DROP TABLE products; --');
+    -- Wildcards & escape sequences
+    SELECT count(*) INTO v_count_spec FROM public.search_products_fast('%_\\');
 
-  PERFORM pg_temp.log_result(
-    9,
-    'Search: SQL injection & wildcard pattern escaping',
-    'Zero unhandled errors, injection rendered inert',
-    'SQLi matches: ' || v_count_sqli || ', Spec matches: ' || v_count_spec,
-    (v_count_sqli = 0 AND v_count_spec = 0)
-  );
+    PERFORM zz_search_test.log_result(
+      9,
+      'Search: SQL injection & wildcard pattern escaping',
+      'Zero unhandled errors, injection rendered inert',
+      'SQLi matches: ' || v_count_sqli || ', Spec matches: ' || v_count_spec,
+      (v_count_sqli = 0 AND v_count_spec = 0)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      9,
+      'Search: SQL injection & wildcard pattern escaping',
+      'Zero unhandled errors, injection rendered inert',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
@@ -309,33 +414,60 @@ DECLARE
   v_col_count int;
   v_bad_cols text;
 BEGIN
-  SELECT count(*), string_agg(column_name, ', ')
-  INTO v_col_count, v_bad_cols
-  FROM information_schema.columns
-  WHERE table_schema = 'public'
-    AND table_name = 'search_products_fast'
-    AND column_name IN ('cost_price', 'supplier', 'margin', 'admin_notes');
+  BEGIN
+    SELECT count(*), string_agg(column_name, ', ')
+    INTO v_col_count, v_bad_cols
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'search_products_fast'
+      AND column_name IN ('cost_price', 'supplier', 'margin', 'admin_notes');
 
-  PERFORM pg_temp.log_result(
-    10,
-    'Security: No private columns or sensitive attributes returned',
-    '0 sensitive columns in search output schema',
-    v_col_count || ' sensitive columns found: ' || COALESCE(v_bad_cols, 'none'),
-    (v_col_count = 0)
-  );
+    PERFORM zz_search_test.log_result(
+      10,
+      'Security: No private columns or sensitive attributes returned',
+      '0 sensitive columns in search output schema',
+      v_col_count || ' sensitive columns found: ' || COALESCE(v_bad_cols, 'none'),
+      (v_col_count = 0)
+    );
+  EXCEPTION WHEN OTHERS THEN
+    PERFORM zz_search_test.log_result(
+      10,
+      'Security: No private columns or sensitive attributes returned',
+      '0 sensitive columns in search output schema',
+      'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
+      false
+    );
+  END;
 END $$;
 
 -- ---------------------------------------------------------------------
--- 2. OUTPUT TEST RESULTS
+-- 2. OUTPUT TEST RESULTS & SUMMARY
 -- ---------------------------------------------------------------------
+-- Detailed results ordered by check number
 SELECT
   test_no,
   test_name,
   CASE WHEN passed THEN 'PASS' ELSE 'FAIL' END AS status,
   expected,
   actual
-FROM test_results
+FROM zz_search_test.test_results
 ORDER BY test_no;
 
--- Clean rollback
-ROLLBACK;
+-- One-row summary
+SELECT
+  count(*) AS total_checks,
+  count(*) FILTER (WHERE passed) AS passed_checks,
+  count(*) FILTER (WHERE NOT passed) AS failed_checks,
+  CASE
+    WHEN count(*) FILTER (WHERE NOT passed) = 0 THEN 'ALL CHECKS PASSED'
+    ELSE 'SOME CHECKS FAILED'
+  END AS final_verdict
+FROM zz_search_test.test_results;
+
+-- ---------------------------------------------------------------------
+-- CLEANUP (Run separately when test session is concluded):
+-- ---------------------------------------------------------------------
+-- DROP SCHEMA IF EXISTS zz_search_test CASCADE;
+-- DELETE FROM public.product_variants WHERE product_id IN ('test_prod_rice', 'test_prod_tomato', 'test_prod_toor_dal');
+-- DELETE FROM public.products WHERE id IN ('test_prod_rice', 'test_prod_tomato', 'test_prod_toor_dal');
+-- DELETE FROM public.categories WHERE id = 'test_search_cat';
