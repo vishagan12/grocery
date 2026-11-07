@@ -9,6 +9,33 @@ import {
 // Maximum payload size allowed for JSON requests (100 KB)
 const MAX_REQUEST_BODY_SIZE_BYTES = 100 * 1024;
 
+/**
+ * Constant-time comparison for load test bypass secret.
+ * Compatible with Edge Runtime (using XOR bit accumulation without Node.js crypto module).
+ * Requires LOADTEST_BYPASS_SECRET to be configured in environment.
+ * If unset or empty, bypass is completely disabled.
+ */
+function isLoadTestBypassAuthorized(providedHeader: string | null): boolean {
+  const secret = process.env.LOADTEST_BYPASS_SECRET;
+  if (!secret || typeof secret !== 'string' || secret.trim().length === 0) {
+    return false;
+  }
+  if (!providedHeader || typeof providedHeader !== 'string') {
+    return false;
+  }
+
+  if (secret.length !== providedHeader.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < secret.length; i++) {
+    result |= secret.charCodeAt(i) ^ providedHeader.charCodeAt(i);
+  }
+
+  return result === 0;
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const requestId = req.headers.get('x-request-id') || crypto.randomUUID();
@@ -44,18 +71,29 @@ export async function middleware(req: NextRequest) {
     // Payment Webhooks: no per-IP rate limit (verified via HMAC signature and replay nonces)
     const isWebhook = pathname.startsWith('/api/webhooks/');
 
-    // Bypass rate limiting for authorized synthetic performance tests
-    const testBypass = req.headers.get('x-loadtest-bypass') === 'sri-amman-loadtest-2026';
+    // Check for authorized load test bypass
+    const hasValidBypass = isLoadTestBypassAuthorized(req.headers.get('x-loadtest-bypass'));
 
-    if (!isWebhook && !testBypass) {
+    // Bypass is strictly restricted: ONLY permitted on read-only endpoints (/api/catalog, /api/resolve-shop, /api/health).
+    // NEVER allowed on /api/auth, /api/orders, /api/admin, /api/rider, /api/webhooks, etc.
+    const isAllowedBypassRoute =
+      pathname.startsWith('/api/catalog') ||
+      pathname.startsWith('/api/resolve-shop') ||
+      pathname.startsWith('/api/health');
+
+    const canBypassRateLimit = hasValidBypass && isAllowedBypassRoute;
+
+    if (!isWebhook) {
       if (pathname.startsWith('/api/catalog')) {
         // Search & catalog: 60 per minute per IP
-        const rl = await checkRateLimit(RATE_LIMITS.SEARCH_CATALOG, `cat:${ip}`);
-        if (!rl.success) {
-          return createRateLimitResponse(rl.retryAfterSeconds, 'Too many catalog requests. Please wait.');
+        if (!canBypassRateLimit) {
+          const rl = await checkRateLimit(RATE_LIMITS.SEARCH_CATALOG, `cat:${ip}`);
+          if (!rl.success) {
+            return createRateLimitResponse(rl.retryAfterSeconds, 'Too many catalog requests. Please wait.');
+          }
         }
       } else if (pathname.startsWith('/api/admin') || pathname.startsWith('/api/rider')) {
-        // Admin and rider APIs: 120 per minute per user/IP
+        // Admin and rider APIs: 120 per minute per user/IP (Bypass NEVER applies here)
         const authCookie = req.cookies.get('sb-access-token')?.value || req.headers.get('authorization') || ip;
         const rl = await checkRateLimit(RATE_LIMITS.ADMIN_RIDER_API, `ops:${authCookie}`);
         if (!rl.success) {

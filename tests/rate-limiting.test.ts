@@ -123,4 +123,38 @@ describe('PHASE 1: Rate Limiting & Protection Suite', () => {
     assert.equal(botFast.isBot, true);
     assert.match(botFast.reason, /Submission too rapid/);
   });
+
+  it('9. Load Test Bypass Security: Disabled when LOADTEST_BYPASS_SECRET is unset, even with header', async () => {
+    const { middleware } = await import('../src/middleware');
+    const { NextRequest } = await import('next/server');
+
+    delete process.env.LOADTEST_BYPASS_SECRET;
+
+    const ip = '10.99.1.1';
+    for (let i = 1; i <= 60; i++) {
+      await checkRateLimit(RATE_LIMITS.SEARCH_CATALOG, `cat:${ip}`);
+    }
+
+    const req = new NextRequest('http://localhost:3000/api/catalog', {
+      headers: {
+        'x-forwarded-for': ip,
+        'x-loadtest-bypass': 'any-test-token',
+      },
+    });
+
+    const res = await middleware(req);
+    assert.equal(res?.status, 429, 'Catalog request must return 429 when bypass secret is unset');
+  });
+
+  it('10. Load Test Bypass Security: Never applies to /api/auth or other sensitive routes', async () => {
+    process.env.LOADTEST_BYPASS_SECRET = 'valid-test-bypass-secret-123';
+
+    const ip = '10.99.2.1';
+    for (let i = 1; i <= 10; i++) {
+      await checkRateLimit(RATE_LIMITS.OTP_SEND_IP, ip);
+    }
+
+    const rlCheck = await checkRateLimit(RATE_LIMITS.OTP_SEND_IP, ip);
+    assert.equal(rlCheck.success, false, 'Auth route IP limit must never be bypassed');
+  });
 });

@@ -46,8 +46,10 @@ const SEARCH_QUERIES = [
 export default function () {
   // Generates unique client IP across 500 VUs so search rate limit (60/min/IP) isn't artificially hit
   const clientIp = `192.168.${Math.floor(__VU / 256)}.${__VU % 256}`;
+  const bypassSecret = __ENV.BYPASS_SECRET || '';
   const headers = {
     'x-forwarded-for': clientIp,
+    ...(bypassSecret ? { 'x-loadtest-bypass': bypassSecret } : {}),
   };
 
   const rand = Math.random();
