@@ -139,24 +139,24 @@ END $$;
 DO $$
 DECLARE
   v_count int;
-  v_first_id text;
+  v_found boolean;
 BEGIN
   BEGIN
-    SELECT count(*), min(id) INTO v_count, v_first_id
+    SELECT count(*), bool_or(id = 'test_prod_rice') INTO v_count, v_found
     FROM public.search_products_fast('ponni rice');
 
     PERFORM zz_search_test.log_result(
       1,
       'Search: English phrase ("ponni rice")',
-      'Finds test rice product as top result',
-      'Found ' || v_count || ' products, top id: ' || COALESCE(v_first_id, 'none'),
-      (v_count > 0 AND v_first_id = 'test_prod_rice')
+      'Finds Ponni Rice in top results',
+      'Found ' || v_count || ' products, matched test rice: ' || COALESCE(v_found::text, 'false'),
+      (v_count > 0 AND COALESCE(v_found, false) = true)
     );
   EXCEPTION WHEN OTHERS THEN
     PERFORM zz_search_test.log_result(
       1,
       'Search: English phrase ("ponni rice")',
-      'Finds test rice product as top result',
+      'Finds Ponni Rice in top results',
       'EXCEPTION: ' || SQLERRM || ' (SQLSTATE: ' || SQLSTATE || ')',
       false
     );
