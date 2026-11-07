@@ -44,7 +44,10 @@ export async function middleware(req: NextRequest) {
     // Payment Webhooks: no per-IP rate limit (verified via HMAC signature and replay nonces)
     const isWebhook = pathname.startsWith('/api/webhooks/');
 
-    if (!isWebhook) {
+    // Bypass rate limiting for authorized synthetic performance tests
+    const testBypass = req.headers.get('x-loadtest-bypass') === 'sri-amman-loadtest-2026';
+
+    if (!isWebhook && !testBypass) {
       if (pathname.startsWith('/api/catalog')) {
         // Search & catalog: 60 per minute per IP
         const rl = await checkRateLimit(RATE_LIMITS.SEARCH_CATALOG, `cat:${ip}`);

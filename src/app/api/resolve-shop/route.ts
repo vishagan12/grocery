@@ -26,7 +26,9 @@ export async function GET() {
       lng: Number(envLng),
       shopUrl: SHOP_MAPS_URL,
     };
-    return NextResponse.json(cachedCoords);
+    const res = NextResponse.json(cachedCoords);
+    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return res;
   }
 
   if (validateSafeExternalUrl(SHOP_MAPS_URL)) {
@@ -64,7 +66,9 @@ export async function GET() {
           lng,
           shopUrl: SHOP_MAPS_URL,
         };
-        return NextResponse.json(cachedCoords);
+        const res = NextResponse.json(cachedCoords);
+    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    return res;
       }
     }
   } catch (err) {

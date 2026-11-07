@@ -25,7 +25,7 @@ export default function HeroSection() {
       saveTa: 'ரூ.320 மிச்சம்',
       actionEn: 'Order Now',
       actionTa: 'ஆர்டர் செய்',
-      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85',
+      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format,compress&fit=crop&w=480&q=70',
       targetPage: 'monthly-list',
     },
     {

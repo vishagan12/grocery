@@ -87,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link
           rel="preload"
           as="image"
-          href="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85"
+          href="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format,compress&fit=crop&w=480&q=70"
           fetchPriority="high"
         />
         <SeoSchema />
