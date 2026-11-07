@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '@/context/StoreContext';
 import { t } from '@/data/translations';
-import { products, categories } from '@/data/products';
+import { products, categories, Product } from '@/data/products';
+import { searchCatalogFast } from '@/lib/searchProducts';
 import ProductCard from './ProductCard';
 import { IconSearch, IconCheckCircle, IconZap } from './Icons';
 
@@ -19,6 +20,45 @@ export default function ProductsPage() {
   const isDown = React.useRef(false);
   const startX = React.useRef(0);
   const scrollLeftPos = React.useRef(0);
+
+  // Dynamic search results from search_products_fast RPC (supporting Thanglish, Tamil & English)
+  const [searchResults, setSearchResults] = useState<Product[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchSeqRef = useRef(0);
+
+  const queryTrimmed = state.searchQuery.trim().slice(0, 60);
+
+  useEffect(() => {
+    if (queryTrimmed.length < 2) {
+      setSearchResults(null);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const abortController = new AbortController();
+    const currentSeq = ++searchSeqRef.current;
+
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchCatalogFast(queryTrimmed, 50, abortController.signal);
+        if (!abortController.signal.aborted && currentSeq === searchSeqRef.current) {
+          setSearchResults(results);
+          setIsSearching(false);
+        }
+      } catch {
+        if (!abortController.signal.aborted && currentSeq === searchSeqRef.current) {
+          setSearchResults(null);
+          setIsSearching(false);
+        }
+      }
+    }, 150);
+
+    return () => {
+      abortController.abort();
+      clearTimeout(timer);
+    };
+  }, [queryTrimmed]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     isDown.current = true;
@@ -46,7 +86,8 @@ export default function ProductsPage() {
     }
   };
 
-  let filtered = [...products];
+  // Base list is either RPC search results or catalog
+  let filtered = searchResults !== null ? [...searchResults] : [...(state.catalog || products)];
 
   // Category filter
   if (state.activeCategory !== 'all') {
@@ -77,13 +118,13 @@ export default function ProductsPage() {
     });
   }
 
-  // Search filter
-  const queryTrimmed = state.searchQuery.trim().toLowerCase();
-  if (queryTrimmed.length >= 2) {
+  // Fallback client search filter (only if searchResults hasn't populated yet)
+  if (searchResults === null && queryTrimmed.length >= 2) {
+    const qLower = queryTrimmed.toLowerCase();
     filtered = filtered.filter(
       (p) =>
-        p.nameEn.toLowerCase().includes(queryTrimmed) ||
-        p.nameTa.includes(state.searchQuery.trim())
+        p.nameEn.toLowerCase().includes(qLower) ||
+        p.nameTa.includes(queryTrimmed)
     );
   }
 
