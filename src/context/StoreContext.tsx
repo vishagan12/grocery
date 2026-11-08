@@ -656,11 +656,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    fetchLiveCatalog();
-
-    return () => {
-      isSubscribed = false;
-    };
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(() => {
+        fetchLiveCatalog();
+      }, { timeout: 3000 });
+      return () => {
+        isSubscribed = false;
+        if ((window as any).cancelIdleCallback) (window as any).cancelIdleCallback(handle);
+      };
+    } else {
+      const timer = setTimeout(() => {
+        fetchLiveCatalog();
+      }, 1500);
+      return () => {
+        isSubscribed = false;
+        clearTimeout(timer);
+      };
+    }
   }, []);
 
   const getProduct = useCallback(

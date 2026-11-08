@@ -2,11 +2,13 @@
 
 import React from 'react';
 import Header from '@/components/Header';
-import CartDrawer from '@/components/CartDrawer';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import Toast from '@/components/Toast';
-import LocationModal from '@/components/LocationModal';
+import dynamic from 'next/dynamic';
+
+const CartDrawer = dynamic(() => import('@/components/CartDrawer'), { ssr: false });
+const LocationModal = dynamic(() => import('@/components/LocationModal'), { ssr: false });
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {

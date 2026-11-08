@@ -482,8 +482,8 @@ export default function ProductsPage() {
               /* Products Grid: 2 cols on mobile, 3 cols on tablet, 4 cols on desktop */
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-                  {filtered.slice(0, visibleCount).map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                  {filtered.slice(0, visibleCount).map((product, idx) => (
+                    <ProductCard key={product.id} product={product} priority={idx < 4} />
                   ))}
                 </div>
                 {visibleCount < filtered.length && (
