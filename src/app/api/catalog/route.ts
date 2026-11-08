@@ -159,6 +159,7 @@ export async function GET(req: NextRequest) {
 
     let catalog = fallbackCatalog;
     if (!productsError && rawProducts && rawProducts.length > 0) {
+      const fallbackOrder = new Map(fallbackCatalog.map((p, idx) => [p.id, idx]));
       catalog = rawProducts.map((p: any) => ({
         id: p.id,
         nameEn: p.name_en,
@@ -177,6 +178,12 @@ export async function GET(req: NextRequest) {
               }))
             : [{ label: '1 pack', price: 50, mrp: 60 }],
       }));
+      // Preserve default catalog ordering so hydration never reshuffles the initial row
+      catalog.sort((a, b) => {
+        const ordA = fallbackOrder.has(a.id) ? (fallbackOrder.get(a.id) as number) : 999;
+        const ordB = fallbackOrder.has(b.id) ? (fallbackOrder.get(b.id) as number) : 999;
+        return ordA - ordB;
+      });
     }
 
     const responseBody = {

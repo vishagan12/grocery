@@ -616,7 +616,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (res.ok) {
           const json = await res.json();
           if (json.catalog && Array.isArray(json.catalog) && json.catalog.length > 0 && isSubscribed) {
-            dispatch({ type: 'SET_CATALOG', products: json.catalog });
+            const fallbackOrder = new Map(products.map((p, idx) => [p.id, idx]));
+            const sortedCatalog = [...json.catalog].sort((a, b) => {
+              const ordA = fallbackOrder.has(a.id) ? (fallbackOrder.get(a.id) as number) : 999;
+              const ordB = fallbackOrder.has(b.id) ? (fallbackOrder.get(b.id) as number) : 999;
+              return ordA - ordB;
+            });
+            dispatch({ type: 'SET_CATALOG', products: sortedCatalog });
             return;
           }
         }
@@ -649,6 +655,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
                 ? row.variants
                 : [{ label: '1 pack', price: 50, mrp: 60 }],
           }));
+          const fallbackOrder = new Map(products.map((p, idx) => [p.id, idx]));
+          liveProducts.sort((a, b) => {
+            const ordA = fallbackOrder.has(a.id) ? (fallbackOrder.get(a.id) as number) : 999;
+            const ordB = fallbackOrder.has(b.id) ? (fallbackOrder.get(b.id) as number) : 999;
+            return ordA - ordB;
+          });
           dispatch({ type: 'SET_CATALOG', products: liveProducts });
         }
       } catch {
