@@ -180,7 +180,7 @@ export default function HeroSection() {
                 alt={currentSlide.titleEn}
                 width={900}
                 height={600}
-                className="w-full h-full object-cover transition-all duration-700 opacity-80 group-hover:scale-105 animate-smooth-fade"
+                className={`w-full h-full object-cover transition-all duration-700 opacity-80 group-hover:scale-105 ${activeSlide !== 0 ? 'animate-smooth-fade' : ''}`}
                 loading="eager"
                 fetchPriority="high"
               />
