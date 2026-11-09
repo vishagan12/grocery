@@ -233,7 +233,7 @@ export default function Header() {
 
       {/* Sticky search & categories header */}
       <header
-        className={`sticky top-0 z-50 text-brand-forest transition-all duration-300 ${
+        className={`sticky top-0 z-50 text-brand-forest transition-colors duration-300 ${
           isScrolled
             ? 'bg-apple/95 backdrop-blur-xl shadow-xl border-b border-brand-forest/15'
             : 'bg-apple shadow-md border-b border-brand-forest/10'

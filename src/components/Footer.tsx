@@ -24,7 +24,7 @@ export default function Footer() {
     'inline-flex items-center min-h-[36px] rounded-md hover:text-white hover:underline underline-offset-4 transition-colors text-left';
 
   return (
-    <footer className="bg-brand-deep text-white py-10 md:py-14 pb-36 md:pb-28 border-t border-emerald-950">
+    <footer className="bg-brand-deep text-white py-10 md:py-14 pb-36 md:pb-28 border-t border-emerald-950 content-visibility-footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-10">
           {/* Brand */}

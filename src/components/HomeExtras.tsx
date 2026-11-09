@@ -38,7 +38,7 @@ export function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-6 sm:py-10 bg-brand-mint/50 border-y border-slate-200/60">
+    <section className="py-6 sm:py-10 bg-brand-mint/50 border-y border-slate-200/60 content-visibility-auto">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         <div className="text-center max-w-xl mx-auto mb-5 sm:mb-8">
           <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-brand-forest bg-white px-3 py-1 rounded-full border border-emerald-200 shadow-2xs mb-2 inline-block whitespace-nowrap">
@@ -112,7 +112,7 @@ export function CustomerReviews() {
   ];
 
   return (
-    <section className="py-6 sm:py-10 bg-white">
+    <section className="py-6 sm:py-10 bg-white content-visibility-auto">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Kudumba Monthly Provision Callout Banner */}
         <div className="mb-6 sm:mb-8 bg-gradient-to-r from-[#0D2608] via-brand-forest to-apple rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3.5 sm:gap-6 border border-emerald-500/30">

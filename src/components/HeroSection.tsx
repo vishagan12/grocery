@@ -170,7 +170,7 @@ export default function HeroSection() {
               }
               dispatch({ type: 'SET_PAGE', page: currentSlide.targetPage });
             }}
-            className="md:col-span-5 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white p-4 sm:p-5 md:p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer min-h-[165px] sm:min-h-[210px] md:min-h-[360px] group border border-emerald-800/30 select-none"
+            className="md:col-span-5 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-900 text-white p-4 sm:p-5 md:p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow duration-300 cursor-pointer min-h-[165px] sm:min-h-[210px] md:min-h-[360px] group border border-emerald-800/30 select-none"
           >
             {/* Background Image Overlay with smooth fade */}
             <div className="absolute inset-0 z-0">
@@ -231,7 +231,7 @@ export default function HeroSection() {
             {/* Content Bottom: Price Pill + Action Trigger */}
             <div key={`bottom-${activeSlide}`} className={`relative z-10 mt-3 sm:mt-4 flex items-center justify-between gap-2 pt-2 border-t border-white/20 flex-nowrap ${activeSlide !== 0 ? 'animate-fade-in' : ''}`}>
 
-              <div className="flex items-baseline gap-1.5 sm:gap-2.5 bg-black/55 backdrop-blur-md px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
+              <div className="flex items-baseline gap-1.5 sm:gap-2.5 bg-black/75 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
                 <span className="text-sm xs:text-base sm:text-xl font-black text-yellow-300">{currentSlide.price}</span>
                 {currentSlide.id === 'monthly-bundle' && (
                   <span className="text-[10px] sm:text-xs text-white/60 line-through hidden xs:inline">{currentSlide.mrp}</span>
