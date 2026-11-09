@@ -10,9 +10,10 @@ import { Clock, Plus, Minus, Heart } from 'lucide-react';
 type Props = {
   product: Product;
   priority?: boolean;
+  eager?: boolean;
 };
 
-export default function ProductCard({ product, priority = false }: Props) {
+export default function ProductCard({ product, priority = false, eager = false }: Props) {
   const { state, dispatch, getItemQuantity, isWishlisted, toggleWishlist, showToast } = useStore();
   const lang = state.lang;
   const [selectedVariant, setSelectedVariant] = useState(0);
@@ -69,6 +70,7 @@ export default function ProductCard({ product, priority = false }: Props) {
           category={product.category}
           className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-300"
           priority={priority}
+          eager={eager}
         />
       </div>
 

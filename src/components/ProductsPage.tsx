@@ -483,7 +483,7 @@ export default function ProductsPage() {
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                   {filtered.slice(0, visibleCount).map((product, idx) => (
-                    <ProductCard key={product.id} product={product} priority={idx < 4} />
+                    <ProductCard key={product.id} product={product} priority={idx === 0} eager={idx < 4} />
                   ))}
                 </div>
                 {visibleCount < filtered.length && (

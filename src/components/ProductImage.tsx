@@ -11,6 +11,7 @@ type Props = {
   category?: string;
   className?: string;
   priority?: boolean;
+  eager?: boolean;
 };
 
 export default function ProductImage({
@@ -19,6 +20,7 @@ export default function ProductImage({
   category,
   className = '',
   priority = false,
+  eager = false,
 }: Props) {
   const [hasError, setHasError] = useState(false);
 
@@ -67,7 +69,7 @@ export default function ProductImage({
         className="object-cover rounded-xl transition-transform duration-500 hover:scale-105"
         onError={() => setHasError(true)}
         priority={priority}
-        loading={priority ? undefined : 'lazy'}
+        loading={priority ? undefined : (eager ? 'eager' : 'lazy')}
       />
     </div>
   );

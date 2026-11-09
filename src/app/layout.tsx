@@ -8,7 +8,6 @@ import { BRAND_PRIMARY } from '@/lib/brand';
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-inter',
 });
