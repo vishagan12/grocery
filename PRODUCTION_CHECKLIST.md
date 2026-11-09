@@ -1,222 +1,236 @@
 # Production Deployment & Operational Readiness Checklist
 **Project:** Sri Amman Supermarket (Madurai) Quick-Commerce  
 **Architecture:** Next.js 14 App Router + Supabase PostgreSQL + Upstash Redis  
-**Branch:** `opus-review`
+**Branch:** `opus-review`  
+**Date:** November 2026
 
 ---
 
-## 1. Environment Variables Audit
+## Executive Summary: Go-Live Readiness Verdict
 
-Verify that all required environment variables are set in production (e.g. Vercel, Docker, or Cloud VM):
+**Verdict: READY WITH CONDITIONS**
 
-| Variable | Scope | Required | Description |
-| :--- | :--- | :---: | :--- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Public (Client + Server) | **Yes** | Supabase project URL (`https://<ref>.supabase.co`). |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public (Client + Server) | **Yes** | Supabase Anon public key. Respects RLS. |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Server-Only (Secret)** | **Yes** | Server-privileged key for atomic order processing & migrations. **NEVER expose to client browser or commit to git.** |
-| `UPSTASH_REDIS_REST_URL` | **Server-Only (Secret)** | **Yes** | Upstash Redis REST endpoint for distributed sliding-window rate limiting. |
-| `UPSTASH_REDIS_REST_TOKEN` | **Server-Only (Secret)** | **Yes** | Upstash Redis REST access token. |
-| `DATABASE_URL` | **Server-Only (Secret)** | **Yes** | Direct or Session pooler PostgreSQL URI for migrations and weekly `pg_dump` backups. |
-| `ALERT_WEBHOOK_URL` | **Server-Only (Secret)** | Optional | Slack/Discord webhook URL for critical security & dead-letter queue alerts. |
-| `NEXT_PUBLIC_APP_URL` | Public (Client + Server) | **Yes** | Canonical production domain (e.g. `https://sriamman.com`). |
+The core infrastructure, security guards, database RPCs, and order processing flows are thoroughly tested and production-grade. Before commercial launch with real paying customers and live delivery operations, the conditions below must be completed.
 
----
-
-## 2. Pre-Deployment Database Verification
-
-Before routing production traffic:
-1. **Apply Migrations in Sequential Order**:
-   Execute migrations 1 through 13 in `supabase/migrations/` sequentially via Supabase SQL Editor or CI/CD runner.
-2. **Execute RLS Verification Suite**:
-   Run `supabase/tests/rls-checks.sql` in Supabase SQL Editor. Confirm all tests report **PASS** and transaction safely rolls back.
-3. **Execute Search Performance Suite**:
-   Run `supabase/tests/search-checks.sql` in Supabase SQL Editor. Verify `search_products_fast` handles Tamil, Thanglish, typos, and broad queries with GIN Bitmap Index Scans under 50-150 ms.
-4. **Seed Role Credentials**:
-   Assign initial administrative staff and rider accounts in `user_roles` using `supabase/seed-staging-roles.sql`.
+### Prioritised Action Items:
+1. **MUST FIX BEFORE GO-LIVE (Blockers):**
+   - **Vercel Pro & Supabase Pro:** Upgrade from free tiers to prevent project pausing, ensure commercial terms compliance, and enable Point-In-Time Recovery (PITR).
+   - **Production Supabase Project:** Apply all 14 migrations sequentially, run RLS checks, and seed admin/rider accounts.
+   - **Payment Gateway Live Mode:** Replace test credentials with live Razorpay keys and configure the webhook signature secret with replay deduplication.
+   - **Domain & SSL:** Point the official custom domain (`sriammansupermarket.in`) to Vercel and verify DNS propagation.
+   - **`LOADTEST_BYPASS_SECRET`:** Ensure this variable is **UNSET** in Vercel Production environment settings.
+2. **RECOMMENDED BEFORE GO-LIVE (Can be done in parallel):**
+   - **Catalog Expansion:** Add missing staple products (Sugar/Sakkarai, Jaggery/Vellam, Mustard/Kadugu, Cumin/Seeragam, Garlic/Poondu) and update `small-onions` with the `ulli` alias.
+   - **Contrast Tuning:** Ensure all `#76CA3E` apple green action buttons use `text-brand-forest` (`#143B0D`) instead of `text-white` to guarantee WCAG AA compliance (contrast ratio > 6:1 vs 2.04:1).
+   - **Local SEO:** Insert Schema.org `GroceryStore` JSON-LD structured data into `src/app/layout.tsx`.
+3. **CAN WAIT (Post-Launch Enhancements):**
+   - SMS OTP Gateway integration (Twilio / MSG91) — Google One-Tap auth is currently active and fully operational.
+   - Advanced delivery route optimization for multi-order drop-offs.
+   - Customer loyalty points module.
 
 ---
 
-## 3. Production Deployment Steps
+## 1. Environment Variables Audit & Vercel Configuration Table
 
-1. **Clean Production Build**:
-   ```bash
-   npm run build
-   ```
-   Confirm exit code 0, 0 type errors, and all routes properly mapped.
-2. **Execute Automated Test Suites**:
-   ```bash
-   npx tsx --test tests/rate-limiting.test.ts tests/order-concurrency.test.ts tests/auth-security.test.ts tests/reliability.test.ts
-   ```
-   Confirm 18/18 tests pass.
-3. **Deploy Web Application**:
-   Deploy build artifact to hosting platform (Vercel, AWS ECS, or Node runtime).
-4. **Verify Live Health Check Endpoint**:
-   ```bash
-   curl -f -s https://sriamman.com/api/health | jq .
-   ```
-   Expected response:
-   ```json
-   {
-     "status": "ok",
-     "database": "connected",
-     "service": "sri-amman-supermarket",
-     "latencyMs": 42
-   }
-   ```
-5. **Set Up Scheduled Weekly Backups**:
-   Schedule the backup cron job on the ops host or GitHub Actions:
-   ```cron
-   0 2 * * 0 cd /srv/amman-grocery && DATABASE_URL="..." ./scripts/db-backup.sh >> ./backups/cron.log 2>&1
-   ```
+Tick off each variable in the Vercel Project Settings (`Settings -> Environment Variables`):
+
+| Variable Name | Scope / Target | Required | Verified Safe in Code? | Description & Value Guidelines |
+| :--- | :--- | :---: | :---: | :--- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Production & Preview | **Yes** | Yes (Client-safe) | Production Supabase project URL (`https://<prod-ref>.supabase.co`). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production & Preview | **Yes** | Yes (Client-safe) | Public Anon key. Respects Row Level Security on all tables. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Production (Server-Only)** | **Yes** | Yes (Protected) | Service role key. Used strictly for atomic orders & administrative RPCs. **NEVER expose to client.** |
+| `UPSTASH_REDIS_REST_URL` | Production & Preview | **Yes** | Yes (Server-Only) | Upstash Redis REST URL for distributed sliding-window rate limiting. |
+| `UPSTASH_REDIS_REST_TOKEN` | Production & Preview | **Yes** | Yes (Server-Only) | Upstash Redis REST authentication token. |
+| `DATABASE_URL` | Production (Server-Only) | **Yes** | Yes (Server-Only) | Direct PostgreSQL connection string (Port 5432 / 6543) for migrations and `pg_dump` backups. |
+| `PAYMENT_WEBHOOK_SECRET` | Production & Preview | **Yes** | Yes (Fails closed) | Secret key from payment gateway webhook dashboard. If unset, webhook endpoint safely fails closed. |
+| `ALERT_WEBHOOK_URL` | Production | Optional | Yes (Server-Only) | Discord/Slack webhook URL for real-time dead-letter queue notifications. |
+| `NEXT_PUBLIC_SITE_URL` | Production & Preview | **Yes** | Yes (Client-safe) | Canonical live domain (e.g. `https://sriammansupermarket.in`). |
+| `NEXT_PUBLIC_SHOP_LAT` | Production & Preview | **Yes** | Yes (Client-safe) | Store latitude (`9.9252` for Madurai store). |
+| `NEXT_PUBLIC_SHOP_LNG` | Production & Preview | **Yes** | Yes (Client-safe) | Store longitude (`78.1198` for Madurai store). |
+| `NEXT_PUBLIC_SENTRY_DSN` | Production & Preview | Optional | Yes (Sanitized) | Sentry public DSN for client error tracking. |
+| `SENTRY_DSN` | Production (Server-Only) | Optional | Yes (Sanitized) | Sentry server DSN for backend error logging. |
+| `LOADTEST_BYPASS_SECRET` | **LEAVE UNSET IN PROD** | **NO** | Yes (Disabled if unset) | **Leave UNSET in Production.** When unset, all bypass attempts are completely ignored. |
 
 ---
 
-## 4. Disaster Recovery & Rollback Procedure
+## 2. Database Migration Runbook (Production Supabase)
 
-In the event of critical regressions, failed releases, or data anomalies:
+Execute these 14 migration files in exact numerical order via Supabase SQL Editor or CI pipeline:
 
-### Web Application Rollback
-- **Hosting Provider Rollback**: Roll back to previous deployment commit hash immediately via Vercel Dashboard / Container tag deployment (< 60 seconds).
+1. `supabase/migrations/20261028170100_create_roles_and_helpers.sql` — Creates `app_role` enum, `user_roles` table, and `is_admin()`, `is_rider()`, `has_role()` helper functions.
+2. `supabase/migrations/20261028170200_create_riders_and_link_auth.sql` — Creates `riders` table, links auth users to rider profiles.
+3. `supabase/migrations/20261028170300_create_audit_log_and_triggers.sql` — Creates `audit_log` table, immutable triggers on orders, products, user_roles.
+4. `supabase/migrations/20261028170400_revoke_and_enable_rls.sql` — Revokes broad privileges, enables RLS on all tables, establishes strict row-level policies.
+5. `supabase/migrations/20261028170500_secure_rpc_functions.sql` — Creates atomic RPCs `admin_assign_rider` and `rider_update_order_status` with state transition validation.
+6. `supabase/migrations/20261028170600_storage_security_policies.sql` — Sets up storage buckets and access policies for product images.
+7. `supabase/migrations/20261029100000_grant_helper_functions_to_authenticated.sql` — Grants helper functions to authenticated role.
+8. `supabase/migrations/20261030100000_drop_legacy_open_policies.sql` — Drops legacy permissive development policies.
+9. `supabase/migrations/20261030100100_add_orders_updated_at.sql` — Adds `updated_at` column and auto-touch trigger to `orders`.
+10. `supabase/migrations/20261030100200_search_and_performance_tuning.sql` — Installs `pg_trgm`, `unaccent`, creates `search_products_fast` RPC with GIN index.
+11. `supabase/migrations/20261031100000_fix_search_path_for_trgm_operators.sql` — Enforces immutable `search_path = public, extensions, pg_temp` on `search_products_fast`.
+12. `supabase/migrations/20261102100000_make_search_products_fast_limit_first.sql` — Optimizes limit clause in `search_products_fast` for sub-50ms query execution.
+13. `supabase/migrations/20261104110000_create_place_order_atomic.sql` — Creates server-only atomic order placement with row-locking (`FOR UPDATE`) on product_variants, stock deduction, and strict idempotency.
+14. `supabase/migrations/20261105100000_high_concurrency_query_indexes.sql` — Adds composite B-Tree indexes on `orders(status, created_at DESC)`, `orders(user_id, created_at DESC)`, `orders(assigned_rider_id, status)`, `products(category, is_active)`, `products(is_active, stock_quantity)`, `order_items(order_id, product_id)`.
 
-### Database Migration Rollback
-Execute the rollback scripts in `supabase/rollbacks/` in strict reverse order:
-1. `supabase/rollbacks/20261104110000_rollback_create_place_order_atomic.sql`
-2. `supabase/rollbacks/20261102100000_rollback_make_search_products_fast_limit_first.sql`
-3. `supabase/rollbacks/20261031100000_rollback_fix_search_path_for_trgm_operators.sql`
-4. `supabase/rollbacks/20261030100200_rollback_search_and_performance_tuning.sql`
-5. `supabase/rollbacks/20261030100100_rollback_add_orders_updated_at.sql`
-6. `supabase/rollbacks/20261030100000_rollback_drop_legacy_open_policies.sql`
-7. `supabase/rollbacks/20261029100000_rollback_grant_helper_functions_to_authenticated.sql`
-8. `supabase/rollbacks/20261028170600_rollback_storage_security_policies.sql`
-9. `supabase/rollbacks/20261028170500_rollback_secure_rpc_functions.sql`
-10. `supabase/rollbacks/20261028170400_rollback_revoke_and_enable_rls.sql`
-11. `supabase/rollbacks/20261028170300_rollback_audit_log_and_triggers.sql`
-12. `supabase/rollbacks/20261028170200_rollback_riders_and_link_auth.sql`
-13. `supabase/rollbacks/20261028170100_rollback_roles_and_helpers.sql`
+### Post-Migration Verification Commands
+Execute in the Supabase SQL Editor:
+```sql
+-- 1. Verify extensions
+SELECT extname, extversion FROM pg_extension WHERE extname IN ('pg_trgm', 'unaccent');
 
-### Snapshot Recovery Test
-Restore from the most recent weekly backup snapshot:
-```bash
-pg_restore --clean --if-exists --no-owner --no-privileges -d "$DATABASE_URL" backups/supabase_backup_YYYYMMDD_HHMMSS.dump
+-- 2. Run RLS Checks (Safe transaction - rolls back automatically)
+-- Copy and run supabase/tests/rls-checks.sql (Expect 43+ PASS results)
+
+-- 3. Run Search Checks
+-- Copy and run supabase/tests/search-checks.sql (Expect 10 PASS results)
+
+-- 4. Apply Thanglish & Tamil Search Aliases
+-- Copy and run supabase/seed-thanglish-aliases.sql
 ```
 
+### RPC Access Matrix: Verified Permissions
 
----
-
-## 5. Monitoring & Observability Setup (Sentry & UptimeRobot)
-
-### 5.1 Sentry Setup (Free Tier Error & Performance Tracking)
-1. **Create Sentry Account & Project**:
-   - Sign up at [sentry.io](https://sentry.io) (Developer Free Plan includes 5k errors and 10k transactions/month).
-   - Create a project with platform **Next.js**.
-2. **Add Environment Variables to Vercel / Hosting Provider**:
-   - `NEXT_PUBLIC_SENTRY_DSN`: Client-side DSN (`https://<key>@<org>.ingest.sentry.io/<project>`).
-   - `SENTRY_DSN`: Server-side DSN (same as client DSN).
-   - *(Optional for source map uploads)*: `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`.
-3. **Verified PII Scrubbing**:
-   - Pre-configured in `src/lib/sentrySanitizer.ts` and active across `sentry.client.config.ts`, `sentry.server.config.ts`, and `sentry.edge.config.ts`.
-   - Automatically scrubs:
-     - Phone numbers: `+91 XXXXX XXXXX`
-     - Auth tokens: `Bearer [REDACTED_TOKEN]`, `[REDACTED_JWT]`
-     - Emails: `[REDACTED_EMAIL]`
-     - Customer names: `[REDACTED_NAME]`
-     - IP Addresses: unset/stripped.
-
-### 5.2 UptimeRobot Setup (Free Tier Database & Webhook Ping)
-1. **Create Free UptimeRobot Account**:
-   - Sign up at [uptimerobot.com](https://uptimerobot.com) (Free tier includes 50 monitors at 5-minute intervals).
-2. **Configure New Monitor**:
-   - **Monitor Type**: `HTTP(s)`
-   - **Friendly Name**: `Sri Amman Supermarket API Health`
-   - **URL**: `https://<production-domain>/api/health` (e.g. `https://sriammansupermarket.in/api/health`)
-   - **Monitoring Interval**: `5 minutes`
-   - **HTTP Method**: `GET`
-   - **Expected Status**: `200 OK`
-   - **Alert Contacts**: Add store dev/ops email or SMS.
-3. **Endpoint Validation**:
-   - Querying `/api/health` executes an indexed probe query (`products.select('id').limit(1)`) returning database latency (`latencyMs < 50ms`) and 200 OK.
-
-
----
-
-## 6. Phase A–D Performance Improvements & Final Scoreboard
-
-### 6.1 Performance Benchmark: Before vs After
-
-| Metric / Dimension | Before Optimization | After Optimization | Delta / Impact |
-| :--- | :--- | :--- | :--- |
-| **Catalog Route Latency** | 120–250 ms (sequential DB queries) | 1–3 ms (60s in-memory cache) / ~45 ms (DB cache-miss) | **-98% latency** |
-| **Search Products Latency** | 80–180 ms (DB roundtrip per keystroke) | 1–3 ms (30s LRU normalized query cache) | **-97% latency** |
-| **Health Check Latency (`/api/health`)** | 60–120 ms (table fallback probe) | 12.2 ms average (`products.select('id').limit(1)`) | **-85% latency** |
-| **Admin Route Bundle Size (`/admin`)** | 57.5 kB First Load JS | 12.9 kB First Load JS | **-77% JS footprint** |
-| **Storefront Root Bundle (`/`)** | 248 kB First Load JS | 216 kB First Load JS | **-32 kB reduction** |
-| **Mobile CLS (Checkout Route)** | 1.133 (extreme layout shift) | **0.000** (zero layout shift) | **100% stable layout** |
-| **Mobile Performance Score (Checkout)** | 34 / 100 | **80 / 100** | **+46 points** |
-| **Mobile Total Blocking Time (Checkout)**| 580 ms | **220 ms** | **-62% main thread blocking** |
-| **Mobile FCP (Checkout)** | 1.7 s | **1.2 s** | **-29% faster render** |
-| **Mobile CLS (Home & Products)** | 0.000 | **0.000** | **Zero shift** |
-| **Realtime Connection Overhead** | 500+ customer WebSockets (pool exhaustion)| Zero customer WebSockets (15s visibility polling) | **100% pool freed for staff** |
-| **500 Concurrent Users (k6)** | High contention / unmitigated | 217 req/s across 24,267 requests, **0.00% failure rate** | **100% check success** |
-| **Add-to-Cart Reaction Time** | 200–400 ms (waiting for network) | **< 10 ms** (instant optimistic state update) | **Instant UX** |
-
----
-
-### 6.2 New Database Migrations & Rollback Instructions
-
-#### Migration: High-Concurrency Composite Query Indexes
-- **File:** `supabase/migrations/20261105100000_high_concurrency_query_indexes.sql`
-- **Purpose:** Adds composite B-Tree indexes targeting the 10 most frequent and slow queries identified during load profiling:
-  1. `idx_orders_status_created_at` on `orders(status, created_at DESC)`: Eliminates Seq Scans on admin & rider order queues.
-  2. `idx_orders_user_created_at` on `orders(user_id, created_at DESC)`: Speeds customer order history lookups.
-  3. `idx_orders_rider_status` on `orders(assigned_rider_id, status)`: Enables instant active-delivery filtering for riders.
-  4. `idx_products_category_active` on `products(category, is_active)`: Instant category filtering with active flag.
-  5. `idx_products_active_stock` on `products(is_active, stock_quantity)`: Filters out-of-stock items without table scans.
-  6. `idx_order_items_order_product` on `order_items(order_id, product_id)`: Accelerates order item lookups and stock reconciliations.
-- **Rollback File:** `supabase/rollbacks/20261105100000_rollback_high_concurrency_query_indexes.sql`
-- **Rollback Execution:**
-  ```sql
-  -- Run in Supabase SQL Editor if index rollback is required:
-  DROP INDEX IF EXISTS idx_orders_status_created_at;
-  DROP INDEX IF EXISTS idx_orders_user_created_at;
-  DROP INDEX IF EXISTS idx_orders_rider_status;
-  DROP INDEX IF EXISTS idx_products_category_active;
-  DROP INDEX IF EXISTS idx_products_active_stock;
-  DROP INDEX IF EXISTS idx_order_items_order_product;
-  ```
-
----
-
-### 6.3 Final Scoreboard Against Stated Targets
-
-| Target Requirement | Target Metric | Measured Production Result | Verdict | Proof / Notes |
+| RPC Stored Function | Executable by `anon`? | Executable by `authenticated`? | Executable by `service_role`? | Security Enforcement Mechanism |
 | :--- | :---: | :---: | :---: | :--- |
-| **1. Storefront Home & Category LCP** | LCP < 2.5 s on throttled 4G | 1.2 s FCP / 0.000 CLS (Pre-rendered static Edge cache) | **MET** | Preloaded hero image, DNS preconnect to Unsplash, extracted StorefrontView with skeleton reservations. In edge production CDN, LCP renders in < 1.8s. |
-| **2. High Concurrency API Responses** | p95 < 300 ms at 500 VUs, < 1% errors | 1–4 ms cached endpoints / 12.2 ms health check / **0.00% failure rate** | **MET** | k6 500-VU test generated 24,267 requests at 217 req/s with 0 unhandled failures and 100% check success rate. |
-| **3. Product Search Server Time** | < 100 ms with 5,000+ products | **1–3 ms** (cached) / **30–65 ms** (cold GIN index) | **MET** | LRU normalized cache (30s TTL) + PostgreSQL GIN trigram index (`search_products_fast`) guarantees sub-70ms cold search and sub-3ms warm search. |
-| **4. Add to Cart & Interactive Reaction** | UI reacts within 100 ms | **< 10 ms** (instant synchronous state) | **MET** | Synchronous React state dispatch with 300ms double-tap debouncing, background server sync, and automatic optimistic rollback on rejection. |
+| `search_products_fast` | **YES** | **YES** | **YES** | Public catalog read-only search via GIN trigram index. Sub-50ms execution. |
+| `place_order_atomic` | **NO (404/Revoked)** | **NO (404/Revoked)** | **YES** | Explicitly revoked from PUBLIC/anon/authenticated. Server-only execution via Next.js `/api/orders`. |
+| `admin_assign_rider` | **NO (404/Revoked)** | Conditioned | **YES** | Requires `public.is_admin()` check. Throws 42501 SQL exception if unauthorized. |
+| `rider_update_order_status` | **NO (404/Revoked)** | Conditioned | **YES** | Requires `public.is_rider()` check and assignment verification. Throws 42501 SQL exception. |
 
 ---
 
-### 6.4 Step-by-Step Production Deployment Checklist
+## 3. Security Audit & Protection Layers
 
-Follow these verified steps to deploy the optimized `opus-review` branch to production:
+1. **Row Level Security (RLS):**
+   - Active on all 9 tables in schema `public`.
+   - Default policy revokes all access from `anon` and `authenticated`.
+   - Customers can only read and insert their own orders (`auth.uid() = user_id`).
+   - Staff roles (`admin`, `rider`) verified via `public.user_roles` table using `security_definer` helper functions with immutable `search_path`.
+2. **Server-Side Role Authentication (`src/lib/serverAuth.ts`):**
+   - Admin and rider routes execute `supabase.auth.getUser()`, cryptographically verifying JWTs with the Supabase Auth server (rejects forged/tampered client cookies).
+   - Multi-role segregation ensures an authenticated customer cannot call `/api/admin` or `/api/rider`.
+3. **Sliding-Window Rate Limiting (`src/lib/rateLimit.ts`):**
+   - Login: 5 attempts per 15 minutes per IP + username, then a 15-minute lockout.
+   - Customer OTP: 3 per 10 minutes per phone, 10 per hour per IP.
+   - Place Order: 5 per minute per user/IP.
+   - Catalog & Search: 60 per minute per IP.
+   - Admin & Rider APIs: 120 per minute per user.
+   - Fails open for read-only catalog routes if Redis is temporarily unreachable; fails closed for login, OTP, and orders.
+4. **Security Headers & CSP (`next.config.js`):**
+   - `Content-Security-Policy`: Permits Supabase auth, Google login, Unsplash media, Sentry ingestion, and Cloudflare Turnstile while forbidding unauthorized scripts and iframe embedding.
+   - `HSTS`: `max-age=63072000; includeSubDomains; preload`.
+   - `X-Frame-Options: DENY` (anti-clickjacking).
+   - `X-Content-Type-Options: nosniff`.
+   - `Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(self)`.
+5. **PII Masking & Log Sanitization:**
+   - Active in `src/lib/logger.ts` and `src/lib/sentrySanitizer.ts`.
+   - Masks customer phone numbers (`+91******3210`), bearer JWTs, passwords, and authorization headers in all console and Sentry events.
+   - Unhandled exceptions return generic sanitized error objects `{ error: "Internal Server Error", requestId }` without leaking stack traces or database schema names.
 
-1. **Database Migration (Supabase Dashboard / CLI)**:
-   - Connect to the production Supabase database.
-   - Execute `supabase/migrations/20261105100000_high_concurrency_query_indexes.sql` in the SQL Editor.
-   - Run verification checks:
-     ```sql
-     SELECT indexname, indexdef FROM pg_indexes WHERE tablename IN ('orders', 'products', 'order_items') AND indexname LIKE 'idx_%';
+---
+
+## 4. Orders, Payments, & Concurrency Safety
+
+1. **Idempotency End-to-End:**
+   - Client sends UUID `idempotencyKey` with every checkout request.
+   - `place_order_atomic` checks `orders.idempotency_key`. If an order exists, it immediately returns the original order without recreating records or re-charging inventory.
+2. **Authoritative Server Pricing:**
+   - Client pricing is completely discarded on the server.
+   - Server re-fetches product variant prices from catalog/database, calculates subtotal, enforces coupon rules (`AMMAN50`, `FREEDEL`, `MALIGAI100`), calculates delivery fees based on order value, and computes final total.
+3. **Concurrency & Negative Stock Prevention:**
+   - `place_order_atomic` locks inventory rows with `SELECT ... FOR UPDATE` on `product_variants`.
+   - If stock is insufficient, the entire transaction rolls back cleanly with `Insufficient stock for product`. Stock cannot drop below 0 under high concurrent demand.
+4. **Payment vs Order Write Desync Handling:**
+   - COD orders are saved immediately with `payment_status = 'pending'`.
+   - Online payments verify HMAC-SHA256 signatures via constant-time comparison (`crypto.timingSafeEqual`).
+   - Webhook events are logged in `webhook_events` to reject replay attacks.
+   - If a payment succeeds but the order write fails, the incident is placed into the dead-letter queue with `ALERT_WEBHOOK_URL` notification for manual staff reconciliation.
+5. **Order Lifecycle State Machine:**
+   - Valid rider progression: `0 (Placed) / 1 (Packed)` -> `2 (On Route)` -> `3 (Delivered)`.
+   - Regressions (e.g. `Delivered` -> `Placed`) and editing financial sums are blocked by database constraints.
+
+---
+
+## 5. Infrastructure, Reliability, & Disaster Recovery
+
+1. **Health Check Monitoring (`/api/health`):**
+   - Probes database responsiveness with an indexed query (`products.select('id').limit(1)`).
+   - Returns HTTP 200 with latency (< 25 ms), heap memory, and uptime.
+   - Configure UptimeRobot (Free plan) to ping `/api/health` every 5 minutes.
+2. **Automated Weekly Backups:**
+   - Use `scripts/db-backup.sh` (or `scripts/db-backup.js`) to take custom-format PostgreSQL dumps (`pg_dump -Fc -Z 9`).
+   - Retain 30 days of timestamped snapshots.
+   - Verified restore test command:
+     ```bash
+     pg_restore --clean --if-exists --no-owner --no-privileges -d "$DATABASE_URL" backups/supabase_backup_YYYYMMDD_HHMMSS.dump
      ```
-2. **Environment Variables Configuration (Vercel / Cloud Dashboard)**:
-   - Ensure `NEXT_PUBLIC_SENTRY_DSN` and `SENTRY_DSN` are set (from your Sentry free-tier Next.js project).
-   - Ensure Upstash Redis variables (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) are configured for rate limiting.
-   - Ensure `SUPABASE_SERVICE_ROLE_KEY` is present in server-only secrets.
-3. **Merge & Deployment**:
-   - Merge `opus-review` into `main` via PR after review.
-   - Trigger production deployment on Vercel.
-4. **Post-Deployment Verification**:
-   - **Health Check**: Run `curl -i https://<production-domain>/api/health` — confirm HTTP 200 OK, `database: connected`, `latencyMs < 50`.
-   - **UptimeRobot**: Add monitor for `https://<production-domain>/api/health` with 5-minute interval.
-   - **Sentry Verification**: Trigger a non-critical test error and confirm event appears in Sentry with masked phone numbers (`+91 XXXXX XXXXX`) and redacted tokens.
-   - **Service Worker Check**: Open site in mobile Chrome, verify `/sw.js` is active in DevTools Application tab, and confirm offline fallback loads when toggled offline.
+3. **Rollback Procedures:**
+   - **Vercel Deployments:** Instant rollback in Vercel Dashboard -> Deployments -> click previous deployment -> "Promote to Production" (< 60 seconds).
+   - **Database Rollback:** Apply scripts in `supabase/rollbacks/` in reverse numerical order (e.g. `20261105100000_rollback_...`, `20261104110000_rollback_...`).
+
+---
+
+## 6. Catalog Data & Search Aliases
+
+1. **Catalog Integrity Audit:**
+   - Current catalog contains **36 verified products** across **8 categories**.
+   - 100% of products have verified high-resolution images.
+   - 100% of products have non-zero pricing and variant packages.
+   - 100% of products have bilingual English and Tamil names (`nameEn`, `nameTa`).
+2. **Missing Aliases & Proposed Migration:**
+   - `small-onions`: Add `ulli`, `chinna ulli`, `sambar ulli` to `search_aliases`.
+   - Proposed expansion products for Madurai kitchen staples:
+     - White Sugar / Sakkarai (`sakkarai`, `seeni`, `sugar`)
+     - Jaggery / Vellam (`vellam`, `mandai vellam`, `achu vellam`, `karupatti`)
+     - Mustard Seeds / Kadugu (`kadugu`, `mustard`)
+     - Cumin Seeds / Seeragam (`seeragam`, `jeeragam`, `cumin`)
+     - Garlic / Poondu (`poondu`, `vellai poondu`, `garlic`)
+     - Ginger / Inji (`inji`, `ginger`)
+     - Black Pepper / Milagu (`milagu`, `pepper`)
+
+---
+
+## 7. SEO, PWA, & Accessibility
+
+1. **SEO:**
+   - `robots.ts` correctly permits crawler access to public pages while blocking `/admin`, `/rider`, `/api/`, and `/checkout`.
+   - `sitemap.ts` generates daily URLs for homepage and all 8 category routes.
+2. **PWA:**
+   - `public/manifest.json` configured with brand green `#76CA3E`, app icons, and `display: standalone`.
+   - Service worker (`public/sw.js`) caches core static assets and provides `public/offline.html` when network connectivity drops.
+3. **Accessibility:**
+   - Contrast calculation: White text on `#76CA3E` apple green yields **2.04:1** (fails WCAG AA). Deep forest green text (`#143B0D`, `text-brand-forest`) yields **6.14:1** (passes WCAG AAA).
+   - All primary checkout buttons in `CartDrawer.tsx` already utilize `text-brand-forest` on `bg-brand-primary` for high contrast.
+   - Touch targets for mobile shopping conform to the 44x44 px minimum recommendation.
+
+---
+
+## 8. Manual Steps for the Store Owner (Outside Codebase)
+
+Before opening the storefront to live shoppers, complete these account and configuration steps:
+
+1. **Vercel Dashboard:**
+   - Upgrade team to **Vercel Pro** ($20/mo) for commercial use.
+   - Set all Production environment variables from the Section 1 table.
+   - Verify `LOADTEST_BYPASS_SECRET` is deleted/unset.
+   - Add custom domain `sriammansupermarket.in` (and `www`) and configure DNS records (A record to `76.76.21.21` or CNAME to `cname.vercel-dns.com`).
+2. **Supabase Dashboard (Production Project):**
+   - Create a dedicated **Production Supabase project** (e.g. `sri-amman-prod`).
+   - Upgrade to **Supabase Pro** ($25/mo) for daily automatic backups, 7-day PITR, and no inactivity pausing.
+   - Run the 14 migrations in Section 2 via the SQL Editor.
+   - Run `supabase/tests/rls-checks.sql` and `supabase/tests/search-checks.sql` to verify integrity.
+   - Run `supabase/seed-thanglish-aliases.sql` to populate search keywords.
+   - Under `Authentication -> Providers`, enable Google OAuth and configure Client ID / Client Secret from Google Cloud Console.
+   - Under `Authentication -> URL Configuration`, set Site URL to `https://sriammansupermarket.in` and add Redirect URL `https://sriammansupermarket.in/**`.
+3. **Payment Gateway (Razorpay / Cashfree / Stripe):**
+   - Complete KYC and bank account verification for Sri Amman Supermarket.
+   - Generate Live API Key and Key Secret.
+   - Configure Webhook URL: `https://sriammansupermarket.in/api/webhooks/payment`.
+   - Select events: `payment.captured`, `payment.failed`, `order.paid`.
+   - Copy Webhook Secret and add to Vercel as `PAYMENT_WEBHOOK_SECRET`.
+4. **Monitoring & Incident Response:**
+   - Create a free account at [sentry.io](https://sentry.io), create project "amman-grocery-web", and copy DSNs to Vercel.
+   - Create a free account at [uptimerobot.com](https://uptimerobot.com), add HTTP monitor for `https://sriammansupermarket.in/api/health` with a 5-minute interval and SMS/email alerts.
+5. **Google Business Profile:**
+   - Claim and verify the physical Google Business profile for Sri Amman Supermarket in Madurai.
+   - Link website URL to `https://sriammansupermarket.in`.
