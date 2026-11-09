@@ -33,7 +33,7 @@ export default function PromoBanners() {
             className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-apple"
           >
             <img
-              src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=800&q=80"
+              src="/images/promo-wholesale.webp"
               alt="Weekend Grocery Deals"
               width={800}
               height={360}
@@ -74,7 +74,7 @@ export default function PromoBanners() {
             className="relative rounded-2xl sm:rounded-3xl overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[160px] sm:min-h-[190px] flex items-center p-4 sm:p-7 shadow-2xs border border-emerald-900/10 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-apple"
           >
             <img
-              src="https://images.unsplash.com/photo-1543168256-418811576931?auto=format&fit=crop&w=800&q=80"
+              src="/images/promo-festival.webp"
               alt="Express Delivery Fresh Produce"
               width={800}
               height={360}

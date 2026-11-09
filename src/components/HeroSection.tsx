@@ -25,7 +25,7 @@ export default function HeroSection() {
       saveTa: 'ரூ.320 மிச்சம்',
       actionEn: 'Order Now',
       actionTa: 'ஆர்டர் செய்',
-      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format,compress&fit=crop&w=480&q=70',
+      image: '/images/hero-bundle.webp',
       targetPage: 'monthly-list',
     },
     {
@@ -42,7 +42,7 @@ export default function HeroSection() {
       saveTa: 'சூப்பர் சேவர்',
       actionEn: 'View Deals',
       actionTa: 'சலுகைகள் பார்',
-      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=900&q=85',
+      image: '/images/hero-deals.webp',
       targetPage: 'products',
       targetCat: 'all',
       targetSort: 'discount',
@@ -61,7 +61,7 @@ export default function HeroSection() {
       saveTa: 'புதியது',
       actionEn: 'Shop Veggies',
       actionTa: 'காய்கறி வாங்க',
-      image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=900&q=85',
+      image: '/images/hero-veggies.webp',
       targetPage: 'products',
       targetCat: 'vegetables-fruits',
     },
@@ -107,7 +107,7 @@ export default function HeroSection() {
       badgeTa: '25% வரை தள்ளுபடி',
       subEn: 'Daily Fresh Stock',
       subTa: 'தினசரி புதிய வரத்து',
-      image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=600&q=80',
+      image: '/images/cat-vegetables-fruits.webp',
     },
     {
       id: 'oils-ghee',
@@ -117,7 +117,7 @@ export default function HeroSection() {
       badgeTa: 'மொத்த விலை சேமிப்பு',
       subEn: 'Direct Store Counter',
       subTa: 'கவுண்டர் விலை',
-      image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80',
+      image: '/images/cat-oils-ghee.webp',
     },
     {
       id: 'dairy-eggs',
@@ -127,7 +127,7 @@ export default function HeroSection() {
       badgeTa: 'காலை புதிய வரத்து',
       subEn: 'Chilled & Inspected',
       subTa: 'பரிசோதிக்கப்பட்ட தரம்',
-      image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=600&q=80',
+      image: '/images/cat-dairy-eggs.webp',
     },
     {
       id: 'household-pooja',
@@ -137,7 +137,7 @@ export default function HeroSection() {
       badgeTa: 'விசேஷ தேவைகள்',
       subEn: 'Camphor, Agarbatti & Oils',
       subTa: 'கற்பூரம், அகர்பத்தி',
-      image: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=600&q=80',
+      image: '/images/cat-household-pooja.webp',
     },
   ];
 

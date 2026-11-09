@@ -82,14 +82,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <link
-          rel="preload"
-          as="image"
-          href="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format,compress&fit=crop&w=480&q=70"
-          fetchPriority="high"
-        />
         <SeoSchema />
       </head>
       <body className="antialiased" suppressHydrationWarning>
