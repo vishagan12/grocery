@@ -1,7 +1,7 @@
 // Sri Amman Supermarket Service Worker
 // Version-controlled PWA caching with offline fallback
 
-const CACHE_VERSION = 'sas-v1.0.0';
+const CACHE_VERSION = 'sas-v1.0.1';
 const STATIC_CACHE = `sas-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `sas-pages-${CACHE_VERSION}`;
 
