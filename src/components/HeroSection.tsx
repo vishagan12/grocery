@@ -189,7 +189,8 @@ export default function HeroSection() {
             </div>
 
             {/* Content Top with smooth fade */}
-            <div key={`content-${activeSlide}`} className="relative z-10 animate-fade-in">
+            <div key={`content-${activeSlide}`} className={`relative z-10 ${activeSlide !== 0 ? 'animate-fade-in' : ''}`}>
+
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="inline-flex items-center gap-1.5 bg-yellow-400 text-brand-forest text-[11px] sm:text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-2xs whitespace-nowrap">
                   <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current shrink-0" />
@@ -228,7 +229,8 @@ export default function HeroSection() {
             </div>
 
             {/* Content Bottom: Price Pill + Action Trigger */}
-            <div key={`bottom-${activeSlide}`} className="relative z-10 mt-3 sm:mt-4 flex items-center justify-between gap-2 pt-2 border-t border-white/20 flex-nowrap animate-fade-in">
+            <div key={`bottom-${activeSlide}`} className={`relative z-10 mt-3 sm:mt-4 flex items-center justify-between gap-2 pt-2 border-t border-white/20 flex-nowrap ${activeSlide !== 0 ? 'animate-fade-in' : ''}`}>
+
               <div className="flex items-baseline gap-1.5 sm:gap-2.5 bg-black/55 backdrop-blur-md px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl border border-white/20 shrink-0">
                 <span className="text-sm xs:text-base sm:text-xl font-black text-yellow-300">{currentSlide.price}</span>
                 {currentSlide.id === 'monthly-bundle' && (
