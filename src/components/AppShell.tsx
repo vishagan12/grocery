@@ -6,11 +6,13 @@ import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import Toast from '@/components/Toast';
 import dynamic from 'next/dynamic';
+import { useStore } from '@/context/StoreContext';
 
 const CartDrawer = dynamic(() => import('@/components/CartDrawer'), { ssr: false });
 const LocationModal = dynamic(() => import('@/components/LocationModal'), { ssr: false });
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const { state } = useStore();
   React.useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       window.addEventListener('load', () => {
@@ -31,10 +33,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <Footer />
-      <CartDrawer />
+      {state.cartOpen && <CartDrawer />}
       <MobileBottomNav />
       <Toast />
-      <LocationModal />
+      {state.locationModalOpen && <LocationModal />}
     </div>
   );
 }
